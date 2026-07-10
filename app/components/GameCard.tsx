@@ -38,8 +38,8 @@ export default function GameCard({ game }: { game: Game }) {
           {/* Metacritic badge */}
           {game.metacritic_score && (
             <div
-              className="absolute top-2 right-2 min-w-[2rem] px-2 py-1 rounded-md text-sm font-bold text-center
-                font-[family-name:var(--font-display)]"
+              className="absolute top-2 right-2 min-w-8 px-2 py-1 rounded-md text-sm font-bold text-center
+                font-(family-name:--font-display)"
               style={{
                 backgroundColor: game.metacritic_score >= 80
                   ? '#00d4aa'
@@ -59,7 +59,7 @@ export default function GameCard({ game }: { game: Game }) {
           <h3
             className="font-semibold text-md leading-tight text-[#f0f0f0]
               group-hover:text-[#00d4aa] transition-colors duration-200
-              font-[family-name:var(--font-display)] line-clamp-1"
+              font-(family-name:--font-display) line-clamp-1"
           >
             {game.name}
           </h3>

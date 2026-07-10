@@ -1,0 +1,109 @@
+'use client'
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation'
+import { ChangeEvent } from 'react';
+
+const selectClass = `bg-[#1a1a1f] text-[#f0f0f0] text-sm border border-[#2a2a35] rounded-lg
+    px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-[#00d4aa] focus:border-[#00d4aa]
+    transition-colors duration-200 cursor-pointer appearance-none`
+const arrowClass = "absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8b8b9a] text-xs pointer-events-none"
+
+function FilterSelect({ value, onChange, children }: {
+    value: string,
+    onChange: (e: ChangeEvent<HTMLSelectElement>) => void,
+    children: React.ReactNode
+}) {
+    return (
+        <div className="relative">
+            <select
+                value={value}
+                onChange={onChange}
+                className={selectClass}
+            >
+                {children}
+            </select>
+            <span className={arrowClass}>
+                ▾           
+            </span>
+        </div>
+    )
+}
+
+export default function GameFilters({ current, genres, platforms, developers, publishers, esrb_ratings }: 
+    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string},
+        genres: { id: number, name: string, slug: string }[], platforms: { id: number, name: string, slug: string }[], 
+        developers: { id: number, name: string, slug: string }[], publishers: { id: number, name: string, slug: string }[], 
+        esrb_ratings: string[]}) {
+
+    const [searchQuery, setSearchQuery] = useState(current.query)
+    const [selectedGenre, setSelectedGenre] = useState(current.genre)
+    const [selectedPlatform, setSelectedPlatform] = useState(current.platform)
+    const [selectedDeveloper, setSelectedDeveloper] = useState(current.developer)
+    const [selectedPublisher, setSelectedPublisher] = useState(current.publisher)
+    const [selectedEsrb, setSelectedEsrb] = useState(current.esrb)
+    const [filtersOpen, setFiltersOpen] = useState(false)
+    const router = useRouter()
+
+    function handleSubmit() {
+        const params = new URLSearchParams();
+        if (searchQuery) params.set("q", searchQuery)
+        if (selectedGenre) params.set("genre", selectedGenre)
+        if (selectedPlatform) params.set("platform", selectedPlatform)
+        if (selectedDeveloper) params.set("developer", selectedDeveloper)
+        if (selectedPublisher) params.set("publisher", selectedPublisher)
+        if (selectedEsrb) params.set("esrb", selectedEsrb)
+        
+        router.push(`/games?${params.toString()}`)
+    }
+
+    return (
+        <div>
+            <div className="flex gap-2 mb-4 items-center">
+                <input
+                    type="text"
+                    placeholder="Search games..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#1a1a24] text-[#8b8b9a] placeholder:text-[#5a5a6e] border border-[#2a2a35] focus:outline-none rounded-lg px-2 py-1"
+                />
+                <button 
+                    onClick={() => handleSubmit()}
+                    className="bg-[#00d4aa] text-[#0e0e10] hover:bg-[#00b894] py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
+                >
+                    Search
+                </button>
+                <button
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                    className="bg-[#1a1a24] text-[#8b8b9a] placeholder:text-[#5a5a6e] border border-[#2a2a35] focus:outline-none rounded-lg px-4 py-2 whitespace-nowrap"
+                >
+                    {filtersOpen ? '- Filters' : '+ Filters'}
+                </button>
+            </div>
+            {filtersOpen && (
+            <div className="flex flex-wrap flex-row gap-4 mb-4">
+                <FilterSelect value={selectedGenre} onChange={e => setSelectedGenre(e.target.value)}>
+                    <option value="">All Genres</option>
+                    {genres.map(g => <option key={g.id} value={g.slug}>{g.name}</option>)}
+                </FilterSelect>
+                <FilterSelect value={selectedPlatform} onChange={e => setSelectedPlatform(e.target.value)}>
+                    <option value="">All Platforms</option>
+                    {platforms.map(p => <option key={p.id} value={p.slug}>{p.name}</option>)}
+                </FilterSelect>
+                <FilterSelect value={selectedDeveloper} onChange={e => setSelectedDeveloper(e.target.value)}>
+                    <option value="">All Developers</option>
+                    {developers.map(d => <option key={d.id} value={d.slug}>{d.name}</option>)}
+                </FilterSelect>
+                <FilterSelect value={selectedPublisher} onChange={e => setSelectedPublisher(e.target.value)}>
+                    <option value="">All Publishers</option>
+                    {publishers.map(p => <option key={p.id} value={p.slug}>{p.name}</option>)}
+                </FilterSelect>
+                <FilterSelect value={selectedEsrb} onChange={e => setSelectedEsrb(e.target.value)}>
+                    <option value="">All ESRB Ratings</option>
+                    {esrb_ratings.map(r => <option key={r} value={r}>{r}</option>)}
+                </FilterSelect>
+            </div>
+            )}
+        </div>
+    )
+}

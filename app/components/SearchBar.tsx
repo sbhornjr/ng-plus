@@ -38,7 +38,7 @@ export default function SearchBar() {
             px-6 py-2.5 rounded-lg text-sm font-semibold
             bg-[#00d4aa] text-[#0e0e10]
             hover:bg-[#00b894] transition-colors duration-200
-            font-[family-name:var(--font-display)]"
+            font-(family-name:--font-display)"
         >
           Search
         </button>
