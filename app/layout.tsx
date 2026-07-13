@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Space_Grotesk, Inter } from 'next/font/google'
 import './globals.css'
+import NavBar from "@/app/components/NavBar"
+import UserProvider from "@/app/components/UserContext"
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -26,9 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
       <body>
-        <div className="min-h-screen bg-[#0e0e10] text-[#f0f0f0]">
-          {children}
-        </div>
+        <UserProvider>
+          <header className="w-full">
+            <NavBar />
+          </header>
+          <div className="min-h-screen bg-[#0e0e10] text-[#f0f0f0]">
+            {children}
+          </div>
+        </UserProvider>
       </body>
     </html>
   )

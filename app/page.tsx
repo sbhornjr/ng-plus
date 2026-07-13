@@ -11,10 +11,6 @@ export default async function Home() {
 
   return (
     <main>
-      {/* Nav placeholder — we'll build this properly later */}
-      <nav className="h-14 border-b border-[#2a2a35]" />
-
-      {/* Hero */}
       <section className="flex flex-col items-center justify-center px-6 pt-10 pb-8 text-center">
         <p className="text-[#00d4aa] text-xs font-semibold tracking-widest uppercase mb-3
           font-(family-name:--font-display)">
@@ -29,7 +25,6 @@ export default async function Home() {
         <SearchBar />
       </section>
 
-      {/* Game grid — max-width container centers everything */}
       <section className="w-full max-w-6xl mx-auto px-8 pb-24">
         <h2 className="text-md font-semibold mb-6 font-(family-name:--font-display)
           text-[#8b8b9a] uppercase tracking-widest">
