@@ -10,7 +10,7 @@ type Game = {
   released: string | null
 }
 
-export default function GameCard({ game }: { game: Game }) {
+export default function GameCard({ game, developer }: { game: Game, developer?: string | null }) {
   return (
     <Link href={`/games/${game.slug}`} className="group block">
       <div
@@ -66,6 +66,11 @@ export default function GameCard({ game }: { game: Game }) {
           {game.released && (
             <p className="text-[#8b8b9a] text-sm mt-1">
               {new Date(game.released).getFullYear()}
+            </p>
+          )}
+          {developer && (
+            <p className="text-[#8b8b9a] text-sm mt-1">
+              Larian Studios
             </p>
           )}
         </div>

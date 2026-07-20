@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from 'next/image'
 import Link from 'next/link'
 import ScreenshotCarousel from "@/app/components/ScreenshotCarousel";
+import LibraryButton from "@/app/components/LibraryButton";
 
 type GamePageProps = {
     params: Promise<{ slug: string }>
@@ -19,24 +20,24 @@ export default async function GamePage({ params }: GamePageProps) {
 
     if (!game) notFound()
 
-  const [{ data: genres }, { data: platforms }, { data: developers }, { data: publishers }] =
-    await Promise.all([
-      supabase
-        .from('game_genres')
-        .select('genres(id, name, slug)')
-        .eq('game_id', game.id),
-      supabase
-        .from('game_platforms')
-        .select('platforms(id, name, slug)')
-        .eq('game_id', game.id),
-      supabase
-        .from('game_developers')
-        .select('developers(id, name, slug)')
-        .eq('game_id', game.id),
-      supabase
-        .from('game_publishers')
-        .select('publishers(id, name, slug)')
-        .eq('game_id', game.id),
+    const [{ data: genres }, { data: platforms }, { data: developers }, { data: publishers }] =
+        await Promise.all([
+            supabase
+                .from('game_genres')
+                .select('genres(id, name, slug)')
+                .eq('game_id', game.id),
+            supabase
+                .from('game_platforms')
+                .select('platforms(id, name, slug)')
+                .eq('game_id', game.id),
+            supabase
+                .from('game_developers')
+                .select('developers(id, name, slug)')
+                .eq('game_id', game.id),
+            supabase
+                .from('game_publishers')
+                .select('publishers(id, name, slug)')
+                .eq('game_id', game.id),
     ])
 
     const genreList = (genres ?? []).flatMap((g) => g.genres ?? [])
@@ -54,9 +55,6 @@ export default async function GamePage({ params }: GamePageProps) {
 
     return (
         <main>
-            {/* Header */}
-            <nav className="h-14 border-b border-[#2a2a35]" />
-
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
 
                 {/* Back to Games link */}
@@ -81,10 +79,10 @@ export default async function GamePage({ params }: GamePageProps) {
                         />
                     </div>
 
-                    <div className="flex flex-col">
+                    <div className="flex flex-col w-full">
 
                         {/* Genres */}
-                        <div className="flex gap-2 flex-wrap mb-3 items-center">
+                        <div className="flex gap-2 mb-3 items-center">
                             {genreList.map((genre) => (
                                 <Link
                                     key={genre.id}
@@ -132,13 +130,11 @@ export default async function GamePage({ params }: GamePageProps) {
                             )}              
                         </div>
                         {/* Button Row */}
-                        <div className="flex gap-4 flex-wrap mb-6 w-48 md:w-64 lg:w-80 justify-start">
+                        <div className="flex gap-4 flex-wrap mb-6 w-full justify-start">
                             {/* Add to Library Button */}
-                            <button className="px-4 py-1 text-md bg-[#00d4aa] text-[#0e0e10] font-semibold rounded-lg hover:bg-[#00b894] transition-colors duration-200">
-                                Add to Library
-                            </button>
+                            <LibraryButton game_id={game.id}/>
                             {/* Add to List Button */}
-                            <button className="px-4 py-1 text-md text-[#00d4aa] border border-[#00d4aa]
+                            <button className="px-4 py-1 text-md text-[#00d4aa] border border-[#00d4aa] self-center justify-self-center
                                 font-semibold rounded-lg hover:bg-[#00d4aa] hover:text-[#0e0e10] transition-colors duration-200">
                                 Add to List
                             </button>

@@ -2,12 +2,13 @@ import { supabase } from "@/lib/supabase";
 import GameCard from "@/app/components/GameCard";
 import GameFilters from "@/app/components/GameFilters";
 import Link from "next/link";
+import { queryGames } from "@/lib/queries";
 
 type SearchPageProps = {
   searchParams: Promise<{ q?: string, genre?: string, platform?: string, developer?: string, publisher?: string, esrb?: string }>
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
+export default async function SearchPage({ searchParams } : SearchPageProps) {
     const { q, genre, platform, developer, publisher, esrb } = await searchParams;
     const query = q?.trim() ?? '';
     const genreQuery = genre?.trim() ?? '';
@@ -16,95 +17,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const publisherQuery = publisher?.trim() ?? '';
     let esrbQuery = esrb?.trim() ?? '';
 
-    let gameIds: number[] = [];
-
-    if (genreQuery) {
-        const { data: genreId } = await supabase
-            .from('genres')
-            .select('id')
-            .eq('slug', genreQuery)
-            .single()
-
-        if (genreId) {
-            const { data: genreData } = await supabase
-                .from('game_genres')
-                .select('game_id')
-                .eq('genre_id', genreId.id)
-
-            const genreGameIds = genreData?.map(g => g.game_id) ?? []
-            if (gameIds.length === 0) {
-                gameIds.push(...genreGameIds)
-            } else {
-                gameIds = gameIds.filter(id => genreGameIds.includes(id))
-            }
-        }
-    }
-
-    if (platformQuery) {
-        const { data: platformId } = await supabase
-            .from('platforms')
-            .select('id')
-            .eq('slug', platformQuery)
-            .single()
-
-        if (platformId) {
-            const { data: platformData } = await supabase
-                .from('game_platforms')
-                .select('game_id')
-                .eq('platform_id', platformId.id)
-
-            const platformGameIds = platformData?.map(g => g.game_id) ?? []
-            if (gameIds.length === 0) {
-                gameIds.push(...platformGameIds)
-            } else {
-                gameIds = gameIds.filter(id => platformGameIds.includes(id))
-            }
-        }
-    }
-
-    if (developerQuery) {
-        const { data: developerId } = await supabase
-            .from('developers')
-            .select('id')
-            .eq('slug', developerQuery)
-            .single()
-
-        if (developerId) {
-            const { data: developerData } = await supabase
-                .from('game_developers')
-                .select('game_id')
-                .eq('developer_id', developerId.id)
-
-            const developerGameIds = developerData?.map(g => g.game_id) ?? []
-            if (gameIds.length === 0) {
-                gameIds.push(...developerGameIds)
-            } else {
-                gameIds = gameIds.filter(id => developerGameIds.includes(id))
-            }
-        }
-    }
-
-    if (publisherQuery) {
-        const { data: publisherId } = await supabase
-            .from('publishers')
-            .select('id')
-            .eq('slug', publisherQuery)
-            .single()
-
-        if (publisherId) {
-            const { data: publisherData } = await supabase
-                .from('game_publishers')
-                .select('game_id')
-                .eq('publisher_id', publisherId.id)
-
-            const publisherGameIds = publisherData?.map(g => g.game_id) ?? []
-            if (gameIds.length === 0) {
-                gameIds.push(...publisherGameIds)
-            } else {
-                gameIds = gameIds.filter(id => publisherGameIds.includes(id))
-            }
-        }
-    }
+    const gameIds = await queryGames({genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery})
 
     let supabaseQuery = supabase
         .from('games')
@@ -141,8 +54,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
     return (
         <main>
-            <nav className="h-14 border-b border-[#2a2a35]" />
-            
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
                 {/* Filters */}
                 <GameFilters

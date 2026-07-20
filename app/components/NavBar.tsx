@@ -8,7 +8,6 @@ import { useUser } from "@/app/components/UserContext"
 export default function NavBar() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [defaultTab, setDefaultTab] = useState<"signup" | "signin">("signup")
-    const [userDropdown, setUserDropdown] = useState(false)
     const { user, signOut } = useUser()
 
     function handleClick(tab: "signup" | "signin") {

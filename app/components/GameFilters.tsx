@@ -2,33 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { ChangeEvent } from 'react';
-
-const selectClass = `bg-[#1a1a1f] text-[#f0f0f0] text-sm border border-[#2a2a35] rounded-lg
-    px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-[#00d4aa] focus:border-[#00d4aa]
-    transition-colors duration-200 cursor-pointer appearance-none`
-const arrowClass = "absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8b8b9a] text-xs pointer-events-none"
-
-function FilterSelect({ value, onChange, children }: {
-    value: string,
-    onChange: (e: ChangeEvent<HTMLSelectElement>) => void,
-    children: React.ReactNode
-}) {
-    return (
-        <div className="relative">
-            <select
-                value={value}
-                onChange={onChange}
-                className={selectClass}
-            >
-                {children}
-            </select>
-            <span className={arrowClass}>
-                ▾           
-            </span>
-        </div>
-    )
-}
+import FilterSelect from "@/app/components/FilterSelect"
+import SearchInput from './SearchInput';
 
 export default function GameFilters({ current, genres, platforms, developers, publishers, esrb_ratings }: 
     { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string},
@@ -59,23 +34,11 @@ export default function GameFilters({ current, genres, platforms, developers, pu
 
     return (
         <div>
-            <div className="flex gap-2 mb-4 items-center">
-                <input
-                    type="text"
-                    placeholder="Search games..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#1a1a24] text-[#8b8b9a] placeholder:text-[#5a5a6e] border border-[#2a2a35] focus:outline-none rounded-lg px-2 py-1"
-                />
-                <button 
-                    onClick={() => handleSubmit()}
-                    className="bg-[#00d4aa] text-[#0e0e10] hover:bg-[#00b894] py-2 px-4 rounded-lg font-semibold transition-colors duration-200"
-                >
-                    Search
-                </button>
+            <div className="flex gap-2 mb-4 items-center w-full">
+                <SearchInput searchQuery={searchQuery} onChange={setSearchQuery} onSubmit={handleSubmit} />
                 <button
                     onClick={() => setFiltersOpen(!filtersOpen)}
-                    className="bg-[#1a1a24] text-[#8b8b9a] placeholder:text-[#5a5a6e] border border-[#2a2a35] focus:outline-none rounded-lg px-4 py-2 whitespace-nowrap"
+                    className="self-center justify-self-center bg-[#1a1a24] text-[#8b8b9a] placeholder:text-[#5a5a6e] border border-[#2a2a35] focus:outline-none rounded-lg px-4 py-2 whitespace-nowrap"
                 >
                     {filtersOpen ? '- Filters' : '+ Filters'}
                 </button>
