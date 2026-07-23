@@ -6,7 +6,7 @@ import FilterSelect from "@/app/components/FilterSelect"
 import SearchInput from './SearchInput';
 
 export default function GameFilters({ current, genres, platforms, developers, publishers, esrb_ratings }: 
-    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string},
+    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string, pageSize: string},
         genres: { id: number, name: string, slug: string }[], platforms: { id: number, name: string, slug: string }[], 
         developers: { id: number, name: string, slug: string }[], publishers: { id: number, name: string, slug: string }[], 
         esrb_ratings: string[]}) {
@@ -17,6 +17,7 @@ export default function GameFilters({ current, genres, platforms, developers, pu
     const [selectedDeveloper, setSelectedDeveloper] = useState(current.developer)
     const [selectedPublisher, setSelectedPublisher] = useState(current.publisher)
     const [selectedEsrb, setSelectedEsrb] = useState(current.esrb)
+    const [selectedPageSize, setSelectedPageSize] = useState(current.pageSize)
     const [filtersOpen, setFiltersOpen] = useState(false)
     const router = useRouter()
 
@@ -28,13 +29,34 @@ export default function GameFilters({ current, genres, platforms, developers, pu
         if (selectedDeveloper) params.set("developer", selectedDeveloper)
         if (selectedPublisher) params.set("publisher", selectedPublisher)
         if (selectedEsrb) params.set("esrb", selectedEsrb)
+        if (selectedPageSize) params.set("pageSize", selectedPageSize)
         
+        router.push(`/games?${params.toString()}`)
+    }
+
+    function handlePageSize(size: string) {
+        setSelectedPageSize(size)
+        const params = new URLSearchParams()
+        if (searchQuery) params.set("q", searchQuery)
+        if (selectedGenre) params.set("genre", selectedGenre)
+        if (selectedPlatform) params.set("platform", selectedPlatform)
+        if (selectedDeveloper) params.set("developer", selectedDeveloper)
+        if (selectedPublisher) params.set("publisher", selectedPublisher)
+        if (selectedEsrb) params.set("esrb", selectedEsrb)
+        params.set("pageSize", size)
+        params.set("page", "1")
         router.push(`/games?${params.toString()}`)
     }
 
     return (
         <div>
             <div className="flex gap-2 mb-4 items-center w-full">
+                <FilterSelect value={selectedPageSize} onChange={e => handlePageSize(e.target.value)}>
+                    <option value="10">Results: 10</option>
+                    <option value="25">Results: 25</option>
+                    <option value="50">Results: 50</option>
+                    <option value="100">Results: 100</option>
+                </FilterSelect>
                 <SearchInput searchQuery={searchQuery} onChange={setSearchQuery} onSubmit={handleSubmit} />
                 <button
                     onClick={() => setFiltersOpen(!filtersOpen)}

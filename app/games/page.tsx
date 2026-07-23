@@ -3,27 +3,33 @@ import GameCard from "@/app/components/GameCard";
 import GameFilters from "@/app/components/GameFilters";
 import Link from "next/link";
 import { queryGames } from "@/lib/queries";
+import Pagination from "../components/Pagination";
 
 type SearchPageProps = {
-  searchParams: Promise<{ q?: string, genre?: string, platform?: string, developer?: string, publisher?: string, esrb?: string }>
+  searchParams: Promise<{ q?: string, genre?: string, platform?: string, developer?: string, publisher?: string, esrb?: string, page?: number, pageSize?: string }>
 }
 
 export default async function SearchPage({ searchParams } : SearchPageProps) {
-    const { q, genre, platform, developer, publisher, esrb } = await searchParams;
+    const { q, genre, platform, developer, publisher, esrb, page, pageSize } = await searchParams;
     const query = q?.trim() ?? '';
     const genreQuery = genre?.trim() ?? '';
     const platformQuery = platform?.trim() ?? '';
     const developerQuery = developer?.trim() ?? '';
     const publisherQuery = publisher?.trim() ?? '';
+    const pageQuery = page ? Number(page) : 1
+    const pageSizeQuery = pageSize ? Number(pageSize) : 10
     let esrbQuery = esrb?.trim() ?? '';
+
+    const from = (pageQuery - 1) * pageSizeQuery
+    const to = from + pageSizeQuery - 1
 
     const gameIds = await queryGames({genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery})
 
     let supabaseQuery = supabase
         .from('games')
-        .select('id, name, slug, cover_image_url, metacritic_score, released')
+        .select('id, name, slug, cover_image_url, metacritic_score, released', { count: "exact" })
         .order('metacritic_score', { ascending: false, nullsFirst: false })
-        .limit(10)
+        .range(from, to)
 
     if (query) {
         supabaseQuery = supabaseQuery.ilike('name', `%${query}%`)
@@ -40,7 +46,7 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
         supabaseQuery = supabaseQuery.in('id', gameIds)
     }
     
-    const { data: games } = await supabaseQuery
+    const { data: games, count } = await supabaseQuery
 
     const genres = await supabase.from('genres').select('id, name, slug')
     const platforms = await supabase.from('platforms').select('id, name, slug')
@@ -57,7 +63,7 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
                 {/* Filters */}
                 <GameFilters
-                    current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery}}
+                    current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery)}}
                     genres={genres.data ?? []}
                     platforms={platforms.data ?? []}
                     developers={developers.data ?? []}
@@ -67,7 +73,7 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
 
                 {/* Game grid */}
                 {games && games.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-10">
                         {games.map(game => (
                             <GameCard key={game.id} game={game} />
                         ))}
@@ -90,6 +96,14 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
                         </Link>
                     </div>
                 )}
+
+                {!!count && count > 0 && 
+                    <Pagination 
+                        page={pageQuery}
+                        maxPages={Math.ceil(count / pageSizeQuery)}
+                        params={{ q: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery) }}
+                    />
+                }
             </div>
         </main>
     )

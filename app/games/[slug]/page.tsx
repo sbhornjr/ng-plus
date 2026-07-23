@@ -1,16 +1,35 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
 import Image from 'next/image'
 import Link from 'next/link'
 import ScreenshotCarousel from "@/app/components/ScreenshotCarousel";
 import LibraryButton from "@/app/components/LibraryButton";
+import RateReviewButton from "@/app/components/RateReviewButton";
+import Review from "@/app/components/Review";
+import DistributionChart from "@/app/components/DistributionChart";
 
 type GamePageProps = {
     params: Promise<{ slug: string }>
 }
 
+type RatingReview = {
+    user_id: string
+    rating: number
+    review: string
+    created_at: string
+    updated_at: string
+    users: {
+        username: string
+        display_name: string
+        avatar_url: string
+    }[]
+}
+
 export default async function GamePage({ params }: GamePageProps) {
     const { slug } = await params;
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
 
     const { data: game } = await supabase
         .from("games")
@@ -53,13 +72,37 @@ export default async function GamePage({ params }: GamePageProps) {
         ? '#f0a500'
         : '#e05555'
 
+    const { data: ratings_reviews, count } = await supabase
+        .from("ratings_reviews")
+        .select("user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url)", { count: "exact" })
+        .eq("game_id", game.id)
+
+    const ratingsReviews = ratings_reviews as RatingReview[]
+
+    const userReview = user && ratings_reviews ? ratingsReviews.find(r => r.user_id === user.id) : null
+
+    const { data: aggregate_rating } = await supabase.rpc("get_game_avg_rating", { p_game_id: game.id})
+
+    const rating_distribution = [10,9,8,7,6,5,4,3,2,1].map(n => ({
+        name: n,
+        count: ratingsReviews.filter(r => r.rating === n).length
+    }))
+
+    const ngScoreColor = aggregate_rating >= 8
+        ? '#00d4aa'
+        : aggregate_rating >= 6
+        ? '#f0a500'
+        : aggregate_rating >= 3
+        ? '#e05555'
+        : '#8b8b9a'
+
     return (
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
 
                 {/* Back to Games link */}
                 <Link href="/games" className="inline-flex items-center gap-2 text-[#8b8b9a]
-                    text-sm font-semibold mb-8 group hover:text-[#00d4aa] transition-colors duration-200
+                    text-sm font-semibold mb-8 group hover:text-[#e05555] transition-colors duration-200
                     font-(family-name:--font-display)"
                 >
                     <span className="group-hover:-translate-x-0.5 transition-transform duration-200 text-lg">←</span> 
@@ -127,7 +170,17 @@ export default async function GamePage({ params }: GamePageProps) {
                                 <p className="text-sm font-semibold px-2 py-1 rounded-lg" style={{ outline: `1px solid ${scoreColor}` }}>
                                     <span style={{ color: scoreColor }}>{game.metacritic_score}</span>
                                 </p>
-                            )}              
+                            )}          
+                            {/* NG+ Score */}
+                            {aggregate_rating ? (
+                                <p className="text-sm font-semibold">
+                                    NG+ Rating: <span style={{ color: ngScoreColor }}>{aggregate_rating}</span>
+                                </p>
+                            ) : (
+                                <p className="text-sm font-semibold text-[#8b8b9a]">
+                                    Be the first to rate this game on NG+!
+                                </p>
+                            )}    
                         </div>
                         {/* Button Row */}
                         <div className="flex gap-4 flex-wrap mb-6 w-full justify-start">
@@ -198,13 +251,26 @@ export default async function GamePage({ params }: GamePageProps) {
                 {/* Screenshot Carousel */}
                 {game.screenshots.length > 1 && (
                     <div className="mb-4 w-1/2 max-w-6xl mx-auto">
-                        <h2 className="text-md font-semibold mb-2 font-(family-name:--font-display)
-                            text-[#8b8b9a] uppercase tracking-widest text-center">
-                            Screenshots:
-                        </h2>
                         <ScreenshotCarousel screenshots={game.screenshots.slice(1) ?? []} />
                     </div>
                 )}
+                {/* Reviews */}
+                <div className="mb-4">
+                    <div className="flex items-center gap-4 justify-between mb-2">
+                        {aggregate_rating ? (
+                            <p className="text-2xl font-semibold mb-2">NG+ users rated {game.name} a <span style={{ color: ngScoreColor }}>{aggregate_rating}</span>/10</p>
+                        ) : (
+                            <p className="text-2xl font-semibold mb-2">Be the first NG+ user to rate {game.name}!</p>
+                        )}
+                        <RateReviewButton game_id={game.id} existing_rating_review={userReview}/>
+                    </div>
+                    <DistributionChart data={rating_distribution}/>
+                    <h2 className="border-t border-[#2a2a35] text-2xl font-semibold mb-2 mt-2 pt-2">Reviews ({count})</h2>
+                    {userReview && user && <Review rating_review={userReview}/>}
+                    {ratings_reviews?.filter(r => r.user_id != user?.id).map(r => 
+                        <Review key={r.user_id} rating_review={r}/>
+                    )}
+                </div>
                 {/* Reddit Link */}
                 {game?.reddit_url && (
                     <div className="mb-6">
