@@ -20,6 +20,11 @@ type EsrbRatingsData = {
     esrb_rating: string
 }
 
+type AvgRatingsData = {
+    game_id: number
+    avg_rating: number
+}
+
 export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     const { q, genre, platform, developer, publisher, esrb, sort, order, status } = await searchParams;
     const query = q?.trim() ?? '';
@@ -132,6 +137,30 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
             .filter(Boolean) as typeof sortedGames
     }
 
+    const gameIds = sortedGames.map(g => g.id)
+    const [
+        { data: avgRatingsData },
+        { data: userRatings },
+        { data: developerLinks },
+    ] = await Promise.all([
+        supabase.rpc('get_avg_ratings_for_games', { p_game_ids: gameIds }),
+        supabase
+            .from('ratings_reviews')
+            .select('game_id, rating')
+            .eq('user_id', user.id)
+            .in('game_id', gameIds),
+        supabase
+            .from('game_developers')
+            .select('game_id, developers(name)')
+            .in('game_id', gameIds),
+    ])
+
+    const avgRatings = avgRatingsData as AvgRatingsData[]
+    // Build lookup Maps — O(1) access per card
+    const avgRatingMap = new Map(avgRatings?.map(r => [r.game_id, r.avg_rating]))
+    const userRatingMap = new Map(userRatings?.map(r => [r.game_id, r.rating]))
+    const developerMap = new Map(developerLinks?.reverse().map(d => [d.game_id, (d.developers as any)?.name ?? null]))
+
     return (
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
@@ -151,7 +180,7 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
                 {sortedGames && sortedGames.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {sortedGames.map(game => (
-                            <GameCard key={game.id} game={game} />
+                            <GameCard key={game.id} game={game} developer={developerMap.get(game.id)} userRating={userRatingMap.get(game.id)} ngplusRating={avgRatingMap.get(game.id) ?? null}/>
                         ))}
                     </div>
                 ) : (

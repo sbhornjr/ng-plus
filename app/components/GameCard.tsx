@@ -10,7 +10,7 @@ type Game = {
   released: string | null
 }
 
-export default function GameCard({ game, developer }: { game: Game, developer?: string | null }) {
+export default function GameCard({ game, developer, ngplusRating, userRating }: { game: Game, developer?: string | null, ngplusRating?: number | null, userRating?: number | null }) {
   return (
     <Link href={`/games/${game.slug}`} className="group block">
       <div
@@ -35,11 +35,11 @@ export default function GameCard({ game, developer }: { game: Game, developer?: 
             </div>
           )}
 
-          {/* Metacritic badge */}
-          {game.metacritic_score && (
+          {/* Rating badge */}
+          {!ngplusRating && game.metacritic_score && (
             <div
               className="absolute top-2 right-2 min-w-8 px-2 py-1 rounded-md text-sm font-bold text-center
-                font-(family-name:--font-display)"
+                font-(family-name:--font-display) flex flex-col items-center gap-0.5"
               style={{
                 backgroundColor: game.metacritic_score >= 80
                   ? '#00d4aa'
@@ -49,7 +49,44 @@ export default function GameCard({ game, developer }: { game: Game, developer?: 
                 color: '#0e0e10',
               }}
             >
-              {game.metacritic_score}
+              <span className="text-xs font-bold text-[#0e0e10] leading-none uppercase tracking-wider">MC</span>
+              <span className="text-sm font-bold text-[#0e0e10] leading-none">{game.metacritic_score}</span>
+            </div>
+          )}
+          {/* NGPlus badge */}
+          {ngplusRating && (
+            <div
+              className="absolute top-2 right-2 min-w-8 px-2 py-1 rounded-md text-sm font-bold text-center
+                font-(family-name:--font-display) flex flex-col items-center gap-0.5"
+              style={{
+                backgroundColor: ngplusRating >= 8
+                  ? '#00d4aa'
+                  : ngplusRating >= 6
+                  ? '#f0a500'
+                  : '#e05555',
+                color: '#0e0e10',
+              }}
+            >
+              <span className="text-xs font-bold text-[#0e0e10] leading-none uppercase tracking-wider">NG+</span>
+              <span className="text-sm font-bold text-[#0e0e10] leading-none">{ngplusRating}</span>
+            </div>
+          )}
+          {/* User Rating badge */}
+          {userRating && (
+            <div
+              className="absolute top-2 left-2 min-w-8 px-2 py-1 mx-0.5 rounded-md text-sm font-bold text-center
+                font-(family-name:--font-display) flex flex-col items-center gap-0.5"
+              style={{
+                backgroundColor: userRating >= 8
+                  ? '#00d4aa'
+                  : userRating >= 6
+                  ? '#f0a500'
+                  : '#e05555',
+                color: '#0e0e10',
+              }}
+            >
+              <span className="text-xs font-bold text-[#0e0e10] leading-none uppercase tracking-wider">You</span>
+              <span className="text-sm font-bold text-[#0e0e10] leading-none">{userRating}</span>
             </div>
           )}
         </div>
@@ -69,8 +106,8 @@ export default function GameCard({ game, developer }: { game: Game, developer?: 
             </p>
           )}
           {developer && (
-            <p className="text-[#8b8b9a] text-sm mt-1">
-              Larian Studios
+            <p className="text-[#8b8b9a] text-sm mt-1 line-clamp-1">
+              {developer}
             </p>
           )}
         </div>
