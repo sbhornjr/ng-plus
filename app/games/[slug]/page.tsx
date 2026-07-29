@@ -266,9 +266,9 @@ export default async function GamePage({ params }: GamePageProps) {
                     </div>
                     <DistributionChart data={rating_distribution}/>
                     <h2 className="border-t border-[#2a2a35] text-2xl font-semibold mb-2 mt-2 pt-2">Reviews ({count})</h2>
-                    {userReview && user && <Review rating_review={userReview}/>}
+                    {userReview && user && <Review rating_review={userReview} gameName={game.name} gameSlug={game.slug}/>}
                     {ratings_reviews?.filter(r => r.user_id != user?.id).map(r => 
-                        <Review key={r.user_id} rating_review={r}/>
+                        <Review key={r.user_id} rating_review={r} gameName={game.name} gameSlug={game.slug}/>
                     )}
                 </div>
                 {/* Reddit Link */}

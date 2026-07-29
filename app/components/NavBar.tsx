@@ -38,12 +38,16 @@ export default function NavBar() {
             ) : (
                 <div className="ml-auto relative group">
                     <div className="flex items-center gap-6 mx-4 cursor-pointer">
-                        <Link href="/account" className="text-2xl font-bold font-(family-name:--font-display) tracking-tight">
+                        <Link href={`/user/${user.username}`}  className="text-2xl font-bold font-(family-name:--font-display) tracking-tight">
                             {user.username} <span className="text-lg pointer-events-none">▾</span>
                         </Link>
                     </div>
                     <div className="absolute right-0 top-full w-48 bg-[#1a1a1f] border border-[#2a2a35] rounded-xl
                         hidden group-hover:flex flex-col z-50 py-2 shadow-xl">
+                        <Link href={`user/${user.username}`} className="px-4 py-2 text-sm text-[#8b8b9a]
+                            hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
+                            Profile
+                        </Link>
                         <Link href="/library" className="px-4 py-2 text-sm text-[#8b8b9a]
                             hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
                             Library
@@ -51,10 +55,6 @@ export default function NavBar() {
                         <Link href="/loadout" className="px-4 py-2 text-sm text-[#8b8b9a]
                             hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
                             Loadout
-                        </Link>
-                        <Link href="/account" className="px-4 py-2 text-sm text-[#8b8b9a]
-                            hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
-                            Account
                         </Link>
                         <Link href="/settings" className="px-4 py-2 text-sm text-[#8b8b9a]
                             hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">

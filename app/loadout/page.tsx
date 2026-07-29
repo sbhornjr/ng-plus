@@ -3,6 +3,7 @@ import GameCard from "@/app/components/GameCard";
 import { redirect } from "next/navigation";
 import DistributionChart from "../components/DistributionChart";
 import { generateLoadoutIdentity } from "@/lib/loadout";
+import SubmitBioButton from "../components/SubmitBioButton";
 
 type HighlightType = {
     cover_image_url: string,
@@ -84,15 +85,15 @@ export default async function LoadoutPage() {
 
     let loadoutIdentity = ''
     if (ratingsReviews.length >= 5) {
-    loadoutIdentity = await generateLoadoutIdentity({
-        username: user.id,
-        totalGames: totalGames,
-        completedGames: completedStat ? completedStat.count : 0,
-        totalRatings: ratingsReviews.length,
-        avgRating,
-        topGenres: genreStats ?? [],
-        topDevelopers: developerStats ?? []
-    })
+        loadoutIdentity = await generateLoadoutIdentity({
+            username: user.id,
+            totalGames: totalGames,
+            completedGames: completedStat ? completedStat.count : 0,
+            totalRatings: ratingsReviews.length,
+            avgRating,
+            topGenres: genreStats ?? [],
+            topDevelopers: developerStats ?? []
+        })
     }
 
     return (
@@ -104,11 +105,12 @@ export default async function LoadoutPage() {
                         <div className="mb-12 max-w-2xl mx-auto text-center">
                             <p className="text-xs font-semibold text-[#8b8b9a] uppercase tracking-widest mb-3
                             font-(family-name:--font-display)">
-                            Your Gaming Identity
+                                Your Gaming Identity
                             </p>
                             <p className="text-lg text-[#f0f0f0] leading-relaxed italic">
-                            "{loadoutIdentity}"
+                                "{loadoutIdentity}"
                             </p>
+                            <SubmitBioButton userId={user.id} bio={loadoutIdentity} />
                         </div>
                     ) : (
                         <div className="mb-12 max-w-2xl mx-auto text-center">
