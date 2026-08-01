@@ -7,6 +7,7 @@ import LibraryButton from "@/app/components/LibraryButton";
 import RateReviewButton from "@/app/components/RateReviewButton";
 import Review from "@/app/components/Review";
 import DistributionChart from "@/app/components/DistributionChart";
+import AddToListButton from "@/app/components/AddToListButton";
 
 type GamePageProps = {
     params: Promise<{ slug: string }>
@@ -23,6 +24,18 @@ type RatingReview = {
         display_name: string
         avatar_url: string
     }[]
+}
+
+type ListType = {
+    id: number,
+    name: string,
+    description: string,
+    is_public: boolean,
+    is_default: boolean,
+    is_pinned: boolean,
+    created_at: string,
+    last_activity: string,
+    game_count: number
 }
 
 export default async function GamePage({ params }: GamePageProps) {
@@ -95,6 +108,19 @@ export default async function GamePage({ params }: GamePageProps) {
         : aggregate_rating >= 3
         ? '#e05555'
         : '#8b8b9a'
+
+    const { data: listsData } = await supabase.rpc('get_user_lists', { p_user_id: user?.id, p_include_private: true })
+    const lists = listsData ? listsData as ListType[] : []
+
+    const listIds = lists.map(l => l.id)
+
+    const { data: gameInLists } = await supabase
+        .from('list_games')
+        .select('list_id')
+        .eq('game_id', game.id)
+        .in('list_id', listIds)
+
+    const listIdsGameIsIn = new Set(gameInLists?.map(g => g.list_id) ?? [])
 
     return (
         <main>
@@ -187,10 +213,7 @@ export default async function GamePage({ params }: GamePageProps) {
                             {/* Add to Library Button */}
                             <LibraryButton game_id={game.id}/>
                             {/* Add to List Button */}
-                            <button className="px-4 py-1 text-md text-[#00d4aa] border border-[#00d4aa] self-center justify-self-center
-                                font-semibold rounded-lg hover:bg-[#00d4aa] hover:text-[#0e0e10] transition-colors duration-200">
-                                Add to List
-                            </button>
+                            <AddToListButton gameId={game.id} lists={lists.map(l => ({ listId: String(l.id), listName: l.name, listCount: l.game_count }))} listIdsGameIsIn={listIdsGameIsIn}/>
                         </div>
                     </div>
                 </div>

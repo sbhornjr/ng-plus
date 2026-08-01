@@ -44,7 +44,7 @@ export default function NavBar() {
                     </div>
                     <div className="absolute right-0 top-full w-48 bg-[#1a1a1f] border border-[#2a2a35] rounded-xl
                         hidden group-hover:flex flex-col z-50 py-2 shadow-xl">
-                        <Link href={`user/${user.username}`} className="px-4 py-2 text-sm text-[#8b8b9a]
+                        <Link href={`/user/${user.username}`} className="px-4 py-2 text-sm text-[#8b8b9a]
                             hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
                             Profile
                         </Link>
@@ -55,6 +55,10 @@ export default function NavBar() {
                         <Link href="/loadout" className="px-4 py-2 text-sm text-[#8b8b9a]
                             hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
                             Loadout
+                        </Link>
+                        <Link href={`/user/${user.username}/lists`} className="px-4 py-2 text-sm text-[#8b8b9a]
+                            hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">
+                            Lists
                         </Link>
                         <Link href="/settings" className="px-4 py-2 text-sm text-[#8b8b9a]
                             hover:text-[#f0f0f0] hover:bg-[#2a2a35] transition-colors duration-200">

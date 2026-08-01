@@ -19,6 +19,11 @@ type ListType = {
     game_count: number
 }
 
+type GameCover = {
+  coverImageUrl: string | null
+  slug: string | null
+}
+
 export default async function ListsPage({ params }: ListsPageProps) {
     const { username } = await params;
     const supabase = await createClient()
@@ -39,16 +44,20 @@ export default async function ListsPage({ params }: ListsPageProps) {
 
     const { data: listGames } = await supabase
         .from('list_games')
-        .select('list_id, position, games(cover_image_url)')
+        .select('list_id, position, games(cover_image_url, slug)')
         .in('list_id', listIds)
         .order('position', { ascending: true })
 
-    const coversByList = new Map<string, (string | null)[]>()
+    const coversByList = new Map<string, GameCover[]>()
+
     for (const entry of listGames ?? []) {
         const existing = coversByList.get(entry.list_id) ?? []
         if (existing.length < 5) {
-            const game = entry.games[0] as { cover_image_url: string | null } | null
-            existing.push(game?.cover_image_url ?? null)
+            const game = entry.games as unknown as { cover_image_url: string | null, slug: string } | null
+            existing.push({
+                coverImageUrl: game?.cover_image_url ?? null,
+                slug: game?.slug ?? null
+            })
             coversByList.set(entry.list_id, existing)
         }
     }
@@ -58,8 +67,8 @@ export default async function ListsPage({ params }: ListsPageProps) {
             <div className="flex flex-col gap-2 mt-6">
                 <h2 className="text-4xl font-bold font-(family-name:--font-display) text-center mb-4">{username}'s Lists</h2>
                 {viewer && viewer.id && isOwnProfile && <CreateListButton userId={viewer?.id}/>}
-                {lists.map(l => <ListPreview key={l.id} username={username} listName={l.name} isPinned={l.is_pinned} isPinnable={true} 
-                    lastUpdated={l.last_activity} description={l.description} gameCovers={coversByList.get(String(l.id))} />)}
+                {lists.map(l => <ListPreview key={l.id} listId={l.id} username={username} listName={l.name} isPinned={l.is_pinned} isPinnable={true} 
+                    lastUpdated={l.last_activity} description={l.description} gameCovers={coversByList.get(String(l.id))} listCount={l.game_count}/>)}
             </div>
         </main>
     )

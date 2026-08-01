@@ -156,7 +156,6 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     ])
 
     const avgRatings = avgRatingsData as AvgRatingsData[]
-    // Build lookup Maps — O(1) access per card
     const avgRatingMap = new Map(avgRatings?.map(r => [r.game_id, r.avg_rating]))
     const userRatingMap = new Map(userRatings?.map(r => [r.game_id, r.rating]))
     const developerMap = new Map(developerLinks?.reverse().map(d => [d.game_id, (d.developers as any)?.name ?? null]))
