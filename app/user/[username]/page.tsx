@@ -7,6 +7,7 @@ import FavoriteGamePicker from "@/app/components/FavoriteGamePicker";
 import GameCard from "@/app/components/GameCard";
 import Review from "@/app/components/Review";
 import Link from "next/link";
+import FollowButton from "@/app/components/FollowButton";
 
 type ProfilePageProps = {
     params: Promise<{ username: string }>
@@ -66,8 +67,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         .order('created_at', { ascending: false })
         .limit(3)
 
-    console.log(recentReviews)
-
     const { data: developer_stats_data } = await supabase.rpc('get_loadout_developer_stats', { p_user_id: profile.id })
     const developerStats = developer_stats_data ? developer_stats_data as DeveloperStatType[] : []
     const topDeveloperNames = developerStats.slice(0, 6).map(d => d.developer_name)
@@ -80,6 +79,18 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     const avgRating = ratingStats ? ratingStats.reduce((acc, r) => { return acc + r.rating }, 0) / ratingStats.length : 0
 
     const currentTitle = profile.selected_title ? profile.selected_title : "Title-less Noob"
+
+    const { data: followersData } = await supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("following_id", profile.id)
+    const followersCount = followersData ? followersData.length : 0
+
+    const { data: followingData } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", profile.id)
+    const followingCount = followingData ? followingData.length : 0
 
     return (
         <main>
@@ -115,16 +126,23 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                             {isOwnProfile && <TitleSelectButton userId={profile.id} currentTitle={currentTitle} topGames={favoriteGames ? favoriteGames.map(g => g.name) : []} topDevelopers={topDeveloperNames} />}
                         </div>
                         <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">Member since {new Date(profile.created_at).getMonth() + 1}/{new Date(profile.created_at).getDate()}/{new Date(profile.created_at).getFullYear()}</p>
+                        <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a] self-center">{followersCount} Followers | {followingCount} Following</p>
                     </div>
-                    {isOwnProfile && (
-                    <div className="flex flex-row gap-2 items-center ml-auto">
-                        <Link href="/library" className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                            hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Library</Link>
-                        <Link href="/loadout" className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                            hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>
-                        <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                            hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
-                    </div>
+                    {isOwnProfile ? (
+                        <div className="flex flex-row gap-2 items-center ml-auto">
+                            <Link href="/library" className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
+                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Library</Link>
+                            <Link href="/loadout" className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
+                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>
+                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
+                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
+                        </div>
+                    ) : (
+                        <div className="flex flex-row gap-2 items-center ml-auto">
+                            {viewer && <FollowButton userId={viewer.id} targetUserId={profile.id} initialIsFollowing={!!followersData?.find(f => f.follower_id === viewer?.id)} />}
+                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
+                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
+                        </div>
                     )}
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 mt-4">

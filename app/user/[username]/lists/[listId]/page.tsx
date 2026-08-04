@@ -5,6 +5,7 @@ import Link from "next/link";
 import GameCard from "@/app/components/GameCard";
 import AddToListFromListButton from "@/app/components/AddToListFromListButton";
 import RemoveFromListButton from "@/app/components/RemoveFromListButton";
+import LikeListButton from "@/app/components/LikeListButton";
 
 type ListPageProps = {
     params: Promise<{ username: string, listId: string }>
@@ -74,6 +75,14 @@ export default async function ListPage({ params }: ListPageProps) {
     let developerMap = new Map()
     const gameIds = games.map(g => g.games.id)
 
+    const { data: likesData } = await supabase
+        .from('list_likes')
+        .select('user_id')
+        .eq('list_id', listId)
+
+    const likeCount = likesData?.length ?? 0
+    const userHasLiked = viewer ? likesData?.some(l => l.user_id === viewer.id) ?? false : false
+
     if (viewer) {
         const [
             { data: avgRatingsData },
@@ -130,6 +139,8 @@ export default async function ListPage({ params }: ListPageProps) {
                     <span className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">{games.length} games</span>
                     <span>·</span>
                     <span className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">Updated {new Date(list.updated_at).getMonth() + 1}/{new Date(list.updated_at).getDate()}/{new Date(list.updated_at).getFullYear()}</span>
+                    <span>·</span>
+                    <LikeListButton listId={listId} initialLiked={userHasLiked} initialCount={likeCount} userId={viewer?.id ?? null} />
                 </div>
                 <p className="text-md text-[#8b8b9a] text-center max-w-3xl mb-4">{list.description}</p>
                 <div className="w-full max-w-6xl mx-auto px-8">

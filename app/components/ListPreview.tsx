@@ -5,14 +5,15 @@ import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase-browser"
 import { useRouter } from "next/navigation"
+import LikeListButton from "./LikeListButton"
 
 type GameCover = {
     coverImageUrl: string | null
     slug: string | null
 }
 
-export default function ListPreview({ listId, listName, gameCovers, isPinnable, description, lastUpdated, username, listCount, isPinned } : 
-    { listId: number, listName: string, gameCovers: GameCover[] | undefined, isPinnable: boolean, description: string, lastUpdated: string, username: string, listCount: number, isPinned?: boolean }) {
+export default function ListPreview({ listId, listName, gameCovers, isPinnable, isLikable, description, lastUpdated, username, listCount, isPinned, likeCount, userHasLiked, activeUserId} : 
+    { listId: number, listName: string, gameCovers: GameCover[] | undefined, isPinnable: boolean, isLikable: boolean, description: string, lastUpdated: string, username: string, listCount: number, isPinned?: boolean, likeCount: number, userHasLiked: boolean, activeUserId: string | undefined }) {
     const [isPinnedNow, setIsPinnedNow] = useState(isPinned)
     const router = useRouter()
 
@@ -60,36 +61,41 @@ export default function ListPreview({ listId, listName, gameCovers, isPinnable, 
                         )}
                     </Link>
                 ))}
-                {isPinnable && (
-                    <button
-                        onClick={async (e) => {
-                            e.stopPropagation() 
-                            handlePinChange()
-                        }}
-                        className="relative z-10 shrink-0 w-10 h-10 rounded-lg border
-                            flex items-center justify-center self-center
-                            transition-all duration-200
-                            group/pin ml-auto
-                            border-[#2a2a35] hover:border-[#00d4aa]
-                            bg-transparent hover:bg-[#00d4aa]/10"
-                        title={isPinnedNow ? 'Unpin list' : 'Pin list'}
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill={isPinnedNow ? '#00d4aa' : 'none'}
-                            stroke={isPinnedNow ? '#00d4aa' : '#8b8b9a'}
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="transition-all duration-200 group-hover/pin:stroke-[#00d4aa]"
+                <div className="flex flex-col gap-2 ml-auto items-end justify-center">
+                    {isLikable && (
+                        <LikeListButton listId={String(listId)} initialLiked={userHasLiked} initialCount={likeCount} userId={activeUserId} />
+                    )}
+                    {isPinnable && (
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation() 
+                                handlePinChange()
+                            }}
+                            className="relative z-10 shrink-0 w-10 h-10 rounded-lg border
+                                flex items-center justify-center self-center
+                                transition-all duration-200
+                                group/pin ml-auto
+                                border-[#2a2a35] hover:border-[#00d4aa]
+                                bg-transparent hover:bg-[#00d4aa]/10"
+                            title={isPinnedNow ? 'Unpin list' : 'Pin list'}
                         >
-                            <line x1="12" y1="17" x2="12" y2="22"/>
-                            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
-                        </svg>
-                    </button>
-                )}
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill={isPinnedNow ? '#00d4aa' : 'none'}
+                                stroke={isPinnedNow ? '#00d4aa' : '#8b8b9a'}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="transition-all duration-200 group-hover/pin:stroke-[#00d4aa]"
+                            >
+                                <line x1="12" y1="17" x2="12" y2="22"/>
+                                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     )
