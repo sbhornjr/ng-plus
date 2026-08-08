@@ -19,25 +19,25 @@ export default function Review({ rating_review, gameName, gameSlug } : { rating_
               {/* Game name as headline */}
             {gameName && gameSlug && (
                 <Link 
-                href={`/games/${gameSlug}`}
-                className="text-sm font-semibold text-[#8b8b9a] hover:text-[#00d4aa] 
-                    transition-colors duration-200 mb-2 block"
+                    href={`/games/${gameSlug}`}
+                    className="text-sm font-semibold text-[#8b8b9a] hover:text-[#00d4aa] 
+                        transition-colors duration-200 mb-2 block"
                 >
-                {gameName}
+                    {gameName}
                 </Link>
             )}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                     {/* Avatar circle */}
                     <div className="w-8 h-8 rounded-full bg-[#2a2a35] flex items-center justify-center
-                        text-xs font-bold text-[#00d4aa] relative">
+                        text-xs font-bold text-[#00d4aa] relative overflow-hidden">
                         {rating_review.users.avatar_url ? (
                             <Image
                                 src={rating_review.users.avatar_url}
                                 alt={rating_review.users.username}
                                 fill
                                 className="object-cover transition-all duration-100 group-hover:scale-105"
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                                sizes="64px"
                             />
                         ) : (
                             <div className="w-8 h-8 rounded-full bg-[#2a2a35] border border-[#00d4aa]
@@ -49,7 +49,9 @@ export default function Review({ rating_review, gameName, gameSlug } : { rating_
                         )}
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-[#f0f0f0] mx-2">{rating_review.users.username}</p>
+                        <Link href={`/user/${rating_review.users.username}`} className="text-sm font-semibold text-[#f0f0f0] hover:text-[#00d4aa] mx-2">
+                            {rating_review.users.display_name}
+                        </Link>
                         <p className="text-xs text-[#8b8b9a] mx-2">
                         {new Date(rating_review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>

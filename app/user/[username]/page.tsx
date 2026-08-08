@@ -100,14 +100,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <AvatarUploader userId={profile.id} username={username} currentAvatarUrl={profile.avatar_url} />
                     ) : (
                         <div className="w-20 h-20 rounded-full bg-[#2a2a35] flex items-center justify-center
-                            text-xs font-bold text-[#00d4aa] relative">
+                            text-xs font-bold text-[#00d4aa] overflow-hidden relative">
                             {profile.avatar_url ? (
                                 <Image
                                     src={profile.avatar_url}
                                     alt={username}
                                     fill
                                     className="object-cover transition-all duration-100 group-hover:scale-105"
-                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                                    sizes="160px"
                                 />
                             ) : (
                                 <div className="w-20 h-20 rounded-full bg-[#2a2a35] border border-[#00d4aa]
@@ -126,7 +126,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                             {isOwnProfile && <TitleSelectButton userId={profile.id} currentTitle={currentTitle} topGames={favoriteGames ? favoriteGames.map(g => g.name) : []} topDevelopers={topDeveloperNames} />}
                         </div>
                         <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">Member since {new Date(profile.created_at).getMonth() + 1}/{new Date(profile.created_at).getDate()}/{new Date(profile.created_at).getFullYear()}</p>
-                        <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a] self-center">{followersCount} Followers | {followingCount} Following</p>
+                        <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">{followersCount} Followers | {followingCount} Following</p>
                     </div>
                     {isOwnProfile ? (
                         <div className="flex flex-row gap-2 items-center ml-auto">
@@ -153,8 +153,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         { label: 'Avg Rating', value: avgRating },
                     ].map(({ label, value }) => (
                         <div key={label} className="bg-[#1a1a1f] border border-[#2a2a35] rounded-xl p-5 text-center">
-                        <p className="text-3xl font-bold font-(family-name:--font-display) text-[#00d4aa]">{value}</p>
-                        <p className="text-sm text-[#8b8b9a] mt-1">{label}</p>
+                            <p className="text-3xl font-bold font-(family-name:--font-display) text-[#00d4aa]">{value}</p>
+                            <p className="text-sm text-[#8b8b9a] mt-1">{label}</p>
                         </div>
                     ))}
                 </div>

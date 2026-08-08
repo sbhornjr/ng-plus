@@ -10,7 +10,7 @@ type Game = {
   released: string | null
 }
 
-export default function GameCard({ game, developer, ngplusRating, userRating }: { game: Game, developer?: string | null, ngplusRating?: number | null, userRating?: number | null }) {
+export default function GameCard({ game, developer, ngplusRating, userRating }: { game: Game, developer?: string | null, ngplusRating?: number | null, userRating?: number | null}) {
   return (
     <Link href={`/games/${game.slug}`} className="group block">
       <div

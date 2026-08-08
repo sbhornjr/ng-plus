@@ -44,7 +44,7 @@ export default function LikeButton({ listId, initialCount, initialLiked, userId 
             onClick={handleLike}
             disabled={loading}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border
-                text-sm font-semibold transition-all duration-200
+                text-sm font-semibold transition-all duration-200 z-10
                 ${liked
                 ? 'border-[#00d4aa] text-[#00d4aa] bg-[#00d4aa]/10'
                 : 'border-[#2a2a35] text-[#8b8b9a] hover:border-[#00d4aa] hover:text-[#00d4aa]'}`}

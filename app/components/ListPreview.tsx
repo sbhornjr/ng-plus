@@ -12,8 +12,8 @@ type GameCover = {
     slug: string | null
 }
 
-export default function ListPreview({ listId, listName, gameCovers, isPinnable, isLikable, description, lastUpdated, username, listCount, isPinned, likeCount, userHasLiked, activeUserId} : 
-    { listId: number, listName: string, gameCovers: GameCover[] | undefined, isPinnable: boolean, isLikable: boolean, description: string, lastUpdated: string, username: string, listCount: number, isPinned?: boolean, likeCount: number, userHasLiked: boolean, activeUserId: string | undefined }) {
+export default function ListPreview({ listId, listName, gameCovers, isPinnable, isLikable, description, lastUpdated, username, listCount, isPinned, likeCount, userHasLiked, activeUserId, fullLength } : 
+    { listId: number, listName: string, gameCovers: GameCover[] | undefined, isPinnable: boolean, isLikable: boolean, description: string | null, lastUpdated: string, username: string, listCount: number, isPinned?: boolean, likeCount: number, userHasLiked: boolean, activeUserId: string | undefined, fullLength: boolean }) {
     const [isPinnedNow, setIsPinnedNow] = useState(isPinned)
     const router = useRouter()
 
@@ -32,7 +32,7 @@ export default function ListPreview({ listId, listName, gameCovers, isPinnable, 
     }
 
     return (
-        <div className="flex flex-col self-center w-1/2 relative border border-[#2a2a35] rounded-xl p-4 hover:border-[#00d4aa]/50 transition-all duration-200 group">
+        <div className={`flex flex-col relative border border-[#2a2a35] rounded-xl p-4 hover:border-[#00d4aa]/50 transition-all duration-200 group ${!fullLength && "self-center w-1/2"}`}>
              <Link 
                 href={`/user/${username}/lists/${listId}`}
                 className="absolute inset-0 rounded-xl z-0"

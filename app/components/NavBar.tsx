@@ -23,8 +23,8 @@ export default function NavBar() {
             <Link href="/games" className="text-2xl font-bold font-(family-name:--font-display) tracking-tight">
                 Games
             </Link>
-            <Link href="/games" className="text-2xl font-bold font-(family-name:--font-display) tracking-tight">
-                Community
+            <Link href="/explore" className="text-2xl font-bold font-(family-name:--font-display) tracking-tight">
+                Explore
             </Link>
             {user == null ? (
                 <div className="flex items-center gap-6 ml-auto">

@@ -129,7 +129,10 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
                         listCount={l.game_count}
                         likeCount={likeCountMap.get(String(l.id)) ?? 0} 
                         userHasLiked={userLikedSet.has(String(l.id))} 
-                        activeUserId={viewer?.id} />)}
+                        activeUserId={viewer?.id} 
+                        fullLength={false}
+                    />
+                )}
             </div>
         </main>
     )
