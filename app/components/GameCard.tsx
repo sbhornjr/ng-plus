@@ -10,7 +10,14 @@ type Game = {
   released: string | null
 }
 
-export default function GameCard({ game, developer, ngplusRating, userRating }: { game: Game, developer?: string | null, ngplusRating?: number | null, userRating?: number | null}) {
+type AdvancedStats = {
+  is100: boolean,
+  hoursPlayed: number | null,
+  playCount: number
+}
+
+export default function GameCard({ game, developer, ngplusRating, userRating, advancedStats } : 
+  { game: Game, developer?: string | null, ngplusRating?: number | null, userRating?: number | null, advancedStats?: AdvancedStats | null | undefined }) {
   return (
     <Link href={`/games/${game.slug}`} className="group block">
       <div
@@ -108,6 +115,11 @@ export default function GameCard({ game, developer, ngplusRating, userRating }: 
           {developer && (
             <p className="text-[#8b8b9a] text-sm mt-1 line-clamp-1">
               {developer}
+            </p>
+          )}
+          {advancedStats && (
+            <p className="text-[#8b8b9a] text-sm mt-1 whitespace-nowrap">
+              {advancedStats.hoursPlayed && `⏱ ${advancedStats.hoursPlayed}h · `} {advancedStats.playCount > 1 && `⟳ x${advancedStats.playCount}`} {advancedStats.is100 && "· ✓ 100%"}
             </p>
           )}
         </div>

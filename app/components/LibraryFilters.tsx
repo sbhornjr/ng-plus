@@ -23,45 +23,45 @@ export default function LibraryFilters({ current, genres, platforms, developers,
     const [filtersOpen, setFiltersOpen] = useState(false)
     const router = useRouter()
 
-function buildParams(overrides: Record<string, string> = {}) {
-    const values = {
-        q: searchQuery,
-        genre: selectedGenre,
-        platform: selectedPlatform,
-        developer: selectedDeveloper,
-        publisher: selectedPublisher,
-        esrb: selectedEsrb,
-        sort: selectedSort,
-        order: selectedOrder,
-        status: selectedStatus,
-        ...overrides
+    function buildParams(overrides: Record<string, string> = {}) {
+        const values = {
+            q: searchQuery,
+            genre: selectedGenre,
+            platform: selectedPlatform,
+            developer: selectedDeveloper,
+            publisher: selectedPublisher,
+            esrb: selectedEsrb,
+            sort: selectedSort,
+            order: selectedOrder,
+            status: selectedStatus,
+            ...overrides
+        }
+        const params = new URLSearchParams()
+        Object.entries(values).forEach(([key, val]) => {
+            if (val) params.set(key, val)
+        })
+        return params
     }
-    const params = new URLSearchParams()
-    Object.entries(values).forEach(([key, val]) => {
-        if (val) params.set(key, val)
-    })
-    return params
-}
 
-function handleStatus(status: string) {
-    setSelectedStatus(status)
-    router.push(`/library?${buildParams({ status: status }).toString()}`)
-}
+    function handleStatus(status: string) {
+        setSelectedStatus(status)
+        router.push(`/library?${buildParams({ status: status }).toString()}`)
+    }
 
-function handleSort(sortChoice: string) {
-    setSelectedSort(sortChoice)
-    router.push(`/library?${buildParams({ sort: sortChoice }).toString()}`)
-}
+    function handleSort(sortChoice: string) {
+        setSelectedSort(sortChoice)
+        router.push(`/library?${buildParams({ sort: sortChoice }).toString()}`)
+    }
 
-function handleSortToggle() {
-    const newDirection = selectedOrder === "desc" ? "asc" : "desc"
-    setSelectedOrder(newDirection)
-    router.push(`/library?${buildParams({ order: newDirection }).toString()}`)
-}
+    function handleSortToggle() {
+        const newDirection = selectedOrder === "desc" ? "asc" : "desc"
+        setSelectedOrder(newDirection)
+        router.push(`/library?${buildParams({ order: newDirection }).toString()}`)
+    }
 
-function handleSubmit() {
-  router.push(`/library?${buildParams().toString()}`)
-}
+    function handleSubmit() {
+    router.push(`/library?${buildParams().toString()}`)
+    }
 
     return (
         <div>
@@ -102,6 +102,8 @@ function handleSubmit() {
                     <option value="date_added">Date Added</option>
                     <option value="name">Name</option>
                     <option value="metacritic_score">Metacritic Rating</option>
+                    <option value="ngplus_rating">NG+ Rating</option>
+                    <option value="your_rating">Your Rating</option>
                 </FilterSelect>
                 <button
                     onClick={() => handleSortToggle()}
@@ -120,28 +122,28 @@ function handleSubmit() {
                 </button>
             </div>
             {filtersOpen && (
-            <div className="flex flex-wrap flex-row gap-4 mb-4">
-                <FilterSelect value={selectedGenre} onChange={e => setSelectedGenre(e.target.value)}>
-                    <option value="">All Genres</option>
-                    {genres.map(g => <option key={g.id} value={g.slug}>{g.name}</option>)}
-                </FilterSelect>
-                <FilterSelect value={selectedPlatform} onChange={e => setSelectedPlatform(e.target.value)}>
-                    <option value="">All Platforms</option>
-                    {platforms.map(p => <option key={p.id} value={p.slug}>{p.name}</option>)}
-                </FilterSelect>
-                <FilterSelect value={selectedDeveloper} onChange={e => setSelectedDeveloper(e.target.value)}>
-                    <option value="">All Developers</option>
-                    {developers.map(d => <option key={d.id} value={d.slug}>{d.name}</option>)}
-                </FilterSelect>
-                <FilterSelect value={selectedPublisher} onChange={e => setSelectedPublisher(e.target.value)}>
-                    <option value="">All Publishers</option>
-                    {publishers.map(p => <option key={p.id} value={p.slug}>{p.name}</option>)}
-                </FilterSelect>
-                <FilterSelect value={selectedEsrb} onChange={e => setSelectedEsrb(e.target.value)}>
-                    <option value="">All ESRB Ratings</option>
-                    {esrb_ratings.map(r => <option key={r} value={r}>{r}</option>)}
-                </FilterSelect>
-            </div>
+                <div className="flex flex-wrap flex-row gap-4 mb-4">
+                    <FilterSelect value={selectedGenre} onChange={e => setSelectedGenre(e.target.value)}>
+                        <option value="">All Genres</option>
+                        {genres.map(g => <option key={g.id} value={g.slug}>{g.name}</option>)}
+                    </FilterSelect>
+                    <FilterSelect value={selectedPlatform} onChange={e => setSelectedPlatform(e.target.value)}>
+                        <option value="">All Platforms</option>
+                        {platforms.map(p => <option key={p.id} value={p.slug}>{p.name}</option>)}
+                    </FilterSelect>
+                    <FilterSelect value={selectedDeveloper} onChange={e => setSelectedDeveloper(e.target.value)}>
+                        <option value="">All Developers</option>
+                        {developers.map(d => <option key={d.id} value={d.slug}>{d.name}</option>)}
+                    </FilterSelect>
+                    <FilterSelect value={selectedPublisher} onChange={e => setSelectedPublisher(e.target.value)}>
+                        <option value="">All Publishers</option>
+                        {publishers.map(p => <option key={p.id} value={p.slug}>{p.name}</option>)}
+                    </FilterSelect>
+                    <FilterSelect value={selectedEsrb} onChange={e => setSelectedEsrb(e.target.value)}>
+                        <option value="">All ESRB Ratings</option>
+                        {esrb_ratings.map(r => <option key={r} value={r}>{r}</option>)}
+                    </FilterSelect>
+                </div>
             )}
         </div>
     )

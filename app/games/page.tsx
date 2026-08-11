@@ -1,16 +1,27 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 import GameCard from "@/app/components/GameCard";
 import GameFilters from "@/app/components/GameFilters";
 import Link from "next/link";
-import { queryGames } from "@/lib/queries";
 import Pagination from "../components/Pagination";
 
 type SearchPageProps = {
-  searchParams: Promise<{ q?: string, genre?: string, platform?: string, developer?: string, publisher?: string, esrb?: string, page?: number, pageSize?: string }>
+    searchParams: Promise<{ q?: string, genre?: string, platform?: string, developer?: string, publisher?: string, esrb?: string, page?: number, pageSize?: string, sort?: string, order?: string }>
+}
+
+type GameData = {
+    id: number
+    name: string
+    slug: string
+    cover_image_url: string
+    metacritic_score: number
+    released: string
+    avg_ngplus_rating: number
+    user_rating: number
+    total_count: number
 }
 
 export default async function SearchPage({ searchParams } : SearchPageProps) {
-    const { q, genre, platform, developer, publisher, esrb, page, pageSize } = await searchParams;
+    const { q, genre, platform, developer, publisher, esrb, page, pageSize, sort, order } = await searchParams;
     const query = q?.trim() ?? '';
     const genreQuery = genre?.trim() ?? '';
     const platformQuery = platform?.trim() ?? '';
@@ -18,35 +29,31 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
     const publisherQuery = publisher?.trim() ?? '';
     const pageQuery = page ? Number(page) : 1
     const pageSizeQuery = pageSize ? Number(pageSize) : 10
-    let esrbQuery = esrb?.trim() ?? '';
+    const sortQuery = sort?.trim() ?? '';
+    const orderQuery = order?.trim() ?? "desc";
+    const esrbQuery = esrb?.trim() ?? '';
+    const supabase = await createClient()
 
-    const from = (pageQuery - 1) * pageSizeQuery
-    const to = from + pageSizeQuery - 1
+    const { data: { user } } = await supabase.auth.getUser()
 
-    const gameIds = await queryGames({genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery})
+    const { data: gamesData } = await supabase.rpc('query_games', {
+        p_q: query || null,
+        p_genre: genreQuery || null,
+        p_platform: platformQuery || null,
+        p_developer: developerQuery || null,
+        p_publisher: publisherQuery || null,
+        p_esrb: esrbQuery || null,
+        p_sort: sortQuery,
+        p_order: orderQuery,
+        p_limit: pageSizeQuery,
+        p_offset: (pageQuery - 1) * pageSizeQuery,
+        p_user_id: user ? user.id : null,
+        p_game_ids: null
+    })
 
-    let supabaseQuery = supabase
-        .from('games')
-        .select('id, name, slug, cover_image_url, metacritic_score, released', { count: "exact" })
-        .order('metacritic_score', { ascending: false, nullsFirst: false })
-        .range(from, to)
-
-    if (query) {
-        supabaseQuery = supabaseQuery.ilike('name', `%${query}%`)
-    }
-
-    if (esrbQuery) {
-        if (esrbQuery == "Everyone 10") {
-            esrbQuery = "Everyone 10+";
-        }
-        supabaseQuery = supabaseQuery.eq('esrb_rating', esrbQuery.charAt(0).toUpperCase() + esrbQuery.slice(1))
-    }
-
-    if (gameIds.length > 0) {
-        supabaseQuery = supabaseQuery.in('id', gameIds)
-    }
-    
-    const { data: games, count } = await supabaseQuery
+    const games = gamesData ? gamesData as GameData[] : []
+    const totalCount = games[0]?.total_count ?? 0
+    const totalPages = Math.ceil(totalCount / pageSizeQuery)
 
     const genres = await supabase.from('genres').select('id, name, slug')
     const platforms = await supabase.from('platforms').select('id, name, slug')
@@ -58,12 +65,20 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
         esrb_ratings = [...new Set(esrb_ratings_data.data.map(row => row.esrb_rating))].filter((rating): rating is string => rating !== null).sort();
     }
 
+    const finalGameIds = games?.map(g => g.id) ?? []
+    const { data: developerLinks } = await supabase
+        .from('game_developers')
+        .select('game_id, developers(name)')
+        .in('game_id', finalGameIds)
+
+    const developerMap = new Map(developerLinks?.reverse().map(d => [d.game_id, (d.developers as any)?.name ?? null]))
+
     return (
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
                 {/* Filters */}
                 <GameFilters
-                    current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery)}}
+                    current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery), order: orderQuery, sort: sortQuery}}
                     genres={genres.data ?? []}
                     platforms={platforms.data ?? []}
                     developers={developers.data ?? []}
@@ -75,7 +90,13 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
                 {games && games.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-10">
                         {games.map(game => (
-                            <GameCard key={game.id} game={game} />
+                            <GameCard 
+                                key={game.id} 
+                                game={{ id: String(game.id), name: game.name, slug: game.slug, cover_image_url: game.cover_image_url, metacritic_score: game.metacritic_score, released: game.released }} 
+                                developer={developerMap.get(game.id)} 
+                                userRating={game.user_rating} 
+                                ngplusRating={game.avg_ngplus_rating}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -97,10 +118,10 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
                     </div>
                 )}
 
-                {!!count && count > 0 && 
+                {!!totalCount && totalCount > 0 && 
                     <Pagination 
                         page={pageQuery}
-                        maxPages={Math.ceil(count / pageSizeQuery)}
+                        maxPages={totalPages}
                         params={{ q: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery) }}
                     />
                 }

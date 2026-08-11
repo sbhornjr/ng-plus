@@ -20,9 +20,16 @@ type EsrbRatingsData = {
     esrb_rating: string
 }
 
-type AvgRatingsData = {
-    game_id: number
-    avg_rating: number
+type GameData = {
+    id: number
+    name: string
+    slug: string
+    cover_image_url: string
+    metacritic_score: number
+    released: string
+    avg_ngplus_rating: number
+    user_rating: number
+    total_count: number
 }
 
 export default async function LibraryPage({ searchParams } : LibraryPageProps) {
@@ -32,8 +39,8 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     const platformQuery = platform?.trim() ?? '';
     const developerQuery = developer?.trim() ?? '';
     const publisherQuery = publisher?.trim() ?? '';
-    let esrbQuery = esrb?.trim() ?? '';
-    const sortQuery = sort?.trim() ?? 'date_added';
+    const esrbQuery = esrb?.trim() ?? '';
+    const sortQuery = sort?.trim() ?? 'ngplus_rating';
     const orderQuery = order?.trim() ?? 'desc';
     const statusQuery = status?.trim() ?? ''
     const supabase = await createClient()
@@ -89,7 +96,7 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
 
     let supabaseLibraryQuery = supabase
         .from('library_entries')
-        .select('game_id, status, created_at')
+        .select('game_id, status, created_at, completed_all_achievements, hours_played, play_count')
         .eq('user_id', user.id)
 
     if (status) supabaseLibraryQuery = supabaseLibraryQuery.eq('status', statusQuery)
@@ -98,66 +105,29 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     
     const { data: libraryEntries } = await supabaseLibraryQuery
     const libraryGameIds = libraryEntries?.map(e => e.game_id) ?? []
-    let filteredGameIds = libraryGameIds
 
-    if (genreQuery || platformQuery || developerQuery || publisherQuery) {
-        const gameIds = await queryGames({genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, limitToGameIds: libraryGameIds})
-        filteredGameIds = gameIds
-    }
+    const { data: gamesData } = await supabase.rpc('query_games', {
+        p_q: query || null,
+        p_genre: genreQuery || null,
+        p_platform: platformQuery || null,
+        p_developer: developerQuery || null,
+        p_publisher: publisherQuery || null,
+        p_esrb: esrbQuery || null,
+        p_sort: sortQuery,
+        p_order: orderQuery,
+        p_user_id: user ? user.id : null,
+        p_game_ids: libraryGameIds,
+        p_limit: 9999
+    })
 
-    let supabaseGamesQuery = supabase
-        .from('games')
-        .select('id, name, slug, cover_image_url, metacritic_score, released')
+    const games = gamesData ? gamesData as GameData[] : []
 
-    if (query) supabaseGamesQuery = supabaseGamesQuery.ilike('name', `%${query}%`)
-
-    if (sortQuery !== 'date_added') supabaseGamesQuery = supabaseGamesQuery.order(sortQuery, { ascending: orderQuery === 'asc', nullsFirst: false })
-
-    if (esrbQuery) {
-        if (esrbQuery == "Everyone 10") {
-            esrbQuery = "Everyone 10+";
-        }
-        supabaseGamesQuery = supabaseGamesQuery.eq('esrb_rating', esrbQuery.charAt(0).toUpperCase() + esrbQuery.slice(1))
-    }
-
-    if (filteredGameIds.length > 0) {
-        supabaseGamesQuery = supabaseGamesQuery.in('id', filteredGameIds)
-    } else {
-        supabaseGamesQuery = supabaseGamesQuery.in('id', ['00000000-0000-0000-0000-000000000000'])
-    }
+    const finalGameIds = games?.map(g => g.id) ?? []
+    const { data: developerLinks } = await supabase
+        .from('game_developers')
+        .select('game_id, developers(name)')
+        .in('game_id', finalGameIds)
     
-    const { data: games } = await supabaseGamesQuery
-
-    let sortedGames = games ?? []
-    if (sortQuery === 'date_added' && libraryEntries) {
-        const orderedIds = libraryEntries.map(e => e.game_id)
-        const gameMap = new Map(sortedGames.map(g => [g.id, g]))
-        sortedGames = orderedIds
-            .map(id => gameMap.get(id))
-            .filter(Boolean) as typeof sortedGames
-    }
-
-    const gameIds = sortedGames.map(g => g.id)
-    const [
-        { data: avgRatingsData },
-        { data: userRatings },
-        { data: developerLinks },
-    ] = await Promise.all([
-        supabase.rpc('get_avg_ratings_for_games', { p_game_ids: gameIds }),
-        supabase
-            .from('ratings_reviews')
-            .select('game_id, rating')
-            .eq('user_id', user.id)
-            .in('game_id', gameIds),
-        supabase
-            .from('game_developers')
-            .select('game_id, developers(name)')
-            .in('game_id', gameIds),
-    ])
-
-    const avgRatings = avgRatingsData as AvgRatingsData[]
-    const avgRatingMap = new Map(avgRatings?.map(r => [r.game_id, r.avg_rating]))
-    const userRatingMap = new Map(userRatings?.map(r => [r.game_id, r.rating]))
     const developerMap = new Map(developerLinks?.reverse().map(d => [d.game_id, (d.developers as any)?.name ?? null]))
 
     return (
@@ -176,10 +146,17 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
                 />
 
                 {/* Game grid */}
-                {sortedGames && sortedGames.length > 0 ? (
+                {games && games.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {sortedGames.map(game => (
-                            <GameCard key={game.id} game={game} developer={developerMap.get(game.id)} userRating={userRatingMap.get(game.id)} ngplusRating={avgRatingMap.get(game.id) ?? null}/>
+                        {games.map(game => (
+                            <GameCard 
+                                key={game.id} 
+                                game={{ id: String(game.id), name: game.name, slug: game.slug, cover_image_url: game.cover_image_url, metacritic_score: game.metacritic_score, released: game.released }} 
+                                developer={developerMap.get(game.id)} 
+                                userRating={game.user_rating} 
+                                ngplusRating={game.avg_ngplus_rating}
+                                advancedStats={{ is100: libraryEntries?.find(le => le.game_id == game.id)?.completed_all_achievements, hoursPlayed: libraryEntries?.find(le => le.game_id == game.id)?.hours_played, playCount: libraryEntries?.find(le => le.game_id == game.id)?.play_count }}
+                            />
                         ))}
                     </div>
                 ) : (

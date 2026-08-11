@@ -6,7 +6,7 @@ import FilterSelect from "@/app/components/FilterSelect"
 import SearchInput from './SearchInput';
 
 export default function GameFilters({ current, genres, platforms, developers, publishers, esrb_ratings }: 
-    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string, pageSize: string},
+    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string, pageSize: string, sort: string, order: string},
         genres: { id: number, name: string, slug: string }[], platforms: { id: number, name: string, slug: string }[], 
         developers: { id: number, name: string, slug: string }[], publishers: { id: number, name: string, slug: string }[], 
         esrb_ratings: string[]}) {
@@ -18,34 +18,49 @@ export default function GameFilters({ current, genres, platforms, developers, pu
     const [selectedPublisher, setSelectedPublisher] = useState(current.publisher)
     const [selectedEsrb, setSelectedEsrb] = useState(current.esrb)
     const [selectedPageSize, setSelectedPageSize] = useState(current.pageSize)
+    const [selectedSort, setSelectedSort] = useState(current.sort)
+    const [selectedOrder, setSelectedOrder] = useState(current.order)
     const [filtersOpen, setFiltersOpen] = useState(false)
     const router = useRouter()
 
+    function buildParams(overrides: Record<string, string> = {}) {
+        const values = {
+            q: searchQuery,
+            genre: selectedGenre,
+            platform: selectedPlatform,
+            developer: selectedDeveloper,
+            publisher: selectedPublisher,
+            esrb: selectedEsrb,
+            sort: selectedSort,
+            order: selectedOrder,
+            pageSize: selectedPageSize,
+            ...overrides
+        }
+        const params = new URLSearchParams()
+        Object.entries(values).forEach(([key, val]) => {
+            if (val) params.set(key, val)
+        })
+        return params
+    }
+
     function handleSubmit() {
-        const params = new URLSearchParams();
-        if (searchQuery) params.set("q", searchQuery)
-        if (selectedGenre) params.set("genre", selectedGenre)
-        if (selectedPlatform) params.set("platform", selectedPlatform)
-        if (selectedDeveloper) params.set("developer", selectedDeveloper)
-        if (selectedPublisher) params.set("publisher", selectedPublisher)
-        if (selectedEsrb) params.set("esrb", selectedEsrb)
-        if (selectedPageSize) params.set("pageSize", selectedPageSize)
-        
-        router.push(`/games?${params.toString()}`)
+        router.push(`/games?${buildParams().toString()}`)
     }
 
     function handlePageSize(size: string) {
         setSelectedPageSize(size)
-        const params = new URLSearchParams()
-        if (searchQuery) params.set("q", searchQuery)
-        if (selectedGenre) params.set("genre", selectedGenre)
-        if (selectedPlatform) params.set("platform", selectedPlatform)
-        if (selectedDeveloper) params.set("developer", selectedDeveloper)
-        if (selectedPublisher) params.set("publisher", selectedPublisher)
-        if (selectedEsrb) params.set("esrb", selectedEsrb)
-        params.set("pageSize", size)
-        params.set("page", "1")
-        router.push(`/games?${params.toString()}`)
+        router.push(`/games?${buildParams({ pageSize: size, page: "1"})}`)
+    }
+
+    function handleSort(sortChoice: string) {
+        setSelectedSort(sortChoice)
+        router.push(`/games?${buildParams({ sort: sortChoice }).toString()}`)
+    }
+
+    function handleSortToggle() {
+        const newDirection = selectedOrder === "desc" ? "asc" : "desc"
+        setSelectedOrder(newDirection)
+        router.push(`/games?${buildParams({ order: newDirection }).toString()}`)
     }
 
     return (
@@ -57,6 +72,19 @@ export default function GameFilters({ current, genres, platforms, developers, pu
                     <option value="50">Results: 50</option>
                     <option value="100">Results: 100</option>
                 </FilterSelect>
+                <FilterSelect value={selectedSort} onChange={e => handleSort(e.target.value)}>
+                    <option value="name">Name</option>
+                    <option value="metacritic_score">Metacritic Rating</option>
+                    <option value="ngplus_rating">NG+ Rating</option>
+                </FilterSelect>
+                <button
+                    onClick={() => handleSortToggle()}
+                    className="px-3 py-1.5 rounded-lg border border-[#2a2a35] bg-[#1a1a1f]
+                        text-[#8b8b9a] hover:border-[#00d4aa] hover:text-[#00d4aa]
+                        transition-all duration-200"
+                    >
+                    {selectedOrder === 'desc' ? '↓' : '↑'}
+                </button>
                 <SearchInput searchQuery={searchQuery} onChange={setSearchQuery} onSubmit={handleSubmit} />
                 <button
                     onClick={() => setFiltersOpen(!filtersOpen)}

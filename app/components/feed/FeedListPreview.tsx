@@ -28,7 +28,7 @@ export default function FeedListPreview({ listId, listName, listDescription, lis
             </div>
             {listCoverUrls && listCoverUrls.length > 0 && (
                 <div className="flex gap-1">
-                    {listCoverUrls.slice(0, 3).map((url, i) => (
+                    {listCoverUrls.slice(0, 5).map((url, i) => (
                         <div key={i} className="relative w-24 h-32 rounded overflow-hidden shrink-0">
                             <Image src={url} alt="" fill className="object-cover" sizes="96px" />
                         </div>

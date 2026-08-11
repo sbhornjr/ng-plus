@@ -68,20 +68,20 @@ export default function CreateListButton({ userId } : { userId: string }) {
                                     onClick={() => setter(!value)}
                                     className="flex items-center gap-3 text-left"
                                 >
-                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center
-                                    transition-all duration-200 shrink-0
-                                    ${value 
-                                    ? 'bg-[#00d4aa] border-[#00d4aa]' 
-                                    : 'bg-transparent border-[#2a2a35] hover:border-[#00d4aa]'}`}
-                                >
-                                    {value && (
-                                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                        <path d="M1 4L3.5 6.5L9 1" stroke="#0e0e10" strokeWidth="2" 
-                                        strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    )}
-                                </div>
-                                <span className="text-sm font-semibold text-[#f0f0f0]">{label}</span>
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center
+                                        transition-all duration-200 shrink-0
+                                        ${value 
+                                        ? 'bg-[#00d4aa] border-[#00d4aa]' 
+                                        : 'bg-transparent border-[#2a2a35] hover:border-[#00d4aa]'}`}
+                                    >
+                                        {value && (
+                                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                            <path d="M1 4L3.5 6.5L9 1" stroke="#0e0e10" strokeWidth="2" 
+                                            strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-semibold text-[#f0f0f0]">{label}</span>
                                 </button>
                             ))}
                         </div>
