@@ -1,35 +1,16 @@
 import { createClient } from "@/lib/supabase-server";
-import GameCard from "@/app/components/GameCard";
+import GameCard from "@/app/components/game/GameCard";
 import { redirect } from "next/navigation"
-import { queryGames } from "@/lib/queries";
-import LibraryFilters from "../components/LibraryFilters";
+import LibraryFilters from "../components/library/LibraryFilters";
 import Link from "next/link";
+import EmptyState from "../components/util/EmptyState";
+import { getViewer } from "@/lib/queries/user";
+import { queryGames, getDeveloperNameMap } from "@/lib/queries/game";
+import { getLibraryFacets, getLibraryEntries } from "@/lib/queries/library";
 
 type LibraryPageProps = {
   searchParams: Promise<{ q?: string,genre?: string, platform?: string, developer?: string, 
     publisher?: string, esrb?: string, sort?: string, order?: string, status?: string }>
-}
-
-type LibraryData = {
-    id: number,
-    name: string,
-    slug: string
-}
-
-type EsrbRatingsData = {
-    esrb_rating: string
-}
-
-type GameData = {
-    id: number
-    name: string
-    slug: string
-    cover_image_url: string
-    metacritic_score: number
-    released: string
-    avg_ngplus_rating: number
-    user_rating: number
-    total_count: number
 }
 
 export default async function LibraryPage({ searchParams } : LibraryPageProps) {
@@ -45,29 +26,10 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     const statusQuery = status?.trim() ?? ''
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getViewer(supabase)
     if (!user) redirect('/')
 
-    const [
-        { data: genresData },
-        { data: platformsData },
-        { data: developersData },
-        { data: publishersData },
-        { data: esrbRatingsData },
-    ] = await Promise.all([
-        supabase.rpc('get_library_genres', { p_user_id: user.id }),
-        supabase.rpc('get_library_platforms', { p_user_id: user.id }),
-        supabase.rpc('get_library_developers', { p_user_id: user.id }),
-        supabase.rpc('get_library_publishers', { p_user_id: user.id }),
-        supabase.rpc('get_library_esrb_ratings', { p_user_id: user.id }),
-    ])
-
-    const genres = genresData as LibraryData[]
-    const platforms = platformsData as LibraryData[]
-    const developers = developersData as LibraryData[]
-    const publishers = publishersData as LibraryData[]
-    const esrbRatingsList = esrbRatingsData as EsrbRatingsData[]
-    const esrbRatings = esrbRatingsList.map((r) => r.esrb_rating)
+    const { genres, platforms, developers, publishers, esrbRatings } = await getLibraryFacets(supabase, user.id)
 
     if (genreQuery != '' && !genres.map((g) => g.slug).includes(genreQuery)) {
         console.log("Genre " + genreQuery + " is not in the Library. Redirecting to home.")
@@ -94,41 +56,25 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
         redirect('/')
     }
 
-    let supabaseLibraryQuery = supabase
-        .from('library_entries')
-        .select('game_id, status, created_at, completed_all_achievements, hours_played, play_count')
-        .eq('user_id', user.id)
-
-    if (status) supabaseLibraryQuery = supabaseLibraryQuery.eq('status', statusQuery)
-
-    if (sortQuery === 'date_added') supabaseLibraryQuery = supabaseLibraryQuery.order('created_at', { ascending: orderQuery === 'asc' })
-    
-    const { data: libraryEntries } = await supabaseLibraryQuery
+    const libraryEntries = await getLibraryEntries(supabase, user.id, { status: statusQuery, sort: sortQuery, order: orderQuery })
     const libraryGameIds = libraryEntries?.map(e => e.game_id) ?? []
 
-    const { data: gamesData } = await supabase.rpc('query_games', {
-        p_q: query || null,
-        p_genre: genreQuery || null,
-        p_platform: platformQuery || null,
-        p_developer: developerQuery || null,
-        p_publisher: publisherQuery || null,
-        p_esrb: esrbQuery || null,
-        p_sort: sortQuery,
-        p_order: orderQuery,
-        p_user_id: user ? user.id : null,
-        p_game_ids: libraryGameIds,
-        p_limit: 9999
+    const games = await queryGames(supabase, {
+        q: query || null,
+        genre: genreQuery || null,
+        platform: platformQuery || null,
+        developer: developerQuery || null,
+        publisher: publisherQuery || null,
+        esrb: esrbQuery || null,
+        sort: sortQuery,
+        order: orderQuery,
+        userId: user ? user.id : null,
+        gameIds: libraryGameIds,
+        limit: 9999
     })
 
-    const games = gamesData ? gamesData as GameData[] : []
-
     const finalGameIds = games?.map(g => g.id) ?? []
-    const { data: developerLinks } = await supabase
-        .from('game_developers')
-        .select('game_id, developers(name)')
-        .in('game_id', finalGameIds)
-    
-    const developerMap = new Map(developerLinks?.reverse().map(d => [d.game_id, (d.developers as any)?.name ?? null]))
+    const developerMap = await getDeveloperNameMap(supabase, finalGameIds)
 
     return (
         <main>
@@ -160,22 +106,12 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-24 text-center">
-                        <p className="text-4xl mb-4">🎮</p>
-                        <h2 className="text-xl font-semibold mb-2 font-(family-name:--font-display)">
-                            No games found
-                        </h2>
-                        <p className="text-[#8b8b9a] text-sm mb-6">
-                            Try a different search, or browse <Link href="/games" className="text-[#00d4aa] hover:underline">all games</Link> and add to your Library.
-                        </p>
-                        <Link href="/" className="px-5 py-2.5 rounded-lg text-sm font-semibold
-                            bg-[#00d4aa] text-[#0e0e10] hover:bg-[#00b894]
-                            transition-colors duration-200
-                            font-(family-name:--font-display)"
-                        >
-                            Back to Home
-                        </Link>
-                    </div>
+                    <EmptyState
+                        title="No games found"
+                        description={<>Try a different search, or browse <Link href="/games" className="text-(--color-accent) hover:underline">all games</Link> and add to your Library.</>}
+                        actionHref="/"
+                        actionLabel="Back to Home"
+                    />
                 )}
             </div>
         </main>

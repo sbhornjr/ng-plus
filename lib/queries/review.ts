@@ -1,0 +1,117 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { GameRatingReview, RatingReviewData, RatingReviewCounts, AvgRatingsData } from '@/types'
+
+export async function getRatingsReviewsForGame(supabase: SupabaseClient, gameId: string) {
+    const { data, count } = await supabase
+        .from('ratings_reviews')
+        .select('user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url)', { count: 'exact' })
+        .eq('game_id', gameId)
+
+    return { ratingsReviews: (data ?? []) as unknown as GameRatingReview[], count: count ?? 0 }
+}
+
+export async function getGameAvgRating(supabase: SupabaseClient, gameId: string) {
+    const { data } = await supabase.rpc('get_game_avg_rating', { p_game_id: gameId })
+    return data
+}
+
+export async function createRatingReview(supabase: SupabaseClient, { userId, gameId, rating, review }: { userId: string, gameId: string, rating: number | string, review: string }) {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .insert({ user_id: userId, game_id: gameId, rating, review })
+        .select('rating, review, user_id, created_at, updated_at')
+        .single()
+
+    return data
+}
+
+export async function updateRatingReview(supabase: SupabaseClient, { userId, gameId, rating, review }: { userId: string, gameId: string, rating: number | string, review: string }) {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .update({ rating, review })
+        .eq('user_id', userId)
+        .eq('game_id', gameId)
+        .select('rating, review, user_id, created_at, updated_at')
+        .single()
+
+    return data
+}
+
+// Full rows (used by the loadout page's stats + rating distribution)
+export async function getUserRatings(supabase: SupabaseClient, userId: string) {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .select('game_id, rating, review')
+        .eq('user_id', userId)
+
+    return data ?? []
+}
+
+export async function getAvgRatingsForGames(supabase: SupabaseClient, gameIds: (string | number)[]): Promise<AvgRatingsData[]> {
+    const { data } = await supabase.rpc('get_avg_ratings_for_games', { p_game_ids: gameIds })
+    return data ?? []
+}
+
+export async function getUserRatingsForGames(supabase: SupabaseClient, userId: string, gameIds: (string | number)[]) {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .select('game_id, rating')
+        .eq('user_id', userId)
+        .in('game_id', gameIds)
+
+    return data ?? []
+}
+
+type RatingsReviewsPageParams = {
+    userId?: string
+    filter: string
+    sort: string
+    order: string
+    limit: number
+    offset: number
+}
+
+export async function getUserRatingsReviewsPage(supabase: SupabaseClient, params: RatingsReviewsPageParams): Promise<RatingReviewData[]> {
+    const { data } = await supabase.rpc('get_user_ratings_reviews', {
+        p_user_id: params.userId,
+        p_filter: params.filter,
+        p_sort: params.sort,
+        p_order: params.order,
+        p_limit: params.limit,
+        p_offset: params.offset,
+    })
+
+    return data ?? []
+}
+
+export async function getUserRatingsReviewsCounts(supabase: SupabaseClient, userId?: string): Promise<RatingReviewCounts[]> {
+    const { data } = await supabase.rpc('get_user_ratings_reviews_counts', { p_user_id: userId })
+    return data ?? [{ total_count: 0, review_count: 0, rating_count: 0 }]
+}
+
+type RecentReview = GameRatingReview & { games: { name: string, slug: string } }
+
+// Same shape as getRecentReviews, but site-wide — used on the logged-out
+// landing page to show real activity instead of a personalized feed.
+export async function getRecentReviewsGlobal(supabase: SupabaseClient, limit = 3): Promise<(RecentReview & { games: { name: string, slug: string, cover_image_url: string } })[]> {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .select('user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url), games(name, slug, cover_image_url)')
+        .neq('review', '')
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+    return (data ?? []) as unknown as (RecentReview & { games: { name: string, slug: string, cover_image_url: string } })[]
+}
+
+export async function getRecentReviews(supabase: SupabaseClient, userId: string, limit = 3): Promise<RecentReview[]> {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .select('user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url), games(name, slug)')
+        .eq('user_id', userId)
+        .neq('review', '')
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+    return (data ?? []) as unknown as RecentReview[]
+}

@@ -1,81 +1,39 @@
 import { createClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
-import ListPreview from "@/app/components/ListPreview";
-import CreateListButton from "@/app/components/CreateListButton";
+import ListPreview from "@/app/components/lists/ListPreview";
+import CreateListButton from "@/app/components/lists/CreateListButton";
 import Link from "next/link";
+import { ListWithOwner } from "@/types";
+import { getViewer, getProfileSummaryByUsername } from "@/lib/queries/user";
+import { getUserLists, getLikedLists, getListCoverMap, getListLikes } from "@/lib/queries/list";
 
 type ListsPageProps = {
     params: Promise<{ username: string, tab?: string }>
     searchParams: Promise<{ tab?: string }>
 }
 
-type ListType = {
-    id: number,
-    name: string,
-    description: string,
-    is_public: boolean,
-    is_default: boolean,
-    is_pinned: boolean,
-    created_at: string,
-    last_activity: string,
-    game_count: number,
-    owner_username: string,
-    owner_avatar_url: string | null,
-    owner_id: string
-}
-
-type GameCover = {
-  coverImageUrl: string | null
-  slug: string | null
-}
-
 export default async function ListsPage({ params, searchParams }: ListsPageProps) {
     const { username } = await params;
     const { tab } = await searchParams;
     const supabase = await createClient()
-    const { data: { user: viewer } } = await supabase.auth.getUser()
+    const viewer = await getViewer(supabase)
 
-    const { data: profile } = await supabase
-        .from('users')
-        .select('id, username, display_name, avatar_url')
-        .eq('username', username)
-        .single()
+    const profile = await getProfileSummaryByUsername(supabase, username)
 
     if (!profile) notFound()
     const isOwnProfile = viewer?.id === profile.id
 
-    const { data: listsData } = !tab || tab === 'user' 
-        ? await supabase.rpc('get_user_lists', { p_user_id: profile.id, p_include_private: isOwnProfile })
-        : await supabase.rpc('get_liked_lists', { p_user_id: profile.id })
-    
-    const lists = listsData ? listsData as ListType[] : []
-    
+    const listsData = !tab || tab === 'user'
+        ? await getUserLists(supabase, profile.id, isOwnProfile)
+        : await getLikedLists(supabase, profile.id)
+
+    const lists = listsData as ListWithOwner[]
+
     const listIds = lists.map(l => l.id) ?? []
 
-    const { data: listGames } = await supabase
-        .from('list_games')
-        .select('list_id, position, games(cover_image_url, slug)')
-        .in('list_id', listIds)
-        .order('position', { ascending: true })
+    const coversByList = await getListCoverMap(supabase, listIds)
 
-    const coversByList = new Map<string, GameCover[]>()
-
-    for (const entry of listGames ?? []) {
-        const existing = coversByList.get(entry.list_id) ?? []
-        if (existing.length < 5) {
-            const game = entry.games as unknown as { cover_image_url: string | null, slug: string } | null
-            existing.push({
-                coverImageUrl: game?.cover_image_url ?? null,
-                slug: game?.slug ?? null
-            })
-            coversByList.set(entry.list_id, existing)
-        }
-    }
-
-    const { data: likesData } = await supabase
-        .from('list_likes')
-        .select('list_id, user_id')
-        .in('list_id', listIds)
+    const likesData = await getListLikes(supabase, listIds)
 
     const likeCountMap = new Map<string, number>()
     const userLikedSet = new Set<string>()
@@ -91,14 +49,14 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
         <main>
             <div className="flex flex-col gap-2 mt-6">
                 <h2 className="text-4xl font-bold font-(family-name:--font-display) text-center mb-4">{username}'s Lists</h2>
-                <div className="flex gap-4 border-b border-[#2a2a35] mb-8 justify-center">
+                <div className="flex gap-4 border-b border-(--color-border) mb-8 justify-center">
                     <Link
                         href={`/user/${username}/lists`}
                         className={`px-4 py-2 text-sm font-semibold transition-colors duration-200
                             border-b-2 -mb-px
                             ${!tab || tab === 'user'
-                                ? 'border-[#00d4aa] text-[#00d4aa]'
-                                : 'border-transparent text-[#8b8b9a] hover:text-[#f0f0f0]'}`}
+                                ? 'border-(--color-accent) text-(--color-accent)'
+                                : 'border-transparent text-(--color-muted) hover:text-(--color-text)'}`}
                     >
                         {isOwnProfile ? 'My Lists' : `${username}'s Lists`}
                     </Link>
@@ -107,8 +65,8 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
                         className={`px-4 py-2 text-sm font-semibold transition-colors duration-200
                         border-b-2 -mb-px
                         ${tab === 'liked'
-                            ? 'border-[#00d4aa] text-[#00d4aa]'
-                            : 'border-transparent text-[#8b8b9a] hover:text-[#f0f0f0]'}`}
+                            ? 'border-(--color-accent) text-(--color-accent)'
+                            : 'border-transparent text-(--color-muted) hover:text-(--color-text)'}`}
                     >
                         Liked Lists
                     </Link>

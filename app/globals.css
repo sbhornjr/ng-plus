@@ -1,14 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --color-bg: #0e0e10;
-  --color-surface: #1a1a1f;
-  --color-border: #2a2a35;
-  --color-accent: #00d4aa;
-  --color-text: #f0f0f0;
-  --color-muted: #8b8b9a;
+  /* Ledger design system: warm, archival, catalog/dossier tones —
+     replaces the earlier near-black-plus-teal palette site-wide. */
+  --font-display: 'Fraunces', serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --color-bg: #14120f;
+  --color-surface: #221f1a;
+  --color-surface-light: #2b271f;
+  --color-border: #3a352b;
+  --color-accent: #8e5aa8;
+  --color-accent-hover: #7a4a8f;
+  --color-text: #c9c2b4;
+  --color-muted: #8a8378;
+
+  /* Rating-tier / stamp seal colors — chosen for hue separation (not just
+     lightness) so they stay distinguishable for color-blind viewers, and
+     boosted in saturation/value so they read against busy cover art. */
+  --color-good: #4f86c6;
+  --color-mid: #d99a3a;
+  --color-bad: #d6493f;
+  --color-bad-hover: #a83a30;
 }
 
 body {

@@ -1,66 +1,172 @@
 import { createClient } from "@/lib/supabase-server";
 import FeedItem from "@/app/components/feed/FeedItem";
-import { redirect } from "next/navigation";
-
-type FeedItem = {
-	activity_type: string
-	created_at: string
-	actor_id: string
-	actor_username: string
-	actor_avatar_url: string | null
-	game_id: string | null
-	game_name: string | null
-	game_slug: string | null
-	game_cover_image_url: string | null
-	game_released: string | null
-	game_metacritic_score: number | null
-	game_developer: string | null
-	game_avg_rating: number | null
-	viewer_game_rating: number | null
-	list_id: string | null
-	list_name: string | null
-	list_description: string | null
-	list_owner_username: string | null
-	list_game_count: number | null
-	list_last_activity: string | null
-	list_like_count: number | null
-	viewer_liked_list: boolean | null
-	rating: number | null
-	review: string | null
-	review_created_at: string | null
-	review_updated_at: string | null
-	library_status: string | null
-}
+import GameCard from "@/app/components/game/GameCard";
+import Seal from "@/app/components/game/Seal";
+import Avatar from "@/app/components/user/Avatar";
+import LandingCTA from "@/app/components/util/LandingCTA";
+import Image from "next/image";
+import Link from "next/link";
+import { getViewer } from "@/lib/queries/user";
+import { getFeed } from "@/lib/queries/feed";
+import { queryGames } from "@/lib/queries/game";
+import { getTrendingGames } from "@/lib/queries/explore";
+import { getRecentReviewsGlobal } from "@/lib/queries/review";
 
 export default async function Home() {
 	const supabase = await createClient()
 
-	const { data: { user: viewer } } = await supabase.auth.getUser()
+	const viewer = await getViewer(supabase)
 
 	if (!viewer) {
-		redirect("/games")
+		const [candidates, trendingGames, recentReviews] = await Promise.all([
+			queryGames(supabase, { sort: 'metacritic_score', order: 'desc', limit: 40, userId: null }),
+			getTrendingGames(supabase, null, 30),
+			getRecentReviewsGlobal(supabase, 3),
+		])
+
+		const withBothScores = candidates.filter(g => g.metacritic_score && g.avg_ngplus_rating)
+		const heroGame = [...withBothScores].sort((a, b) =>
+			Math.abs(b.metacritic_score - b.avg_ngplus_rating * 10) - Math.abs(a.metacritic_score - a.avg_ngplus_rating * 10)
+		)[0]
+
+		return (
+			<main>
+				{/* Hero — the tri-source rating tension, made concrete with a real game */}
+				<section className="w-full max-w-6xl mx-auto px-6 pt-16 pb-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+					<div>
+						<p className="text-(--color-muted) text-xs font-semibold tracking-[0.3em] uppercase mb-4 font-mono">
+							{heroGame ? `${heroGame.name}` : 'Every game, three scores'}
+						</p>
+						{heroGame ? (
+							<h1 className="text-5xl md:text-6xl font-(family-name:--font-display) text-(--color-text) leading-[1.1] mb-6">
+								Metacritic said <span className="text-(--color-good)">{heroGame.metacritic_score}</span>.
+								{' '}NG+ said <span className="text-(--color-mid)">{heroGame.avg_ngplus_rating}</span>.
+							</h1>
+						) : (
+							<h1 className="text-5xl md:text-6xl font-(family-name:--font-display) text-(--color-text) leading-[1.1] mb-6">
+								Every game gets three scores.
+							</h1>
+						)}
+						<p className="text-lg text-(--color-muted) mb-6 font-(family-name:--font-display) italic">
+							What do you say?
+						</p>
+						<p className="text-(--color-muted) mb-8 max-w-md leading-relaxed">
+							NG+ stamps every game you log with three scores — the critics&apos; verdict, the community&apos;s, and yours. Track your library, rate what you&apos;ve played, and see where you land.
+						</p>
+						<LandingCTA primaryLabel="Start Your Library" />
+					</div>
+					{heroGame && (
+						<div className="relative aspect-3/4 w-full max-w-sm mx-auto rounded-[3px] overflow-hidden
+							border border-(--color-border) shadow-[0_20px_50px_rgba(0,0,0,0.5)] -rotate-2">
+							<Image
+								src={heroGame.cover_image_url}
+								alt={heroGame.name}
+								fill
+								className="object-cover"
+								sizes="(max-width: 768px) 80vw, 400px"
+								priority
+							/>
+							<Seal label="MC" score={heroGame.metacritic_score} side="right" />
+							<Seal label="NG+" score={heroGame.avg_ngplus_rating} side="left" />
+						</div>
+					)}
+				</section>
+
+				{/* Proof strip — real activity, not marketing copy */}
+				<section className="w-full max-w-6xl mx-auto px-6 pb-20">
+					<p className="text-(--color-muted) text-xs font-semibold tracking-[0.3em] uppercase mb-2 font-mono">
+						On NG+ right now
+					</p>
+					<h2 className="text-3xl font-(family-name:--font-display) text-(--color-text) mb-8">
+						Real ratings from real players
+					</h2>
+
+					{recentReviews.length > 0 && (
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14">
+							{recentReviews.map(r => (
+								<div key={`${r.user_id}-${r.games.slug}`} className="bg-(--color-surface) border border-(--color-border)
+									rounded-[3px] p-4 flex flex-col gap-3">
+									<div className="flex items-center gap-2">
+										<Avatar src={r.users.avatar_url} alt={r.users.username} size="sm" bordered />
+										<div className="min-w-0 flex-1">
+											<Link href={`/user/${r.users.username}`}
+												className="text-sm font-semibold text-(--color-text) hover:text-(--color-accent) transition-colors duration-200 block truncate">
+												{r.users.username}
+											</Link>
+											<Link href={`/games/${r.games.slug}`}
+												className="text-xs text-(--color-muted) hover:text-(--color-accent) transition-colors duration-200 truncate block">
+												{r.games.name}
+											</Link>
+										</div>
+										<span
+											className="text-sm font-mono shrink-0"
+											style={{ color: r.rating >= 8 ? 'var(--color-good)' : r.rating >= 6 ? 'var(--color-mid)' : 'var(--color-bad)' }}
+										>
+											{r.rating}/10
+										</span>
+									</div>
+									<p className="text-sm text-(--color-muted) line-clamp-4 leading-relaxed">
+										{r.review}
+									</p>
+								</div>
+							))}
+						</div>
+					)}
+
+					{trendingGames.length > 0 && (
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+							{trendingGames.slice(0, 5).map(game => (
+								<GameCard
+									key={game.game_id}
+									game={{ id: game.game_id, name: game.game_name, slug: game.game_slug, cover_image_url: game.game_cover_image_url, metacritic_score: game.metacritic_score, released: game.game_released }}
+									developer={game.game_developer}
+									ngplusRating={game.avg_rating}
+									userRating={null}
+								/>
+							))}
+						</div>
+					)}
+				</section>
+
+				{/* Loadout teaser — the single most ownable feature, made tangible */}
+				<section className="w-full max-w-3xl mx-auto px-6 pb-24 text-center">
+					<p className="text-(--color-muted) text-xs font-semibold tracking-[0.3em] uppercase mb-2 font-mono">
+						Your turn
+					</p>
+					<h2 className="text-3xl font-(family-name:--font-display) text-(--color-text) mb-8">
+						Rate five games. We&apos;ll tell you who you are.
+					</h2>
+					<div className="text-left max-w-xl mx-auto mb-10 rotate-[0.5deg]">
+						<div className="border border-(--color-border) bg-(--color-surface) rounded-[3px] px-7 py-6 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+							<p className="text-[10px] tracking-[0.3em] uppercase text-(--color-accent) font-mono mb-3">
+								Example Dossier Entry
+							</p>
+							<p className="text-lg leading-relaxed text-(--color-text) font-(family-name:--font-display) italic">
+								&ldquo;You&apos;ve completed 41 games and rated 28 of them — averaging an 8.1, which says you don&apos;t waste time finishing things you don&apos;t like. RPGs dominate your library, but your highest-rated games are all tight, three-hour puzzle boxes.&rdquo;
+							</p>
+						</div>
+					</div>
+					<LandingCTA primaryLabel="Get Your Loadout" className="justify-center" />
+				</section>
+			</main>
+		)
 	}
 
-	const { data: feedData } = await supabase.rpc("get_feed", { p_user_id: viewer?.id })
-
-	const feed = feedData ? feedData as FeedItem[] : []
-
-	console.log(feedData)
-	console.log(feed)
+	const feed = await getFeed(supabase, viewer?.id)
 
 	return (
 		<main>
 			<section className="flex flex-col items-center justify-center px-6 pt-10 pb-8 text-center">
-				<p className="text-[#00d4aa] text-xs font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
+				<p className="text-(--color-accent) text-xs font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
 					Your gaming identity
 				</p>
 				<h1 className="text-7xl font-bold mb-4 font-(family-name:--font-display) tracking-tight">
-					NG<span className="text-[#00d4aa]">+</span>
+					NG<span className="text-(--color-accent)">+</span>
 				</h1>
 			</section>
 
 			<section className="w-full max-w-3xl mx-auto px-6 pb-16 flex flex-col gap-3">
-				{feed && feed.map(item => ( <FeedItem key={item.created_at} item={item} userId={viewer?.id} /> ))}
+				{feed && feed.map(item => ( <FeedItem key={item.created_at} item={item} /> ))}
 			</section>
 		</main>
 	)

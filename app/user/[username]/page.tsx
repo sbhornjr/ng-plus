@@ -1,96 +1,63 @@
 import { createClient } from "@/lib/supabase-server";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import TitleSelectButton from "@/app/components/TitleSelectButton";
-import AvatarUploader from "@/app/components/AvatarUploader";
-import FavoriteGamePicker from "@/app/components/FavoriteGamePicker";
-import GameCard from "@/app/components/GameCard";
-import Review from "@/app/components/Review";
+import TitleSelectButton from "@/app/components/user/TitleSelectButton";
+import AvatarUploader from "@/app/components/user/AvatarUploader";
+import Avatar from "@/app/components/user/Avatar";
+import FavoriteGamePicker from "@/app/components/game/FavoriteGamePicker";
+import GameCard from "@/app/components/game/GameCard";
+import Review from "@/app/components/game/Review";
 import Link from "next/link";
-import FollowButton from "@/app/components/FollowButton";
+import FollowButton from "@/app/components/user/FollowButton";
+import BioButton from "@/app/components/user/BioButton";
+import StatGrid from "@/app/components/util/StatGrid";
+import { GameData } from "@/types";
+import { getViewer, getFullProfile, getFollowers, getFollowing } from "@/lib/queries/user";
+import { queryGames, getDeveloperNameMap } from "@/lib/queries/game";
+import { getLibraryStatusBreakdown } from "@/lib/queries/library";
+import { getRecentReviews, getUserRatings } from "@/lib/queries/review";
+import { getLoadoutDeveloperStats } from "@/lib/queries/stats";
 
 type ProfilePageProps = {
     params: Promise<{ username: string }>
-}
-
-type DeveloperStatType = {
-    developer_name: string,
-    avg_rating: number,
-    weighted_rating: number,
-    game_count: number,
-    rated_count: number
-}
-
-type Game = {
-    id: string
-    name: string
-    slug: string
-    cover_image_url: string | null
-    metacritic_score: number | null
-    released: string | null
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
     const { username } = await params;
     const supabase = await createClient()
 
-    const { data: profile } = await supabase
-        .from('users')
-        .select('id, username, display_name, avatar_url, bio, created_at, selected_title, favorite_game_ids')
-        .eq('username', username)
-        .single()
+    const profile = await getFullProfile(supabase, username)
 
     if (!profile) notFound()
 
-    const { data: { user: viewer } } = await supabase.auth.getUser()
+    const viewer = await getViewer(supabase)
     const isOwnProfile = viewer?.id === profile.id
 
-    const { data: libraryEntries, count: totalGames } = await supabase
-        .from('library_entries')
-        .select('status', { count: 'exact' })
-        .eq('user_id', profile.id)
+    const { entries: libraryEntries, totalCount: totalGames } = await getLibraryStatusBreakdown(supabase, profile.id)
 
-    const { data: favoriteGamesData } = profile.favorite_game_ids?.length > 0
-        ? await supabase
-            .from('games')
-            .select('id, name, slug, cover_image_url, metacritic_score, released')
-            .in('id', profile.favorite_game_ids)
-        : { data: [] }
-    const favoriteGames = favoriteGamesData ? favoriteGamesData as Game[] : []
-    const orderedFavorites = profile.favorite_game_ids.map((id: string) => favoriteGames?.find(g => g.id === id)).filter(Boolean).reverse()
+    const favoriteGamesData = profile.favorite_game_ids?.length > 0
+        ? await queryGames(supabase, { userId: viewer ? viewer.id : null, gameIds: profile.favorite_game_ids })
+        : []
+    const favoriteGames = favoriteGamesData as GameData[]
+    const orderedFavorites = profile.favorite_game_ids.map((id: string) => favoriteGames?.find(g => String(g.id) === id)).filter(Boolean).reverse() as GameData[]
 
-    const { data: recentReviews } = await supabase
-        .from('ratings_reviews')
-        .select('user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url), games(name, slug)')
-        .eq('user_id', profile.id)
-        .neq('review', '')
-        .order('created_at', { ascending: false })
-        .limit(3)
+    const developerMap = await getDeveloperNameMap(supabase, profile.favorite_game_ids)
 
-    const { data: developer_stats_data } = await supabase.rpc('get_loadout_developer_stats', { p_user_id: profile.id })
-    const developerStats = developer_stats_data ? developer_stats_data as DeveloperStatType[] : []
+    const recentReviews = await getRecentReviews(supabase, profile.id)
+
+    const developerStats = await getLoadoutDeveloperStats(supabase, profile.id)
     const topDeveloperNames = developerStats.slice(0, 6).map(d => d.developer_name)
 
-    const { data: ratingStats } = await supabase
-        .from('ratings_reviews')
-        .select('rating')
-        .eq('user_id', profile.id)
+    const ratingStats = await getUserRatings(supabase, profile.id)
 
-    const avgRating = ratingStats ? ratingStats.reduce((acc, r) => { return acc + r.rating }, 0) / ratingStats.length : 0
+    const avgRating = ratingStats.length > 0 ? ratingStats.reduce((acc, r) => { return acc + r.rating }, 0) / ratingStats.length : 0
 
     const currentTitle = profile.selected_title ? profile.selected_title : "Title-less Noob"
 
-    const { data: followersData } = await supabase
-        .from("follows")
-        .select("follower_id")
-        .eq("following_id", profile.id)
-    const followersCount = followersData ? followersData.length : 0
+    const followersData = await getFollowers(supabase, profile.id)
+    const followersCount = followersData.length
 
-    const { data: followingData } = await supabase
-        .from("follows")
-        .select("following_id")
-        .eq("follower_id", profile.id)
-    const followingCount = followingData ? followingData.length : 0
+    const followingData = await getFollowing(supabase, profile.id)
+    const followingCount = followingData.length
 
     return (
         <main>
@@ -99,25 +66,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     {isOwnProfile ? (
                         <AvatarUploader userId={profile.id} username={username} currentAvatarUrl={profile.avatar_url} />
                     ) : (
-                        <div className="w-20 h-20 rounded-full bg-[#2a2a35] flex items-center justify-center
-                            text-xs font-bold text-[#00d4aa] overflow-hidden relative">
-                            {profile.avatar_url ? (
-                                <Image
-                                    src={profile.avatar_url}
-                                    alt={username}
-                                    fill
-                                    className="object-cover transition-all duration-100 group-hover:scale-105"
-                                    sizes="160px"
-                                />
-                            ) : (
-                                <div className="w-20 h-20 rounded-full bg-[#2a2a35] border border-[#00d4aa]
-                                    flex items-center justify-center">
-                                    <span className="text-2xl font-bold text-[#00d4aa] font-(family-name:--font-display)">
-                                        {username[0].toUpperCase()}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                        <Avatar src={profile.avatar_url} alt={username} size="lg" />
                     )}
                     <div className="flex flex-col">
                         <h2 className="text-3xl font-semibold font-(family-name:--font-display)">{username}</h2>
@@ -125,51 +74,57 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                             <p className="text-lg font-semibold font-(family-name:--font-display)">{currentTitle}</p>
                             {isOwnProfile && <TitleSelectButton userId={profile.id} currentTitle={currentTitle} topGames={favoriteGames ? favoriteGames.map(g => g.name) : []} topDevelopers={topDeveloperNames} />}
                         </div>
-                        <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">Member since {new Date(profile.created_at).getMonth() + 1}/{new Date(profile.created_at).getDate()}/{new Date(profile.created_at).getFullYear()}</p>
-                        <p className="text-md font-semibold font-(family-name:--font-display) text-[#8b8b9a]">{followersCount} Followers | {followingCount} Following</p>
+                        <p className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">Member since {new Date(profile.created_at).getMonth() + 1}/{new Date(profile.created_at).getDate()}/{new Date(profile.created_at).getFullYear()}</p>
+                        <p className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">{followersCount} Followers | {followingCount} Following</p>
                     </div>
                     {isOwnProfile ? (
                         <div className="flex flex-row gap-2 items-center ml-auto">
-                            <Link href="/library" className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Library</Link>
-                            <Link href="/loadout" className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>
-                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
+                            <Link href="/library" className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Library</Link>
+                            <Link href="/loadout" className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>
+                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
                         </div>
                     ) : (
                         <div className="flex flex-row gap-2 items-center ml-auto">
                             {viewer && <FollowButton userId={viewer.id} targetUserId={profile.id} initialIsFollowing={!!followersData?.find(f => f.follower_id === viewer?.id)} />}
-                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#00d4aa] text-[#0e0e10]
-                                hover:bg-[#00b894] transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
+                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
                         </div>
                     )}
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 mt-4">
-                    {[
-                        { label: 'Games', value: totalGames },
-                        { label: 'Completed', value: libraryEntries?.filter(l => l.status === "completed").length },
-                        { label: 'Rated', value: ratingStats?.length },
-                        { label: 'Avg Rating', value: avgRating },
-                    ].map(({ label, value }) => (
-                        <div key={label} className="bg-[#1a1a1f] border border-[#2a2a35] rounded-xl p-5 text-center">
-                            <p className="text-3xl font-bold font-(family-name:--font-display) text-[#00d4aa]">{value}</p>
-                            <p className="text-sm text-[#8b8b9a] mt-1">{label}</p>
-                        </div>
-                    ))}
+                <StatGrid className="mt-4" stats={[
+                    { label: 'Games', value: totalGames },
+                    { label: 'Completed', value: libraryEntries?.filter(l => l.status === "completed").length },
+                    { label: 'Rated', value: ratingStats?.length },
+                    { label: 'Avg Rating', value: Math.trunc(avgRating * Math.pow(10, 2)) / Math.pow(10, 2) },
+                ]} />
+                <div className="flex flex-row gap-2 mb-2 rounded-[3px]">
+                    <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Bio</h2>
+                    {isOwnProfile && <BioButton userId={profile.id} currentBio={profile.user_bio} />}
                 </div>
+                {profile.user_bio}
                 <div className="flex flex-row gap-2 mb-2 mt-4">
                     <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Favorite Games</h2>
-                    {isOwnProfile && <FavoriteGamePicker userId={profile.id} currentGames={favoriteGames}/>}
+                    {isOwnProfile && <FavoriteGamePicker userId={profile.id} currentGames={favoriteGames.map(g => ({ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }))}/>}
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-                    {orderedFavorites.map((g: Game) => <GameCard key={g.id} game={g}/>)}
+                    {orderedFavorites.map((g: GameData) => 
+                        <GameCard 
+                            key={g.id} 
+                            game={{ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }} 
+                            developer={developerMap.get(g.id)} 
+                            userRating={g.user_rating} 
+                            ngplusRating={g.avg_ngplus_rating}
+                        />
+                    )}
                 </div>
                 <div className="mt-6 flex flex-col">
                     <p className="text-md italic text-center w-1/2 self-center max-w-2xl mx-auto mb-8 mt-8">{profile.bio}</p>
                     <div className="flex flex-row justify-between">
                         <h2 className="text-3xl font-semibold font-(family-name:--font-display) mb-2">Recent Reviews</h2>
-                        <Link className="hover:text-[#00d4aa] transition-colors duration-200" href={`/user/${username}/ratings_reviews`}>View All</Link>
+                        <Link className="hover:text-(--color-accent) transition-colors duration-200" href={`/user/${username}/ratings_reviews`}>View All</Link>
                     </div>
                     {recentReviews?.map(r => <Review key={r.games.name} gameName={r.games.name} gameSlug={r.games.slug} rating_review={r}/>)}
                 </div>

@@ -1,10 +1,11 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import FeedGameCard from "@/app/components/feed/FeedGameCard"
 import FeedReview from "@/app/components/feed/FeedReview"
 import FeedListPreview from "@/app/components/feed/FeedListPreview"
+import Avatar from "@/app/components/user/Avatar"
+import type { FeedItem as FeedItemType } from "@/types"
 
 export function timeAgo(date: string): string {
     const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
@@ -15,38 +16,7 @@ export function timeAgo(date: string): string {
     return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-type FeedItem = {
-	activity_type: string
-	created_at: string
-	actor_id: string
-	actor_username: string
-	actor_avatar_url: string | null
-	game_id: string | null
-	game_name: string | null
-	game_slug: string | null
-	game_cover_image_url: string | null
-	game_released: string | null
-	game_metacritic_score: number | null
-	game_developer: string | null
-	game_avg_rating: number | null
-	viewer_game_rating: number | null
-    list_cover_urls: string[] | null
-	list_id: string | null
-	list_name: string | null
-	list_description: string | null
-	list_owner_username: string | null
-	list_game_count: number | null
-	list_last_activity: string | null
-	list_like_count: number | null
-	viewer_liked_list: boolean | null
-	rating: number | null
-	review: string | null
-	review_created_at: string | null
-	review_updated_at: string | null
-    library_status: string | null
-}
-
-export default function FeedItem({ item }: { item: FeedItem }) {
+export default function FeedItem({ item }: { item: FeedItemType }) {
 
     const activity_text = item.activity_type === "library_add" 
         ? `added ${item.game_name} to their ${item.library_status === 'playing' ? 'currently playing' : item.library_status}` 
@@ -56,32 +26,18 @@ export default function FeedItem({ item }: { item: FeedItem }) {
         : item.activity_type === "list_liked" ? `liked "${item.list_name}" by ${item.list_owner_username}` : ""
 
     return (
-        <div key={item.created_at} className="p-4 bg-[#1a1a1f] rounded-xl border border-[#2a2a35] hover:border-[#2a2a35]/80 transition-colors duration-200">
-            
+        <div key={item.created_at} className="p-4 bg-(--color-surface) rounded-[3px] border border-(--color-border) hover:border-(--color-accent)/40 transition-colors duration-200">
+
             <div className="mb-2 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#2a2a35] border border-[#00d4aa] flex items-center justify-center overflow-hidden relative">
-                    {item.actor_avatar_url ? (
-                        <Image
-                            src={item.actor_avatar_url}
-                            alt={item.actor_username}
-                            fill
-                            className="object-cover"
-                            sizes="28px"
-                        />
-                    ) : (
-                        <span className="text-xs font-bold text-[#00d4aa]">
-                            {item.actor_username[0].toUpperCase()}
-                        </span>
-                    )}
-                </div>
-                <p className="text-sm text-[#8b8b9a] flex-1 min-w-0">
-                    <Link href={`/user/${item.actor_username}`} 
-                        className="text-[#f0f0f0] font-semibold hover:text-[#00d4aa] transition-colors duration-200">
+                <Avatar src={item.actor_avatar_url} alt={item.actor_username} size="sm" bordered />
+                <p className="text-sm text-(--color-muted) flex-1 min-w-0">
+                    <Link href={`/user/${item.actor_username}`}
+                        className="text-(--color-text) font-semibold hover:text-(--color-accent) transition-colors duration-200">
                         {item.actor_username}
                     </Link>
                     {' '}{activity_text}
                     </p>
-                <span className="text-xs text-[#8b8b9a] shrink-0">{timeAgo(item.created_at)}</span>
+                <span className="text-xs text-(--color-muted) shrink-0 font-mono">{timeAgo(item.created_at)}</span>
             </div>
             {(item.activity_type === "library_add" || item.activity_type === "rating") && 
                 <FeedGameCard 

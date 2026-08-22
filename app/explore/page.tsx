@@ -1,84 +1,20 @@
 import { createClient } from "@/lib/supabase-server";
-import GameCard from "@/app/components/GameCard";
+import GameCard from "@/app/components/game/GameCard";
 import Link from "next/link";
-import ListPreview from "@/app/components/ListPreview";
-import UserCard from "../components/UserCard";
+import ListPreview from "../components/lists/ListPreview";
+import UserCard from "../components/user/UserCard";
+import { getViewer } from "@/lib/queries/user";
+import { getTrendingGames, getTrendingLists, getExploreRecommendations } from "@/lib/queries/explore";
 
 type ExplorePageProps = {
     searchParams: Promise<{ range?: string }>
-}
-
-type TrendingGame = {
-    game_id: string
-    game_name: string
-    game_slug: string
-    game_cover_image_url: string | null
-    game_released: string | null
-    metacritic_score: number | null
-    game_developer: string | null
-    avg_rating: number | null
-    user_rating: number | null
-}
-
-type TrendingList = {
-    list_id: string
-    list_name: string
-    list_description: string | null
-    owner_username: string
-    last_activity: string
-    game_count: number
-    like_count: number
-    recent_like_count: number
-    user_has_liked: boolean
-    cover_urls: string[] | null
-}
-
-type RecommendedGame = {
-    game_id: string
-    game_name: string
-    game_slug: string
-    game_cover_image_url: string | null
-    game_released: string | null
-    metacritic_score: number | null
-    game_developer: string | null
-    avg_follower_rating: number | null
-    follower_count: number | null
-    platform_avg_rating: number | null
-    user_library_status: string | null
-}
-
-type RecommendedList = {
-    list_id: string
-    list_name: string
-    list_description: string | null
-    owner_username: string
-    last_activity: string
-    follower_like_count: number
-    total_like_count: number
-    user_has_liked: boolean
-    cover_urls: string[] | null
-    game_count: number
-}
-
-type RecommendedUser = {
-    user_id: string
-    username: string
-    display_name: string | null
-    avatar_url: string | null
-    selected_title: string | null
-    created_at: string
-    mutual_follower_count: number
-    follower_count: number
-    following_count: number
-    game_count: number
-    avg_rating: number | null
 }
 
 export default async function Explore({ searchParams }: ExplorePageProps) {
     const { range } = await searchParams;
     const supabase = await createClient()
 
-    const { data: { user: viewer } } = await supabase.auth.getUser()
+    const viewer = await getViewer(supabase)
 
     const rangeToDays: Record<string, number> = {
         week: 7,
@@ -90,22 +26,10 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
     const rangeString = range ?? "week"
     const days = rangeToDays[rangeString] ?? 7
 
-    const { data: trendingGamesData } = await supabase.rpc("get_trending_games", { p_user_id: viewer?.id ?? null, p_days: days })
-    const trendingGames = trendingGamesData ? trendingGamesData as TrendingGame[] : []
+    const trendingGames = await getTrendingGames(supabase, viewer?.id, days)
+    const trendingLists = await getTrendingLists(supabase, viewer?.id, days)
 
-    const { data: trendingListsData } = await supabase.rpc("get_trending_lists", { p_user_id: viewer?.id ?? null, p_days: days })
-    const trendingLists = trendingListsData ? trendingListsData as TrendingList[] : []
-
-    const [{ data: recommendedGamesData }, { data: recommendedListsData }, { data: recommendedUsersData }] = 
-        await Promise.all([
-            supabase.rpc("get_follow_recommendations", { p_user_id: viewer?.id ?? null }),
-            supabase.rpc("get_recommended_lists", { p_user_id: viewer?.id ?? null }),
-            supabase.rpc("get_who_to_follow", { p_user_id: viewer?.id ?? null })
-        ])
-
-    const recommendedGames = recommendedGamesData ? recommendedGamesData as RecommendedGame[] : []
-    const recommendedLists = recommendedListsData ? recommendedListsData as RecommendedList[] : []
-    const recommendedUsers = recommendedUsersData ? recommendedUsersData as RecommendedUser[] : []
+    const { games: recommendedGames, lists: recommendedLists, users: recommendedUsers } = await getExploreRecommendations(supabase, viewer?.id)
 
     console.log("Recommended Games:", recommendedGames)
     console.log("Recommended Lists:", recommendedLists)
@@ -114,7 +38,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
     return (
         <main>
             <div className="flex flex-col items-center justify-center pt-10 pb-4 text-center max-w-6xl mx-auto w-full">
-                <p className="text-[#00d4aa] text-3xl font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
+                <p className="text-(--color-accent) text-3xl font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
                     Explore The Gaming World
                 </p>
             </div>
@@ -125,10 +49,10 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                         <Link
                             key={r}
                             href={`/explore?range=${r}`}
-                            className={`px-3 py-1 rounded-lg text-sm font-semibold transition-colors duration-200
+                            className={`px-3 py-1 rounded-[3px] text-sm font-semibold transition-colors duration-200
                             ${range === r 
-                            ? "bg-[#00d4aa] text-[#0e0e10]"
-                            : "text-[#8b8b9a] hover:text-[#f0f0f0]"}`}
+                            ? "bg-(--color-accent) text-(--color-bg)"
+                            : "text-(--color-muted) hover:text-(--color-text)"}`}
                         >
                             {r === "week" ? "This Week" : r === "month" ? "This Month" : r === "year" ? "This Year" : "All Time"}
                         </Link>
@@ -154,7 +78,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                         <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
                             Recommended For You
                         </h2>
-                        <p className="text-sm text-[#8b8b9a] mb-2 text-left w-full max-w-6xl mx-auto">
+                        <p className="text-sm text-(--color-muted) mb-2 text-left w-full max-w-6xl mx-auto">
                             Follow more users to get more recommendations.
                         </p>
                         {recommendedGames.length > 0 && (
@@ -165,8 +89,8 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
                                     {recommendedGames.map(game => (
                                         <div key={game.game_id} className="flex flex-col gap-1">
-                                            <p className="text-xs text-[#8b8b9a] text-center">
-                                                <span className="text-[#00d4aa] font-semibold">{game.follower_count}</span>
+                                            <p className="text-xs text-(--color-muted) text-center">
+                                                <span className="text-(--color-accent) font-semibold">{game.follower_count}</span>
                                                 {game.follower_count === 1 ? ' follower' : ' followers'} completed · {game.avg_follower_rating}/10 avg
                                             </p>
                                             <GameCard 
@@ -177,7 +101,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                                                 userRating={null} 
                                             />
                                             {game.user_library_status !== 'none' && (
-                                                <p className="text-xs text-[#8b8b9a] text-center">
+                                                <p className="text-xs text-(--color-muted) text-center">
                                                 {game.user_library_status === 'backlog' ? 'In your backlog' : 'On your wishlist'}
                                                 </p>
                                             )}
@@ -194,8 +118,8 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                                 <div className="flex flex-col gap-4 w-full">
                                     {recommendedLists.map(list => (
                                         <div key={list.list_id} className="flex flex-col gap-0.5 w-full">
-                                            <div className="text-xs text-[#8b8b9a] mb-2 text-left">
-                                                <span className="text-[#00d4aa] font-semibold">{list.follower_like_count}</span>
+                                            <div className="text-xs text-(--color-muted) mb-2 text-left">
+                                                <span className="text-(--color-accent) font-semibold">{list.follower_like_count}</span>
                                                 {list.follower_like_count === 1 ? ' user' : ' users'} you follow liked this
                                             </div>                                            
                                             <ListPreview 
@@ -227,8 +151,8 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                                 <div className="grid grid-col grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl mx-auto">
                                     {recommendedUsers.map(user => (
                                         <div key={user.user_id} className="flex flex-col gap-2 w-full">
-                                            <p className="text-sm text-left text-[#8b8b9a] mt-2">followed by
-                                                <span className="text-[#00d4aa] font-semibold">{" " + user.mutual_follower_count}</span> users you follow</p>
+                                            <p className="text-sm text-left text-(--color-muted) mt-2">followed by
+                                                <span className="text-(--color-accent) font-semibold">{" " + user.mutual_follower_count}</span> users you follow</p>
                                             <UserCard 
                                                 username={user.username} 
                                                 avatarUrl={user.avatar_url}

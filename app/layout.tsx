@@ -1,18 +1,27 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Inter } from 'next/font/google'
+import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
-import NavBar from "@/app/components/NavBar"
-import UserProvider from "@/app/components/UserContext"
+import NavBar from "@/app/components/util/NavBar"
+import UserProvider from "@/app/components/user/UserContext"
 
-const spaceGrotesk = Space_Grotesk({
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-display',
-  weight: ['400', '500', '600', '700'],
+  weight: 'variable',
+  style: ['normal', 'italic'],
 })
 
-const inter = Inter({
+const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
   variable: '--font-body',
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+})
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500', '600'],
 })
 
 export const metadata: Metadata = {
@@ -26,13 +35,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
         <UserProvider>
           <header className="w-full">
             <NavBar />
           </header>
-          <div className="min-h-screen bg-[#0e0e10] text-[#f0f0f0]">
+          <div className="min-h-screen bg-(--color-bg) text-(--color-text)">
             {children}
           </div>
         </UserProvider>

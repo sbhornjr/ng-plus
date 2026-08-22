@@ -1,75 +1,38 @@
 import { createClient } from "@/lib/supabase-server";
-import GameCard from "@/app/components/GameCard";
+import GameCard from "@/app/components/game/GameCard";
 import { redirect } from "next/navigation";
-import DistributionChart from "../components/DistributionChart";
 import { generateLoadoutIdentity } from "@/lib/loadout";
-import SubmitBioButton from "../components/SubmitBioButton";
+import SubmitBioButton from "../components/user/SubmitBioButton";
+import { getViewer } from "@/lib/queries/user";
+import { getLoadoutGenreStats, getLoadoutDeveloperStats, getLoadoutStatusBreakdown, getLoadoutRatingHighlights } from "@/lib/queries/stats";
+import { getUserRatings } from "@/lib/queries/review";
 
-type HighlightType = {
-    cover_image_url: string,
-    game_id: string,
-    game_name: string,
-    game_slug: string,
-    highlight_type: string,
-    rating: number
+function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <h2 className="text-[11px] tracking-[0.3em] uppercase text-(--color-muted)
+            font-mono border-t border-(--color-muted)/25
+            pt-3 mb-5">
+            {children}
+        </h2>
+    )
 }
 
-type GenreStatType = {
-    avg_rating: number,
-    completed_count: number,
-    genre_id: string,
-    genre_name: string,
-    rated_count: number,
-    total_count: number,
-    weighted_rating: number
-}
-
-type DeveloperStatType = {
-    developer_name: string,
-    avg_rating: number,
-    weighted_rating: number,
-    game_count: number,
-    rated_count: number
-}
-
-type StatusStatType = {
-    status: string,
-    count: number
-}
-
-type RatingReviewType = {
-    game_id: number,
-    rating: number,
-    review: string
+function tierColor(rating: number) {
+    return rating >= 8 ? 'var(--color-good)' : rating >= 6 ? 'var(--color-mid)' : 'var(--color-bad)'
 }
 
 export default async function LoadoutPage() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getViewer(supabase)
     if (!user) redirect('/')
 
-    const [
-        { data: genre_stats_data }, 
-        { data: developer_stats_data },
-        { data: status_stats_data }, 
-        { data: highlights_data },
-        { data: ratings_reviews }
-    ] = await Promise.all([
-        supabase.rpc('get_loadout_genre_stats', { p_user_id: user.id }),
-        supabase.rpc('get_loadout_developer_stats', { p_user_id: user.id }),
-        supabase.rpc('get_loadout_status_breakdown', { p_user_id: user.id }),
-        supabase.rpc('get_loadout_rating_highlights', { p_user_id: user.id }),
-        supabase
-            .from('ratings_reviews')
-            .select('game_id, rating, review')
-            .eq('user_id', user.id)
+    const [genreStats, developerStats, statusStats, highlights, ratingsReviews] = await Promise.all([
+        getLoadoutGenreStats(supabase, user.id),
+        getLoadoutDeveloperStats(supabase, user.id),
+        getLoadoutStatusBreakdown(supabase, user.id),
+        getLoadoutRatingHighlights(supabase, user.id),
+        getUserRatings(supabase, user.id),
     ])
-
-    const genreStats = genre_stats_data ? genre_stats_data as GenreStatType[] : []
-    const developerStats = developer_stats_data ? developer_stats_data as DeveloperStatType[] : []
-    const statusStats = status_stats_data ? status_stats_data as StatusStatType[] : []
-    const highlights = highlights_data ? highlights_data as HighlightType[] : []
-    const ratingsReviews = ratings_reviews ? ratings_reviews as RatingReviewType[] : []
 
     const backlogStat = statusStats.find(s => s.status == "backlog")
     const playingStat = statusStats.find(s => s.status == "playing")
@@ -77,11 +40,12 @@ export default async function LoadoutPage() {
     const completedStat = statusStats.find(s => s.status == "completed")
     const totalGames = statusStats.reduce((acc, s) => { return acc + s.count}, 0)
 
-    const avgRating = ratingsReviews.reduce((acc, r) => { return acc + r.rating}, 0) / ratingsReviews.length
+    const avgRating = ratingsReviews.length > 0 ? ratingsReviews.reduce((acc, r) => { return acc + r.rating}, 0) / ratingsReviews.length : 0
     const ratingDistribution = [10,9,8,7,6,5,4,3,2,1].map(n => ({
         name: n,
         count: ratingsReviews.filter(r => r.rating === n).length
     }))
+    const maxDistCount = Math.max(...ratingDistribution.map(d => d.count), 1)
 
     let loadoutIdentity = ''
     if (ratingsReviews.length >= 5) {
@@ -97,99 +61,148 @@ export default async function LoadoutPage() {
     }
 
     return (
-        <main>
-            <div className="w-full max-w-6xl mx-auto px-8 py-12">
-                <h2 className="text-center text-5xl mb-6 font-bold">Loadout</h2>
-                <div className="flex flex-col gap-4">
-                    {loadoutIdentity ? (
-                        <div className="mb-12 max-w-2xl mx-auto text-center">
-                            <p className="text-xs font-semibold text-[#8b8b9a] uppercase tracking-widest mb-3
-                            font-(family-name:--font-display)">
-                                Your Gaming Identity
+        <main className="bg-(--color-bg)">
+            <div className="w-full max-w-5xl mx-auto px-6 md:px-10 py-14 font-(family-name:--font-body)">
+                <header className="mb-10 text-center">
+                    <p className="text-[11px] tracking-[0.35em] uppercase text-(--color-muted)
+                        font-mono mb-3">
+                        Player Dossier
+                    </p>
+                    <h1 className="text-5xl md:text-6xl text-(--color-text)
+                        font-(family-name:--font-display)">
+                        Loadout
+                    </h1>
+                </header>
+
+                {loadoutIdentity ? (
+                    <div className="max-w-2xl mx-auto mb-14 rotate-[-0.5deg]">
+                        <div className="border border-(--color-muted)/30 bg-(--color-surface)
+                            rounded-[3px] px-7 py-6 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                            <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-accent)
+                                font-mono mb-3">
+                                Analyst&apos;s Note
                             </p>
-                            <p className="text-lg text-[#f0f0f0] leading-relaxed italic">
-                                "{loadoutIdentity}"
+                            <p className="text-lg leading-relaxed text-(--color-text)
+                                font-(family-name:--font-display) italic">
+                                &ldquo;{loadoutIdentity}&rdquo;
                             </p>
-                            <SubmitBioButton userId={user.id} bio={loadoutIdentity} />
+                            <div className="mt-4 flex justify-end">
+                                <SubmitBioButton userId={user.id} bio={loadoutIdentity} />
+                            </div>
                         </div>
-                    ) : (
-                        <div className="mb-12 max-w-2xl mx-auto text-center">
-                            <p className="text-sm text-[#8b8b9a]">
-                            Rate at least 5 games to unlock your Gaming Identity.
+                    </div>
+                ) : (
+                    <div className="max-w-md mx-auto mb-14 text-center">
+                        <p className="text-sm text-(--color-muted)">
+                            Rate at least 5 games to unlock your dossier entry.
+                        </p>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
+                    {[
+                        { label: 'Games Logged', value: totalGames },
+                        { label: 'Completed', value: completedStat?.count ?? 0 },
+                        { label: 'Rated', value: ratingsReviews.length },
+                        { label: 'Avg Rating', value: Math.trunc(avgRating * 100) / 100 },
+                    ].map(s => (
+                        <div key={s.label} className="border border-(--color-muted)/25
+                            bg-(--color-surface) rounded-[3px] py-5 text-center">
+                            <p className="text-3xl text-(--color-good) font-mono">
+                                {s.value}
+                            </p>
+                            <p className="text-[11px] mt-1 uppercase tracking-[0.15em] text-(--color-muted)
+                                font-mono">
+                                {s.label}
                             </p>
                         </div>
-                    )}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                        {[
-                            { label: 'Games', value: totalGames },
-                            { label: 'Completed', value: completedStat?.count },
-                            { label: 'Rated', value: ratingsReviews.length },
-                            { label: 'Avg Rating', value: avgRating },
-                        ].map(({ label, value }) => (
-                            <div key={label} className="bg-[#1a1a1f] border border-[#2a2a35] rounded-xl p-5 text-center">
-                            <p className="text-3xl font-bold font-(family-name:--font-display) text-[#00d4aa]">{value}</p>
-                            <p className="text-sm text-[#8b8b9a] mt-1">{label}</p>
+                    ))}
+                </div>
+
+                <SectionLabel>Rating Style</SectionLabel>
+                <div className="flex flex-col gap-1.5 max-w-sm mb-14">
+                    {ratingDistribution.map(({ name, count }) => (
+                        <div key={name} className="flex items-center gap-2 font-mono">
+                            <span className="text-xs text-(--color-muted) w-4 text-right shrink-0">{name}</span>
+                            <div className="flex-1 bg-(--color-surface-light) h-2 overflow-hidden rounded-[1px]">
+                                <div
+                                    className="h-full"
+                                    style={{
+                                        width: `${(count / maxDistCount) * 100}%`,
+                                        backgroundColor: tierColor(name),
+                                        minWidth: count > 0 ? '4px' : '0'
+                                    }}
+                                />
+                            </div>
+                            <span className="text-xs text-(--color-muted) w-4 shrink-0">{count}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <SectionLabel>Favorite Genres</SectionLabel>
+                {genreStats && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-14">
+                        {genreStats.filter(g => g.rated_count > 1).slice(0, 6).map(g => (
+                            <div key={g.genre_name} className="border border-(--color-muted)/25
+                                bg-(--color-surface) rounded-[3px] p-4 flex flex-col gap-2">
+                                <h3 className="text-base text-(--color-text) font-(family-name:--font-display)">
+                                    {g.genre_name}
+                                </h3>
+                                <div className="flex items-baseline gap-1.5">
+                                    <span
+                                        className="text-2xl font-mono"
+                                        style={{ color: tierColor(g.weighted_rating) }}
+                                    >
+                                        {g.weighted_rating}
+                                    </span>
+                                    <span className="text-xs text-(--color-muted)">avg</span>
+                                </div>
+                                <p className="text-xs text-(--color-muted)">
+                                    {g.rated_count} rated · {g.completed_count} completed
+                                </p>
                             </div>
                         ))}
                     </div>
-                    <h2 className="text-xl border-t font-semibold text-[#8b8b9a] uppercase tracking-widest mb-6 font-(family-name:--font-display)">Your Rating Style</h2>
-                    <DistributionChart data={ratingDistribution}/>
-                    <h2 className="text-xl border-t font-semibold text-[#8b8b9a] uppercase tracking-widest mb-6 font-(family-name:--font-display)">Your Favorite Genres</h2>
-                    {genreStats && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
-                            {genreStats.filter(g => g.rated_count > 1).slice(0, 6).map(g => (
-                                <div key={g.genre_name} className="bg-[#1a1a1f] border border-[#2a2a35] rounded-xl p-5 flex flex-col gap-2">
-                                    <h3 className="text-xl font-bold font-(family-name:--font-display) px-4 py-2">{g.genre_name}</h3>
-                                    <div className="flex items-baseline gap-1 px-4">
-                                        <span className="text-3xl font-bold rounded-lg px-1" style={{
-                                            backgroundColor: g.weighted_rating >= 8
-                                            ? '#00d4aa'
-                                            : g.weighted_rating >= 6
-                                            ? '#f0a500'
-                                            : '#e05555',
-                                            color: '#0e0e10',
-                                        }}>{g.weighted_rating}</span>
-                                        <span className="text-sm text-[#8b8b9a]">avg</span>
-                                    </div>
-                                    <p className="text-xs text-[#8b8b9a] px-4 py-2">{g.rated_count} games rated · {g.completed_count} completed</p>
+                )}
+
+                <SectionLabel>Favorite Developers</SectionLabel>
+                {developerStats && (
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-14">
+                        {developerStats.filter(d => d.rated_count > 1).slice(0, 6).map(d => (
+                            <div key={d.developer_name} className="border border-(--color-muted)/25
+                                bg-(--color-surface) rounded-[3px] p-4 flex flex-col gap-2">
+                                <h3 className="text-base text-(--color-text) font-(family-name:--font-display)">
+                                    {d.developer_name}
+                                </h3>
+                                <div className="flex items-baseline gap-1.5">
+                                    <span
+                                        className="text-2xl font-mono"
+                                        style={{ color: tierColor(d.weighted_rating) }}
+                                    >
+                                        {d.weighted_rating}
+                                    </span>
+                                    <span className="text-xs text-(--color-muted)">avg</span>
                                 </div>
-                            ))}             
-                        </div>
-                    )}
-                    <h2 className="text-xl border-t font-semibold text-[#8b8b9a] uppercase tracking-widest mb-6 font-(family-name:--font-display)">Your Favorite Developers</h2>
-                    {developerStats && (
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                            {developerStats.filter(d => d.rated_count > 1).slice(0, 6).map(d => (
-                                <div key={d.developer_name} className="bg-[#1a1a1f] border border-[#2a2a35] rounded-xl p-5 flex flex-col gap-2">
-                                    <h3 className="text-xl font-bold font-(family-name:--font-display) px-4 py-2">{d.developer_name}</h3>
-                                    <div className="flex items-baseline gap-1 px-4">
-                                        <span className="text-3xl font-bold rounded-lg px-1" style={{
-                                            backgroundColor: d.weighted_rating >= 8
-                                            ? '#00d4aa'
-                                            : d.weighted_rating >= 6
-                                            ? '#f0a500'
-                                            : '#e05555',
-                                            color: '#0e0e10',
-                                        }}>{d.weighted_rating}</span>
-                                        <span className="text-sm text-[#8b8b9a]">avg</span>
-                                    </div>
-                                    <p className="text-xs text-[#8b8b9a] px-4 py-2">{d.rated_count} games rated · {d.game_count} total</p>
-                                </div>
-                            ))}             
-                        </div>
-                    )}
-                    <h2 className="text-xl border-t font-semibold text-[#8b8b9a] uppercase tracking-widest mb-6 font-(family-name:--font-display)">Your Perfect Games</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
-                        {highlights.filter(h => h.highlight_type == "top").map(h => 
-                            <GameCard key={h.game_id} game={{id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: null, released: null}}/>
-                        )}
+                                <p className="text-xs text-(--color-muted)">
+                                    {d.rated_count} rated · {d.game_count} total
+                                </p>
+                            </div>
+                        ))}
                     </div>
-                    <h2 className="text-xl border-t font-semibold text-[#8b8b9a] uppercase tracking-widest mb-6 font-(family-name:--font-display)">Your Lowest Rated</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
-                        {highlights.filter(h => h.highlight_type == "bottom").map(h => 
-                            <GameCard key={h.game_id} game={{id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: null, released: null}}/>
-                        )}
-                    </div>
+                )}
+
+                <SectionLabel>Perfect Games</SectionLabel>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-14">
+                    {highlights.filter(h => h.highlight_type == "top").map(h =>
+                        <GameCard key={h.game_id} game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: null, released: null }} />
+                    )}
+                </div>
+
+                <SectionLabel>Lowest Rated</SectionLabel>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {highlights.filter(h => h.highlight_type == "bottom").map(h =>
+                        <GameCard key={h.game_id} game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: null, released: null }} />
+                    )}
                 </div>
             </div>
         </main>
