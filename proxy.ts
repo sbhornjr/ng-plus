@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createLoggingFetch } from '@/lib/supabase-logging'
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -22,6 +23,7 @@ export async function proxy(request: NextRequest) {
           )
         },
       },
+      global: { fetch: createLoggingFetch('proxy') },
     }
   )
 

@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { logger } from './logger'
 
 type LoadoutData = {
   username: string
@@ -10,7 +11,22 @@ type LoadoutData = {
   topDevelopers: { developer_name: string, weighted_rating: number, rated_count: number }[]
 }
 
+// Failures here (rate limit, bad key, network) shouldn't take down the whole
+// Loadout page — the identity paragraph is a bonus, not required content. Log
+// the real error server-side and let the caller fall back to no paragraph.
 export async function generateLoadoutIdentity(data: LoadoutData): Promise<string> {
+  try {
+    return await requestLoadoutIdentity(data)
+  } catch (err) {
+    logger.error('loadout', 'Failed to generate loadout identity', {
+      username: data.username,
+      error: err instanceof Error ? err.message : String(err),
+    })
+    return ''
+  }
+}
+
+async function requestLoadoutIdentity(data: LoadoutData): Promise<string> {
   const client = new Anthropic()
 
   const topGenresSummary = data.topGenres.slice(0, 5).map(g =>
