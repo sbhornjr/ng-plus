@@ -6,10 +6,10 @@ import FilterSelect from "@/app/components/util/FilterSelect"
 import SearchInput from '../util/SearchInput';
 import SearchableDropdown from '../util/SearchableDropdown';
 
-export default function LibraryFilters({ current, genres, platforms, developers, publishers, esrb_ratings, username }: 
-    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string, sort: string, order: string, status: string},
-        genres: { id: number, name: string, slug: string }[], platforms: { id: number, name: string, slug: string }[], 
-        developers: { id: number, name: string, slug: string }[], publishers: { id: number, name: string, slug: string }[], 
+export default function LibraryFilters({ current, genres, platforms, developers, publishers, esrb_ratings, username }:
+    { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string, sort: string, order: string, status: string, is100: string},
+        genres: { id: number, name: string, slug: string }[], platforms: { id: number, name: string, slug: string }[],
+        developers: { id: number, name: string, slug: string }[], publishers: { id: number, name: string, slug: string }[],
         esrb_ratings: string[], username: string}) {
 
     const [searchQuery, setSearchQuery] = useState(current.query)
@@ -21,6 +21,7 @@ export default function LibraryFilters({ current, genres, platforms, developers,
     const [selectedSort, setSelectedSort] = useState(current.sort)
     const [selectedOrder, setSelectedOrder] = useState(current.order)
     const [selectedStatus, setSelectedStatus] = useState(current.status)
+    const [selected100, setSelected100] = useState(current.is100)
     const [filtersOpen, setFiltersOpen] = useState(false)
     const router = useRouter()
 
@@ -35,6 +36,7 @@ export default function LibraryFilters({ current, genres, platforms, developers,
             sort: selectedSort,
             order: selectedOrder,
             status: selectedStatus,
+            is100: selected100,
             ...overrides
         }
         const params = new URLSearchParams()
@@ -47,6 +49,12 @@ export default function LibraryFilters({ current, genres, platforms, developers,
     function handleStatus(status: string) {
         setSelectedStatus(status)
         router.push(`/user/${username}/library?${buildParams({ status: status }).toString()}`)
+    }
+
+    function handle100Toggle() {
+        const next = selected100 === 'true' ? '' : 'true'
+        setSelected100(next)
+        router.push(`/user/${username}/library?${buildParams({ is100: next }).toString()}`)
     }
 
     function handleSort(sortChoice: string) {
@@ -96,6 +104,13 @@ export default function LibraryFilters({ current, genres, platforms, developers,
                     className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "abandoned" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
                     Abandoned
+                </button>
+                <span className="w-px h-6 bg-(--color-border)" />
+                <button
+                    onClick={() => handle100Toggle()}
+                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selected100 === 'true' ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                >
+                    100%
                 </button>
             </div>
             <div className="flex gap-2 mb-4 items-center w-full">

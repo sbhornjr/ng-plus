@@ -10,12 +10,12 @@ import { getLibraryFacets, getLibraryEntries } from "@/lib/queries/library";
 
 type LibraryPageProps = {
     params: Promise<{ username: string }>
-    searchParams: Promise<{ q?: string,genre?: string, platform?: string, developer?: string, 
-        publisher?: string, esrb?: string, sort?: string, order?: string, status?: string }>
+    searchParams: Promise<{ q?: string,genre?: string, platform?: string, developer?: string,
+        publisher?: string, esrb?: string, sort?: string, order?: string, status?: string, is100?: string }>
 }
 
 export default async function LibraryPage({ params, searchParams } : LibraryPageProps) {
-    const { q, genre, platform, developer, publisher, esrb, sort, order, status } = await searchParams;
+    const { q, genre, platform, developer, publisher, esrb, sort, order, status, is100 } = await searchParams;
     const { username } = await params;
     const query = q?.trim() ?? '';
     const genreQuery = genre?.trim() ?? '';
@@ -26,6 +26,7 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
     const sortQuery = sort?.trim() ?? 'ngplus_rating';
     const orderQuery = order?.trim() ?? 'desc';
     const statusQuery = status?.trim() ?? ''
+    const is100Query = is100?.trim() === 'true'
     const supabase = await createClient()
 
     const viewer = await getViewer(supabase)
@@ -65,7 +66,7 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
         redirect('/')
     }
 
-    const libraryEntries = await getLibraryEntries(supabase, ownerId.id, { status: statusQuery, sort: sortQuery, order: orderQuery })
+    const libraryEntries = await getLibraryEntries(supabase, ownerId.id, { status: statusQuery, is100: is100Query, sort: sortQuery, order: orderQuery })
     const libraryGameIds = libraryEntries?.map(e => e.game_id) ?? []
 
     const games = await queryGames(supabase, {
@@ -77,7 +78,7 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
         esrb: esrbQuery || null,
         sort: sortQuery,
         order: orderQuery,
-        userId: viewer?.id ?? "",
+        userId: viewer?.id ?? null,
         gameIds: libraryGameIds,
         limit: 9999
     })
@@ -91,8 +92,8 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
                 <h2 className="text-center text-5xl mb-6 font-bold">{username}'s Library</h2>
                 {/* Filters */}
                 <LibraryFilters
-                    current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, 
-                        esrb: esrbQuery, sort: sortQuery, order: orderQuery, status: statusQuery}}
+                    current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery,
+                        esrb: esrbQuery, sort: sortQuery, order: orderQuery, status: statusQuery, is100: is100Query ? 'true' : ''}}
                     genres={genres ?? []}
                     platforms={platforms ?? []}
                     developers={developers ?? []}

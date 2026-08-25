@@ -47,6 +47,7 @@ export async function deleteLibraryEntry(supabase: SupabaseClient, entryId: stri
 
 type LibraryEntriesFilter = {
     status?: string
+    is100?: boolean
     sort?: string
     order?: string
 }
@@ -58,6 +59,7 @@ export async function getLibraryEntries(supabase: SupabaseClient, userId: string
         .eq('user_id', userId)
 
     if (filter.status) query = query.eq('status', filter.status)
+    if (filter.is100) query = query.eq('completed_all_achievements', true)
     if (filter.sort === 'date_added') query = query.order('created_at', { ascending: filter.order === 'asc' })
 
     const { data } = await query
