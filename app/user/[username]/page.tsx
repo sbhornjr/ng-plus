@@ -79,9 +79,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     </div>
                     {isOwnProfile ? (
                         <div className="flex flex-row gap-2 items-center ml-auto">
-                            <Link href="/library" className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                            <Link href={`/user/${username}/library`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
                                 hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Library</Link>
-                            <Link href="/loadout" className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                            <Link href={`/user/${username}/loadout`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
                                 hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>
                             <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
                                 hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
@@ -89,6 +89,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     ) : (
                         <div className="flex flex-row gap-2 items-center ml-auto">
                             {viewer && <FollowButton userId={viewer.id} targetUserId={profile.id} initialIsFollowing={!!followersData?.find(f => f.follower_id === viewer?.id)} />}
+                            {profile.library_public && <Link href={`/user/${username}/library`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Library</Link>}
+                            {profile.loadout_public && <Link href={`/user/${username}/loadout`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
+                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>}
                             <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
                                 hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
                         </div>

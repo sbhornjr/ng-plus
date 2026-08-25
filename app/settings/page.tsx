@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import AvatarUploader from "../components/user/AvatarUploader";
-import ChangeUsernameButton from "../components/user/ChangeUsernameButton";
-import ChangeEmailButton from "../components/user/ChangeEmailButton";
-import ChangePasswordButton from "../components/user/ChangePasswordButton";
-import DeleteAccountButton from "../components/user/DeleteUserButton";
+import ChangeUsernameButton from "../components/settings/ChangeUsernameButton";
+import ChangeEmailButton from "../components/settings/ChangeEmailButton";
+import ChangePasswordButton from "../components/settings/ChangePasswordButton";
+import DeleteAccountButton from "../components/settings/DeleteUserButton";
+import ChangePrivacyButton from "../components/settings/ChangePrivacyButton";
 import { getViewer, getAccountSettings } from "@/lib/queries/user";
 
 export default async function Settings() {
@@ -52,18 +53,17 @@ export default async function Settings() {
                 <div className="flex flex-col gap-4 mt-6">
                     <h2 className="text-3xl">Privacy Settings</h2>
                     <div className="flex gap-2">
-                        <p className="font-semibold text-lg text-(--color-muted)">Default List Privacy: <span className="text-[#ffffff]">{user.default_list_public }</span></p>
-                        <ChangeUsernameButton userId={user.id} currentUsername={user.username} />
+                        <p className="font-semibold text-lg text-(--color-muted)">Default List Privacy: <span className="text-[#ffffff]">{ user.default_list_public ? "Public" : "Private" }</span></p>
+                        <ChangePrivacyButton currentPrivacy={user.default_list_public} type="Default List" userId={user.id} />
                     </div>
                     <div className="flex gap-2">
-                        <p className="font-semibold text-lg text-(--color-muted)">Email: <span className="text-[#ffffff]">{viewer.email}</span></p>
-                        <ChangeEmailButton currentEmail={viewer.email!} />
+                        <p className="font-semibold text-lg text-(--color-muted)">Library Privacy: <span className="text-[#ffffff]">{ user.library_public ? "Public" : "Private" }</span></p>
+                        <ChangePrivacyButton currentPrivacy={user.library_public} type="Library" userId={user.id} />
                     </div>
                     <div className="flex gap-2">
-                        <p className="font-semibold text-lg text-(--color-muted)">Password: <span className="text-[#ffffff]">********</span></p>
-                        <ChangePasswordButton />
+                        <p className="font-semibold text-lg text-(--color-muted)">Loadout Privacy: <span className="text-[#ffffff]">{ user.loadout_public ? "Public" : "Private" }</span></p>
+                        <ChangePrivacyButton currentPrivacy={user.loadout_public} type="Loadout" userId={user.id} />
                     </div>
-                    <DeleteAccountButton />
                 </div>
             </div>
         </main>

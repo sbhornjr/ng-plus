@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation"
 import Modal from "@/app/components/util/Modal"
 import { createList, addGameToList } from "@/lib/queries/list"
 
-export default function CreateListFromGamePageButton({ userId, gameId, close } : { userId: string, gameId: string, close: () => void }) {
+export default function CreateListFromGamePageButton({ userId, gameId, close, defaultListPrivacy } : { userId: string, gameId: string, close: () => void, defaultListPrivacy?: boolean }) {
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
     const [isPinned, setIsPinned] = useState(false)
-    const [isPublic, setIsPublic] = useState(true)
+    const [isPublic, setIsPublic] = useState(defaultListPrivacy ?? true)
     const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false)
     const router = useRouter()
 

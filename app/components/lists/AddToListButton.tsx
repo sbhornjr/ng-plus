@@ -8,8 +8,8 @@ import CreateListFromGamePageButton from "./CreateListFromGamePageButton"
 import Modal from "@/app/components/util/Modal"
 import { addGameToList, removeGameFromList } from "@/lib/queries/list"
 
-export default function AddToListButton({ gameId, lists, listIdsGameIsIn } : 
-    { gameId : string, lists : { listId: string, listName: string, listCount: number }[], listIdsGameIsIn: Set<string> }) {
+export default function AddToListButton({ gameId, lists, listIdsGameIsIn, defaultListPrivacy } : 
+    { gameId : string, lists : { listId: string, listName: string, listCount: number }[], listIdsGameIsIn: Set<string>, defaultListPrivacy?: boolean }) {
     const [isAddToListModalOpen, setIsAddToListModalOpen] = useState(false)
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
     const [listIdsGameIsInState, setListIdsGameIsInState] = useState(new Set(listIdsGameIsIn))
@@ -79,7 +79,7 @@ export default function AddToListButton({ gameId, lists, listIdsGameIsIn } :
                                 </button>
                             )
                         })}
-                        {user && <CreateListFromGamePageButton gameId={gameId} userId={user.id} close={() => setIsAddToListModalOpen(false)}/>}
+                        {user && <CreateListFromGamePageButton gameId={gameId} userId={user.id} close={() => setIsAddToListModalOpen(false)} defaultListPrivacy={defaultListPrivacy ?? true}/>}
                 </Modal>
             )}
         </div>

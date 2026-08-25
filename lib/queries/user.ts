@@ -28,7 +28,17 @@ export async function getProfileSummaryById(supabase: SupabaseClient, userId: st
 export async function getFullProfile(supabase: SupabaseClient, username: string) {
     const { data } = await supabase
         .from('users')
-        .select('id, username, display_name, avatar_url, bio, created_at, selected_title, favorite_game_ids, user_bio')
+        .select('id, username, display_name, avatar_url, bio, created_at, selected_title, favorite_game_ids, user_bio, default_list_public, library_public, loadout_public')
+        .eq('username', username)
+        .single()
+
+    return data
+}
+
+export async function getUserIdFromUsername(supabase: SupabaseClient, username: string) {
+    const { data } = await supabase
+        .from('users')
+        .select('id')
         .eq('username', username)
         .single()
 
@@ -131,6 +141,28 @@ export async function updateEmail(supabase: SupabaseClient, email: string) {
 export async function updatePassword(supabase: SupabaseClient, password: string) {
     const { error } = await supabase.auth.updateUser({ password })
     return error
+}
+
+export async function updatePrivacy(supabase: SupabaseClient, privacy: boolean, type: string, userId: string) {
+    if (type === "Default List") {
+        const { error } = await supabase
+            .from("users")
+            .update({ default_list_public: privacy})
+            .eq("id", userId)
+        return error
+    } else if (type === "Library") {
+        const { error } = await supabase
+            .from("users")
+            .update({ library_public : privacy})
+            .eq("id", userId)
+        return error
+    } else if (type == "Loadout") {
+        const { error } = await supabase
+            .from("users")
+            .update({ loadout_public : privacy})
+            .eq("id", userId)
+        return error
+    }
 }
 
 export async function getFollowers(supabase: SupabaseClient, userId: string) {

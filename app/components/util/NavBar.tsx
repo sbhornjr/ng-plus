@@ -48,11 +48,11 @@ export default function NavBar() {
                             hover:text-(--color-text) hover:bg-(--color-surface-light) transition-colors duration-200">
                             Profile
                         </Link>
-                        <Link href="/library" className="px-4 py-2 text-sm text-(--color-muted)
+                        <Link href={`/user/${user.username}/library`} className="px-4 py-2 text-sm text-(--color-muted)
                             hover:text-(--color-text) hover:bg-(--color-surface-light) transition-colors duration-200">
                             Library
                         </Link>
-                        <Link href="/loadout" className="px-4 py-2 text-sm text-(--color-muted)
+                        <Link href={`/user/${user.username}/loadout`} className="px-4 py-2 text-sm text-(--color-muted)
                             hover:text-(--color-text) hover:bg-(--color-surface-light) transition-colors duration-200">
                             Loadout
                         </Link>

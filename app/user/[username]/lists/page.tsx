@@ -4,7 +4,7 @@ import ListPreview from "@/app/components/lists/ListPreview";
 import CreateListButton from "@/app/components/lists/CreateListButton";
 import Link from "next/link";
 import { ListWithOwner } from "@/types";
-import { getViewer, getProfileSummaryByUsername } from "@/lib/queries/user";
+import { getViewer, getProfileSummaryByUsername, getAccountSettings } from "@/lib/queries/user";
 import { getUserLists, getLikedLists, getListCoverMap, getListLikes } from "@/lib/queries/list";
 
 type ListsPageProps = {
@@ -34,6 +34,8 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
     const coversByList = await getListCoverMap(supabase, listIds)
 
     const likesData = await getListLikes(supabase, listIds)
+
+    const userSettings = await getAccountSettings(supabase, profile.id)
 
     const likeCountMap = new Map<string, number>()
     const userLikedSet = new Set<string>()
@@ -71,7 +73,7 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
                         Liked Lists
                     </Link>
                 </div>
-                {viewer && viewer.id && isOwnProfile && <CreateListButton userId={viewer?.id}/>}
+                {viewer && viewer.id && isOwnProfile && <CreateListButton userId={viewer?.id} defaultListPrivacy={userSettings?.default_list_public ?? true} />}
                 {lists.map(l => 
                     <ListPreview 
                         key={l.id} 

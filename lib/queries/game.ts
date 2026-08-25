@@ -75,9 +75,6 @@ type QueryGamesParams = {
     gameIds?: (string | number)[] | null
 }
 
-// Params are passed straight through to the RPC (including `undefined`, which
-// omits the key so the database function's own default applies) — callers are
-// responsible for resolving whatever defaults matter for their query.
 export async function queryGames(supabase: SupabaseClient, params: QueryGamesParams): Promise<GameData[]> {
     const { data } = await supabase.rpc('query_games', {
         p_q: params.q,

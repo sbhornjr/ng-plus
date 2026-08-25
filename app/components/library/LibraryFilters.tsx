@@ -6,11 +6,11 @@ import FilterSelect from "@/app/components/util/FilterSelect"
 import SearchInput from '../util/SearchInput';
 import SearchableDropdown from '../util/SearchableDropdown';
 
-export default function LibraryFilters({ current, genres, platforms, developers, publishers, esrb_ratings }: 
+export default function LibraryFilters({ current, genres, platforms, developers, publishers, esrb_ratings, username }: 
     { current: {query: string, genre: string, platform: string, developer: string, publisher: string, esrb: string, sort: string, order: string, status: string},
         genres: { id: number, name: string, slug: string }[], platforms: { id: number, name: string, slug: string }[], 
         developers: { id: number, name: string, slug: string }[], publishers: { id: number, name: string, slug: string }[], 
-        esrb_ratings: string[]}) {
+        esrb_ratings: string[], username: string}) {
 
     const [searchQuery, setSearchQuery] = useState(current.query)
     const [selectedGenre, setSelectedGenre] = useState(current.genre)
@@ -46,22 +46,22 @@ export default function LibraryFilters({ current, genres, platforms, developers,
 
     function handleStatus(status: string) {
         setSelectedStatus(status)
-        router.push(`/library?${buildParams({ status: status }).toString()}`)
+        router.push(`/user/${username}/library?${buildParams({ status: status }).toString()}`)
     }
 
     function handleSort(sortChoice: string) {
         setSelectedSort(sortChoice)
-        router.push(`/library?${buildParams({ sort: sortChoice }).toString()}`)
+        router.push(`/user/${username}/library?${buildParams({ sort: sortChoice }).toString()}`)
     }
 
     function handleSortToggle() {
         const newDirection = selectedOrder === "desc" ? "asc" : "desc"
         setSelectedOrder(newDirection)
-        router.push(`/library?${buildParams({ order: newDirection }).toString()}`)
+        router.push(`/user/${username}/library?${buildParams({ order: newDirection }).toString()}`)
     }
 
     function handleSubmit() {
-    router.push(`/library?${buildParams().toString()}`)
+        router.push(`/user/${username}/library?${buildParams().toString()}`)
     }
 
     return (

@@ -28,4 +28,6 @@ export type HighlightType = {
     game_slug: string
     highlight_type: string
     rating: number
+    released: string
+    metacritic_score: number
 }

@@ -1,20 +1,22 @@
 import { createClient } from "@/lib/supabase-server";
 import GameCard from "@/app/components/game/GameCard";
 import { redirect } from "next/navigation"
-import LibraryFilters from "../components/library/LibraryFilters";
+import LibraryFilters from "../../../components/library/LibraryFilters";
 import Link from "next/link";
-import EmptyState from "../components/util/EmptyState";
-import { getViewer } from "@/lib/queries/user";
+import EmptyState from "../../../components/util/EmptyState";
+import { getViewer, getUserIdFromUsername, getAccountSettings } from "@/lib/queries/user";
 import { queryGames, getDeveloperNameMap } from "@/lib/queries/game";
 import { getLibraryFacets, getLibraryEntries } from "@/lib/queries/library";
 
 type LibraryPageProps = {
-  searchParams: Promise<{ q?: string,genre?: string, platform?: string, developer?: string, 
-    publisher?: string, esrb?: string, sort?: string, order?: string, status?: string }>
+    params: Promise<{ username: string }>
+    searchParams: Promise<{ q?: string,genre?: string, platform?: string, developer?: string, 
+        publisher?: string, esrb?: string, sort?: string, order?: string, status?: string }>
 }
 
-export default async function LibraryPage({ searchParams } : LibraryPageProps) {
+export default async function LibraryPage({ params, searchParams } : LibraryPageProps) {
     const { q, genre, platform, developer, publisher, esrb, sort, order, status } = await searchParams;
+    const { username } = await params;
     const query = q?.trim() ?? '';
     const genreQuery = genre?.trim() ?? '';
     const platformQuery = platform?.trim() ?? '';
@@ -26,10 +28,17 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     const statusQuery = status?.trim() ?? ''
     const supabase = await createClient()
 
-    const user = await getViewer(supabase)
-    if (!user) redirect('/')
+    const viewer = await getViewer(supabase)
+    const ownerId = await getUserIdFromUsername(supabase, username)
 
-    const { genres, platforms, developers, publishers, esrbRatings } = await getLibraryFacets(supabase, user.id)
+    if (!ownerId) redirect("/")
+
+    if (!viewer || viewer.id != ownerId.id) {
+        const ownerSettings = await getAccountSettings(supabase, ownerId.id)
+        if (!ownerSettings || !ownerSettings.library_public) redirect("/")
+    }
+
+    const { genres, platforms, developers, publishers, esrbRatings } = await getLibraryFacets(supabase, ownerId.id)
 
     if (genreQuery != '' && !genres.map((g) => g.slug).includes(genreQuery)) {
         console.log("Genre " + genreQuery + " is not in the Library. Redirecting to home.")
@@ -56,7 +65,7 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
         redirect('/')
     }
 
-    const libraryEntries = await getLibraryEntries(supabase, user.id, { status: statusQuery, sort: sortQuery, order: orderQuery })
+    const libraryEntries = await getLibraryEntries(supabase, ownerId.id, { status: statusQuery, sort: sortQuery, order: orderQuery })
     const libraryGameIds = libraryEntries?.map(e => e.game_id) ?? []
 
     const games = await queryGames(supabase, {
@@ -68,7 +77,7 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
         esrb: esrbQuery || null,
         sort: sortQuery,
         order: orderQuery,
-        userId: user ? user.id : null,
+        userId: viewer?.id ?? "",
         gameIds: libraryGameIds,
         limit: 9999
     })
@@ -79,7 +88,7 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
     return (
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 py-12">
-                <h2 className="text-center text-5xl mb-6 font-bold">Library</h2>
+                <h2 className="text-center text-5xl mb-6 font-bold">{username}'s Library</h2>
                 {/* Filters */}
                 <LibraryFilters
                     current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, 
@@ -89,6 +98,7 @@ export default async function LibraryPage({ searchParams } : LibraryPageProps) {
                     developers={developers ?? []}
                     publishers={publishers ?? []}
                     esrb_ratings={esrbRatings ?? []}
+                    username={username}
                 />
 
                 {/* Game grid */}

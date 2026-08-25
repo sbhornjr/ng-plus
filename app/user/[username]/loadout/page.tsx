@@ -2,10 +2,16 @@ import { createClient } from "@/lib/supabase-server";
 import GameCard from "@/app/components/game/GameCard";
 import { redirect } from "next/navigation";
 import { generateLoadoutIdentity } from "@/lib/loadout";
-import SubmitBioButton from "../components/user/SubmitBioButton";
-import { getViewer } from "@/lib/queries/user";
+import SubmitBioButton from "@/app/components/user/SubmitBioButton";
+import { getViewer, getUserIdFromUsername, getAccountSettings } from "@/lib/queries/user";
+import { getDeveloperNameMap } from "@/lib/queries/game";
 import { getLoadoutGenreStats, getLoadoutDeveloperStats, getLoadoutStatusBreakdown, getLoadoutRatingHighlights } from "@/lib/queries/stats";
-import { getUserRatings } from "@/lib/queries/review";
+import { getUserRatings, getAvgRatingsForGames, getUserRatingsForGames } from "@/lib/queries/review";
+import { AvgRatingsData } from "@/types";
+
+type LoadoutPageProps = {
+    params: Promise<{ username: string }>
+}
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
@@ -21,17 +27,26 @@ function tierColor(rating: number) {
     return rating >= 8 ? 'var(--color-good)' : rating >= 6 ? 'var(--color-mid)' : 'var(--color-bad)'
 }
 
-export default async function LoadoutPage() {
+export default async function LoadoutPage({ params } : LoadoutPageProps) {
+    const { username } = await params;
     const supabase = await createClient()
-    const user = await getViewer(supabase)
-    if (!user) redirect('/')
+    
+    const viewer = await getViewer(supabase)
+    const ownerId = await getUserIdFromUsername(supabase, username)
+
+    if (!ownerId) redirect("/")
+
+    if (!viewer || viewer.id != ownerId.id) {
+        const ownerSettings = await getAccountSettings(supabase, ownerId.id)
+        if (!ownerSettings || !ownerSettings.loadout_public) redirect("/")
+    }
 
     const [genreStats, developerStats, statusStats, highlights, ratingsReviews] = await Promise.all([
-        getLoadoutGenreStats(supabase, user.id),
-        getLoadoutDeveloperStats(supabase, user.id),
-        getLoadoutStatusBreakdown(supabase, user.id),
-        getLoadoutRatingHighlights(supabase, user.id),
-        getUserRatings(supabase, user.id),
+        getLoadoutGenreStats(supabase, ownerId.id),
+        getLoadoutDeveloperStats(supabase, ownerId.id),
+        getLoadoutStatusBreakdown(supabase, ownerId.id),
+        getLoadoutRatingHighlights(supabase, ownerId.id),
+        getUserRatings(supabase, ownerId.id),
     ])
 
     const backlogStat = statusStats.find(s => s.status == "backlog")
@@ -47,10 +62,14 @@ export default async function LoadoutPage() {
     }))
     const maxDistCount = Math.max(...ratingDistribution.map(d => d.count), 1)
 
+    const developerMap = await getDeveloperNameMap(supabase, highlights.map(h => h.game_id))
+    const avgRatings = await getAvgRatingsForGames(supabase, highlights.map(h => h.game_id)) as AvgRatingsData[]
+    const viewerRatings = await getUserRatingsForGames(supabase, viewer?.id ?? "", highlights.map(h => h.game_id))
+
     let loadoutIdentity = ''
     if (ratingsReviews.length >= 5) {
         loadoutIdentity = await generateLoadoutIdentity({
-            username: user.id,
+            username: username,
             totalGames: totalGames,
             completedGames: completedStat ? completedStat.count : 0,
             totalRatings: ratingsReviews.length,
@@ -64,13 +83,9 @@ export default async function LoadoutPage() {
         <main className="bg-(--color-bg)">
             <div className="w-full max-w-5xl mx-auto px-6 md:px-10 py-14 font-(family-name:--font-body)">
                 <header className="mb-10 text-center">
-                    <p className="text-[11px] tracking-[0.35em] uppercase text-(--color-muted)
-                        font-mono mb-3">
-                        Player Dossier
-                    </p>
                     <h1 className="text-5xl md:text-6xl text-(--color-text)
                         font-(family-name:--font-display)">
-                        Loadout
+                        {username}'s Loadout
                     </h1>
                 </header>
 
@@ -87,7 +102,7 @@ export default async function LoadoutPage() {
                                 &ldquo;{loadoutIdentity}&rdquo;
                             </p>
                             <div className="mt-4 flex justify-end">
-                                <SubmitBioButton userId={user.id} bio={loadoutIdentity} />
+                                <SubmitBioButton userId={ownerId.id} bio={loadoutIdentity} />
                             </div>
                         </div>
                     </div>
@@ -194,14 +209,26 @@ export default async function LoadoutPage() {
                 <SectionLabel>Perfect Games</SectionLabel>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-14">
                     {highlights.filter(h => h.highlight_type == "top").map(h =>
-                        <GameCard key={h.game_id} game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: null, released: null }} />
+                        <GameCard 
+                            key={h.game_id} 
+                            game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: h.metacritic_score, released: h.released }}
+                            developer={developerMap.get(h.game_id)}
+                            ngplusRating={avgRatings.find(r => String(r.game_id) == h.game_id)?.avg_rating}
+                            userRating={viewerRatings.find(r => String(r.game_id) == h.game_id)?.rating} 
+                        />
                     )}
                 </div>
 
                 <SectionLabel>Lowest Rated</SectionLabel>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {highlights.filter(h => h.highlight_type == "bottom").map(h =>
-                        <GameCard key={h.game_id} game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: null, released: null }} />
+                        <GameCard 
+                            key={h.game_id} 
+                            game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: h.metacritic_score, released: h.released }}
+                            developer={developerMap.get(h.game_id)}
+                            ngplusRating={avgRatings.find(r => String(r.game_id) == h.game_id)?.avg_rating}
+                            userRating={viewerRatings.find(r => String(r.game_id) == h.game_id)?.rating}  
+                        />
                     )}
                 </div>
             </div>

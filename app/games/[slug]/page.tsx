@@ -10,7 +10,7 @@ import DistributionChart from "@/app/components/util/DistributionChart";
 import AddToListButton from "@/app/components/lists/AddToListButton";
 import ExpandableText from "@/app/components/util/ExpandableText";
 import { ListSummary } from "@/types";
-import { getViewer } from "@/lib/queries/user";
+import { getViewer, getAccountSettings } from "@/lib/queries/user";
 import { getGameBySlug, getGameTaxonomy } from "@/lib/queries/game";
 import { getRatingsReviewsForGame, getGameAvgRating } from "@/lib/queries/review";
 import { getUserLists, getGameListMembership } from "@/lib/queries/list";
@@ -46,6 +46,8 @@ export default async function GamePage({ params }: GamePageProps) {
 
     const { ratingsReviews, count } = await getRatingsReviewsForGame(supabase, game.id)
 
+    const reviewCount = ratingsReviews.filter(r => r.review != "").length
+
     const userReview = user ? ratingsReviews.find(r => r.user_id === user.id) : null
 
     const aggregate_rating = await getGameAvgRating(supabase, game.id)
@@ -68,6 +70,8 @@ export default async function GamePage({ params }: GamePageProps) {
     const listIds = lists.map(l => l.id)
 
     const listIdsGameIsIn = await getGameListMembership(supabase, game.id, listIds)
+
+    const userSettings = user ? await getAccountSettings(supabase, user.id) : null
 
     return (
         <main>
@@ -160,7 +164,7 @@ export default async function GamePage({ params }: GamePageProps) {
                             {/* Add to Library Button */}
                             <LibraryButton game_id={game.id}/>
                             {/* Add to List Button */}
-                            <AddToListButton gameId={game.id} lists={lists.map(l => ({ listId: String(l.id), listName: l.name, listCount: l.game_count }))} listIdsGameIsIn={listIdsGameIsIn}/>
+                            <AddToListButton gameId={game.id} lists={lists.map(l => ({ listId: String(l.id), listName: l.name, listCount: l.game_count }))} listIdsGameIsIn={listIdsGameIsIn} defaultListPrivacy={userSettings?.default_list_public ?? true} />
                         </div>
                     </div>
                 </div>
@@ -228,16 +232,16 @@ export default async function GamePage({ params }: GamePageProps) {
                 <div className="mb-4">
                     <div className="flex items-center gap-4 justify-between mb-2">
                         {aggregate_rating ? (
-                            <p className="text-2xl font-semibold mb-2">NG+ users rated {game.name} a <span style={{ color: ngScoreColor }}>{aggregate_rating}</span>/10</p>
+                            <p className="text-2xl font-semibold mb-2">NG+ users rated {game.name} a <span style={{ color: ngScoreColor }}>{aggregate_rating}</span>/10 ({count} Ratings)</p>
                         ) : (
                             <p className="text-2xl font-semibold mb-2">Be the first NG+ user to rate {game.name}!</p>
                         )}
                         <RateReviewButton game_id={game.id} existing_rating_review={userReview}/>
                     </div>
                     <DistributionChart data={rating_distribution}/>
-                    <h2 className="border-t border-(--color-border) text-2xl font-semibold mb-2 mt-2 pt-2">Reviews ({count})</h2>
-                    {userReview && user && <Review rating_review={userReview} gameName={game.name} gameSlug={game.slug}/>}
-                    {ratingsReviews.filter(r => r.user_id != user?.id).map(r => 
+                    <h2 className="border-t border-(--color-border) text-2xl font-semibold mb-2 mt-2 pt-2">Reviews ({reviewCount})</h2>
+                    {userReview && user && userReview.review != "" && <Review rating_review={userReview} gameName={game.name} gameSlug={game.slug}/>}
+                    {ratingsReviews.filter(r => r.user_id != user?.id && r.review != "").map(r => 
                         <Review key={r.user_id} rating_review={r} gameName={game.name} gameSlug={game.slug}/>
                     )}
                 </div>

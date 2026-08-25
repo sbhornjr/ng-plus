@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation"
 import Modal from "@/app/components/util/Modal"
 import { createList, updateList } from "@/lib/queries/list"
 
-export default function CreateListButton({ userId, type, current } : 
-    { userId: string, type?: "create" | "update" | undefined, current?: { listId: string, name: string, description: string, isPublic: boolean, isPinned: boolean } | undefined }) {
+export default function CreateListButton({ userId, type, current, defaultListPrivacy } : 
+    { userId: string, type?: "create" | "update" | undefined, current?: { listId: string, name: string, description: string, isPublic: boolean, isPinned: boolean } | undefined, defaultListPrivacy?: boolean }) {
     const [name, setName] = useState(current ? current.name : "")
     const [description, setDescription] = useState(current ? current.description : "")
     const [isPinned, setIsPinned] = useState(current ? current.isPinned : false)
-    const [isPublic, setIsPublic] = useState(current ? current.isPublic : true)
+    const [isPublic, setIsPublic] = useState(current ? current.isPublic : defaultListPrivacy ?? true)
     const [isCreateListModalOpen, setIsCreateListModalOpen] = useState(false)
     const router = useRouter()
     const isUpdate = type && type === "update"
