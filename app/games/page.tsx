@@ -20,7 +20,7 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
     const publisherQuery = publisher?.trim() ?? '';
     const pageQuery = page ? Number(page) : 1
     const pageSizeQuery = pageSize ? Number(pageSize) : 10
-    const sortQuery = sort?.trim() ?? '';
+    const sortQuery = sort?.trim() || 'ngplus_rating';
     const orderQuery = order?.trim() ?? "desc";
     const esrbQuery = esrb?.trim() ?? '';
     const supabase = await createClient()
@@ -89,7 +89,7 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
                     <Pagination 
                         page={pageQuery}
                         maxPages={totalPages}
-                        params={{ q: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery) }}
+                        params={{ q: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery), sort: sortQuery, order: orderQuery }}
                         url="games"
                     />
                 }
