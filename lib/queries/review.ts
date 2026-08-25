@@ -1,18 +1,55 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { GameRatingReview, RatingReviewData, RatingReviewCounts, AvgRatingsData } from '@/types'
+import { GameRatingReview, RatingReviewData, RatingReviewCounts, AvgRatingsData, GameRatingsStats } from '@/types'
 
-export async function getRatingsReviewsForGame(supabase: SupabaseClient, gameId: string) {
-    const { data, count } = await supabase
+// Rating counts + distribution for a game, computed server-side rather than
+// pulling every rating/review row (with joined user data) into memory.
+export async function getGameRatingsStats(supabase: SupabaseClient, gameId: string): Promise<GameRatingsStats> {
+    const { data } = await supabase.rpc('get_game_ratings_stats', { p_game_id: gameId })
+    return data?.[0] ?? {
+        total_ratings: 0, total_reviews: 0, avg_rating: null,
+        rating_1: 0, rating_2: 0, rating_3: 0, rating_4: 0, rating_5: 0,
+        rating_6: 0, rating_7: 0, rating_8: 0, rating_9: 0, rating_10: 0,
+    }
+}
+
+export async function getUserRatingReviewForGame(supabase: SupabaseClient, gameId: string, userId: string) {
+    const { data } = await supabase
+        .from('ratings_reviews')
+        .select('user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url)')
+        .eq('game_id', gameId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+    return data as unknown as GameRatingReview | null
+}
+
+type GameReviewsPageParams = {
+    limit: number
+    offset: number
+    sort: "date" | "rating"
+    order: "asc" | "desc"
+    excludeUserId?: string
+}
+
+// Paginated, written reviews for a game (rating rows with no review text are excluded).
+export async function getGameReviewsForPage(supabase: SupabaseClient, gameId: string, { limit, offset, sort, order, excludeUserId }: GameReviewsPageParams) {
+    const sortColumn = sort === "rating" ? "rating" : "updated_at"
+
+    let query = supabase
         .from('ratings_reviews')
         .select('user_id, rating, review, created_at, updated_at, users(username, display_name, avatar_url)', { count: 'exact' })
         .eq('game_id', gameId)
+        .neq('review', '')
+        .order(sortColumn, { ascending: order === "asc" })
+        .range(offset, offset + limit - 1)
 
-    return { ratingsReviews: (data ?? []) as unknown as GameRatingReview[], count: count ?? 0 }
-}
+    if (excludeUserId) {
+        query = query.neq('user_id', excludeUserId)
+    }
 
-export async function getGameAvgRating(supabase: SupabaseClient, gameId: string) {
-    const { data } = await supabase.rpc('get_game_avg_rating', { p_game_id: gameId })
-    return data
+    const { data, count } = await query
+
+    return { reviews: (data ?? []) as unknown as GameRatingReview[], count: count ?? 0 }
 }
 
 export async function createRatingReview(supabase: SupabaseClient, { userId, gameId, rating, review }: { userId: string, gameId: string, rating: number | string, review: string }) {

@@ -6,21 +6,29 @@ import ScreenshotCarousel from "@/app/components/game/ScreenshotCarousel";
 import LibraryButton from "@/app/components/library/LibraryButton";
 import RateReviewButton from "@/app/components/game/RateReviewButton";
 import Review from "@/app/components/game/Review";
+import GameReviewsFilters from "@/app/components/game/GameReviewsFilters";
+import Pagination from "@/app/components/util/Pagination";
 import DistributionChart from "@/app/components/util/DistributionChart";
 import AddToListButton from "@/app/components/lists/AddToListButton";
 import ExpandableText from "@/app/components/util/ExpandableText";
-import { ListSummary } from "@/types";
+import { ListSummary, GameRatingsStats } from "@/types";
 import { getViewer, getAccountSettings } from "@/lib/queries/user";
 import { getGameBySlug, getGameTaxonomy } from "@/lib/queries/game";
-import { getRatingsReviewsForGame, getGameAvgRating } from "@/lib/queries/review";
+import { getGameRatingsStats, getUserRatingReviewForGame, getGameReviewsForPage } from "@/lib/queries/review";
 import { getUserLists, getGameListMembership } from "@/lib/queries/list";
 
 type GamePageProps = {
     params: Promise<{ slug: string }>
+    searchParams: Promise<{ page?: string, pageSize?: string, sort?: string, order?: string }>
 }
 
-export default async function GamePage({ params }: GamePageProps) {
+export default async function GamePage({ params, searchParams }: GamePageProps) {
     const { slug } = await params;
+    const { page, pageSize, sort, order } = await searchParams;
+    const pageQuery = page ? Number(page) : 1
+    const pageSizeQuery = pageSize ? Number(pageSize) : 10
+    const sortQuery: "date" | "rating" = sort === "rating" ? "rating" : "date"
+    const orderQuery: "asc" | "desc" = order === "asc" ? "asc" : "desc"
     const supabase = await createClient()
 
     const user = await getViewer(supabase)
@@ -44,17 +52,26 @@ export default async function GamePage({ params }: GamePageProps) {
         ? 'var(--color-mid)'
         : 'var(--color-bad)'
 
-    const { ratingsReviews, count } = await getRatingsReviewsForGame(supabase, game.id)
+    const stats = await getGameRatingsStats(supabase, game.id)
 
-    const reviewCount = ratingsReviews.filter(r => r.review != "").length
+    const userReview = user ? await getUserRatingReviewForGame(supabase, game.id, user.id) : null
 
-    const userReview = user ? ratingsReviews.find(r => r.user_id === user.id) : null
+    const { reviews: pagedReviews, count: otherReviewsCount } = await getGameReviewsForPage(supabase, game.id, {
+        limit: pageSizeQuery,
+        offset: (pageQuery - 1) * pageSizeQuery,
+        sort: sortQuery,
+        order: orderQuery,
+        excludeUserId: user?.id,
+    })
+    const otherReviewsTotalPages = Math.ceil(otherReviewsCount / pageSizeQuery)
 
-    const aggregate_rating = await getGameAvgRating(supabase, game.id)
+    const count = stats.total_ratings
+    const reviewCount = stats.total_reviews
+    const aggregate_rating = stats.avg_rating ?? 0
 
     const rating_distribution = [10,9,8,7,6,5,4,3,2,1].map(n => ({
         name: n,
-        count: ratingsReviews.filter(r => r.rating === n).length
+        count: stats[`rating_${n}` as keyof GameRatingsStats] as number
     }))
 
     const ngScoreColor = aggregate_rating >= 8
@@ -240,10 +257,21 @@ export default async function GamePage({ params }: GamePageProps) {
                     </div>
                     <DistributionChart data={rating_distribution}/>
                     <h2 className="border-t border-(--color-border) text-2xl font-semibold mb-2 mt-2 pt-2">Reviews ({reviewCount})</h2>
+                    <GameReviewsFilters gameSlug={game.slug} pageSize={String(pageSizeQuery)} sort={sortQuery} order={orderQuery} page={String(pageQuery)} />
                     {userReview && user && userReview.review != "" && <Review rating_review={userReview} gameName={game.name} gameSlug={game.slug}/>}
-                    {ratingsReviews.filter(r => r.user_id != user?.id && r.review != "").map(r => 
+                    {pagedReviews.map(r =>
                         <Review key={r.user_id} rating_review={r} gameName={game.name} gameSlug={game.slug}/>
                     )}
+                    {otherReviewsCount > 0 &&
+                        <div className="mt-4">
+                            <Pagination
+                                page={pageQuery}
+                                maxPages={otherReviewsTotalPages}
+                                params={{ pageSize: String(pageSizeQuery), sort: sortQuery, order: orderQuery }}
+                                url={`games/${game.slug}`}
+                            />
+                        </div>
+                    }
                 </div>
                 {/* Reddit Link */}
                 {game?.reddit_url && (

@@ -3,14 +3,13 @@
 import FilterSelect from "../util/FilterSelect"
 import { useRouter } from "next/navigation"
 
-export default function RatingsReviewsFilters({ filter, pageSize, sort, order, page, username } : 
-    { filter: "all" | "ratings" | "reviews", pageSize: string, sort: "date" | "rating", order: "asc" | "desc", page: string, username: string }) {
+export default function GameReviewsFilters({ gameSlug, pageSize, sort, order, page } :
+    { gameSlug: string, pageSize: string, sort: "date" | "rating", order: "asc" | "desc", page: string }) {
 
     const router = useRouter()
 
     function buildParams(overrides: Record<string, string> = {}) {
         const values = {
-            filter: filter,
             pageSize: pageSize,
             sort: sort,
             order: order,
@@ -25,20 +24,16 @@ export default function RatingsReviewsFilters({ filter, pageSize, sort, order, p
     }
 
     function handlePageSize(size: string) {
-        router.push(`/user/${username}/ratings_reviews?${buildParams({ pageSize: size, page: "1"})}`)
+        router.push(`/games/${gameSlug}?${buildParams({ pageSize: size, page: "1" })}`)
     }
 
     function handleSort(sortChoice: string) {
-        router.push(`/user/${username}/ratings_reviews?${buildParams({ sort: sortChoice, page: "1" }).toString()}`)
-    }
-
-    function handleFilter(filterChoice: string) {
-        router.push(`/user/${username}/ratings_reviews?${buildParams({ filter: filterChoice, page: "1" }).toString()}`)
+        router.push(`/games/${gameSlug}?${buildParams({ sort: sortChoice, page: "1" }).toString()}`)
     }
 
     function handleSortToggle() {
         const newDirection = order === "desc" ? "asc" : "desc"
-        router.push(`/user/${username}/ratings_reviews?${buildParams({ order: newDirection, page: "1" }).toString()}`)
+        router.push(`/games/${gameSlug}?${buildParams({ order: newDirection, page: "1" }).toString()}`)
     }
 
     return (
@@ -48,11 +43,6 @@ export default function RatingsReviewsFilters({ filter, pageSize, sort, order, p
                 <option value="25">Results: 25</option>
                 <option value="50">Results: 50</option>
                 <option value="100">Results: 100</option>
-            </FilterSelect>
-            <FilterSelect value={filter} onChange={e => handleFilter(e.target.value)}>
-                <option value="all">All</option>
-                <option value="reviews">Reviews</option>
-                <option value="ratings">Ratings</option>
             </FilterSelect>
             <FilterSelect value={sort} onChange={e => handleSort(e.target.value)}>
                 <option value="date">Date</option>
