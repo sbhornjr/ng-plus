@@ -118,7 +118,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <GameCard 
                             key={g.id} 
                             game={{ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }} 
-                            developer={developerMap.get(g.id)} 
+                            developer={developerMap.get(String(g.id))}
                             userRating={g.user_rating} 
                             ngplusRating={g.avg_ngplus_rating}
                         />

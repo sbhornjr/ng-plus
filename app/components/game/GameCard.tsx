@@ -5,6 +5,9 @@ import Seal from '@/app/components/game/Seal'
 
 export default function GameCard({ game, developer, ngplusRating, userRating, advancedStats } :
   { game: Game, developer?: string | null, ngplusRating?: number | null, userRating?: number | null, advancedStats?: AdvancedStats | null | undefined }) {
+  const hasHours = !!advancedStats?.hoursPlayed && advancedStats.hoursPlayed > 0
+  const hasPlayCount = !!advancedStats?.playCount && advancedStats.playCount > 1
+
   return (
     <Link href={`/games/${game.slug}`} className="group block">
       <div
@@ -65,11 +68,26 @@ export default function GameCard({ game, developer, ngplusRating, userRating, ad
             )}
           </div>
           {advancedStats && (
-            <p className="text-(--color-muted) text-[11px] mt-1.5 whitespace-nowrap font-mono tracking-tight">
-              {advancedStats.hoursPlayed && `${advancedStats.hoursPlayed}h `}
-              {advancedStats.playCount > 1 && `×${advancedStats.playCount} `}
-              {advancedStats.is100 && "100%"}
-            </p>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {/* Always rendered (even when empty) so every card in a row reserves
+                  identical height — a conditional min-height would drift out of sync
+                  the moment either slot's padding/border changes. */}
+              <span className="text-(--color-muted) text-[11px] whitespace-nowrap font-mono tracking-tight">
+                {hasHours && `${advancedStats.hoursPlayed}h`}
+                {hasHours && hasPlayCount && ' · '}
+                {hasPlayCount && `×${advancedStats.playCount}`}
+                {!hasHours && !hasPlayCount && ' '}
+              </span>
+              <span
+                className={`ml-auto inline-flex items-center gap-0.5 rounded-full border
+                  px-1.5 py-[1px] text-[9px] font-semibold uppercase tracking-wider
+                  ${advancedStats.is100
+                    ? 'bg-(--color-accent)/15 border-(--color-accent)/50 text-(--color-accent)'
+                    : 'invisible border-transparent'}`}
+              >
+                ✓ 100%
+              </span>
+            </div>
           )}
         </div>
       </div>

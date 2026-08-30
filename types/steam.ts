@@ -23,4 +23,5 @@ export type SteamLinkEntry = {
     gameDeveloper: string
     gameReleased: string | null
     timesPlayed?: number
+    completedAllAchievements: boolean
 }

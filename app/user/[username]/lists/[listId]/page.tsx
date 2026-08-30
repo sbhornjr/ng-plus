@@ -85,7 +85,7 @@ export default async function ListPage({ params }: ListPageProps) {
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             {games.map(game => (
                                 <div key={game.games.id} className="flex flex-col gap-1">
-                                    <GameCard game={game.games} developer={developerMap.get(game.games.id)} userRating={userRatingMap.get(game.games.id)} ngplusRating={avgRatingMap.get(game.games.id) ?? null}/>
+                                    <GameCard game={game.games} developer={developerMap.get(String(game.games.id))} userRating={userRatingMap.get(game.games.id)} ngplusRating={avgRatingMap.get(game.games.id) ?? null}/>
                                     {isOwnProfile && (
                                         <RemoveFromListButton listId={listId} gameId={game.games.id} />
                                     )}

@@ -10,6 +10,7 @@ export default function GameFromSteam({ appid, linkEntry, onUpdate } : { appid: 
     const [playTime, setPlayTime] = useState(linkEntry.playtimeSelected)
     const [selected, setSelected] = useState(linkEntry.selected)
     const [timesPlayed, setTimesPlayed] = useState(linkEntry.timesPlayed ?? 1)
+    const [completedAllAchievements, setCompletedAllAchievements] = useState(linkEntry.completedAllAchievements)
     const [entry, setEntry] = useState(linkEntry)
 
     function updateSelected(newSelected: boolean) {
@@ -36,6 +37,13 @@ export default function GameFromSteam({ appid, linkEntry, onUpdate } : { appid: 
     function updateTimesPlayed(newTimesPlayed: number) {
         setTimesPlayed(newTimesPlayed)
         const newLinkEntry = { ...entry, timesPlayed: newTimesPlayed }
+        setEntry(newLinkEntry)
+        onUpdate(appid, newLinkEntry)
+    }
+
+    function updateCompletedAllAchievements(newCompletedAllAchievements: boolean) {
+        setCompletedAllAchievements(newCompletedAllAchievements)
+        const newLinkEntry = { ...entry, completedAllAchievements: newCompletedAllAchievements }
         setEntry(newLinkEntry)
         onUpdate(appid, newLinkEntry)
     }
@@ -149,6 +157,32 @@ export default function GameFromSteam({ appid, linkEntry, onUpdate } : { appid: 
                             +
                         </button>
                     </div>
+                </div>
+                <div className="flex flex-col gap-1 shrink-0 items-center pointer-events-auto">
+                    <label className="text-xs font-semibold text-(--color-muted) uppercase tracking-wider">
+                        100%
+                    </label>
+                    <button
+                        type="button"
+                        onClick={() => updateCompletedAllAchievements(!completedAllAchievements)}
+                        aria-pressed={completedAllAchievements}
+                        aria-label={`${completedAllAchievements ? "Unmark" : "Mark"} ${linkEntry.gameName} as 100% Achievements Completed`}
+                        className="flex items-center justify-center h-[38px]"
+                    >
+                        <div className={`w-5 h-5 rounded-[3px] border-2 flex items-center justify-center
+                            transition-all duration-200 shrink-0
+                            ${completedAllAchievements
+                            ? 'bg-(--color-accent) border-(--color-accent)'
+                            : 'bg-transparent border-(--color-border) hover:border-(--color-accent)'}`}
+                        >
+                            {completedAllAchievements && (
+                                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                    <path d="M1 4L3.5 6.5L9 1" stroke="var(--color-bg)" strokeWidth="2"
+                                    strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            )}
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>

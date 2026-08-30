@@ -51,13 +51,33 @@ export async function searchGamesByName(supabase: SupabaseClient, query: string,
 }
 
 // Maps game_id -> developer name for a set of games. Used anywhere a game grid needs to show its developer.
-export async function getDeveloperNameMap(supabase: SupabaseClient, gameIds: (string | number)[]): Promise<Map<string | number, string | null>> {
-    const { data: developerLinks } = await supabase
-        .from('game_developers')
-        .select('game_id, developers(name)')
-        .in('game_id', gameIds)
+// Keys are normalized to strings since callers pass ids as a mix of string and number.
+// Chunked like getGamesFromSteamIds below — a large library/catalog can push the .in()
+// filter (sent as URL query params) past undici's header size limit, which fails the
+// fetch entirely (HeadersOverflowError) and would otherwise silently return no developers.
+export async function getDeveloperNameMap(supabase: SupabaseClient, gameIds: (string | number)[]): Promise<Map<string, string | null>> {
+    const CHUNK_SIZE = 100
+    const map = new Map<string, string | null>()
 
-    return new Map(developerLinks?.reverse().map(d => [d.game_id, (d.developers as unknown as { name: string } | null)?.name ?? null]))
+    for (let i = 0; i < gameIds.length; i += CHUNK_SIZE) {
+        const chunk = gameIds.slice(i, i + CHUNK_SIZE)
+        const { data: developerLinks, error } = await supabase
+            .from('game_developers')
+            .select('game_id, developers(name)')
+            .in('game_id', chunk)
+
+        if (error) {
+            console.error('Failed to fetch developer names:', error)
+            continue
+        }
+
+        for (const d of developerLinks ?? []) {
+            const name = (d.developers as unknown as { name: string } | null)?.name ?? null
+            if (!map.has(String(d.game_id))) map.set(String(d.game_id), name)
+        }
+    }
+
+    return map
 }
 
 type QueryGamesParams = {

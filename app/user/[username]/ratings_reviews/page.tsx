@@ -76,9 +76,9 @@ export default async function RatingsPage({ params, searchParams }: RatingsPageP
                         <RatingsReviewsFilters username={username} filter={filterValue} page={String(currentPage)} pageSize={String(currentPageSize)} sort={sortValue} order={orderValue} />
                         {ratingsReviews.map(rr => (
                             rr.review == "" ? (
-                                <Rating key={rr.game_id} slug={rr.game_slug} name={rr.game_name} cover={rr.game_cover_image_url} developer={developerMap.get(rr.game_id)} released={rr.game_released} rating={rr.rating} createdAt={rr.updated_at} />
+                                <Rating key={rr.game_id} slug={rr.game_slug} name={rr.game_name} cover={rr.game_cover_image_url} developer={developerMap.get(String(rr.game_id))} released={rr.game_released} rating={rr.rating} createdAt={rr.updated_at} />
                             ) : (
-                                <Review key={rr.game_id} slug={rr.game_slug} name={rr.game_name} cover={rr.game_cover_image_url} developer={developerMap.get(rr.game_id)} released={rr.game_released} rating={rr.rating} review={rr.review} createdAt={rr.updated_at} />
+                                <Review key={rr.game_id} slug={rr.game_slug} name={rr.game_name} cover={rr.game_cover_image_url} developer={developerMap.get(String(rr.game_id))} released={rr.game_released} rating={rr.rating} review={rr.review} createdAt={rr.updated_at} />
                             )
                         ))}
                     </div>

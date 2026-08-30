@@ -109,7 +109,7 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
                             <GameCard 
                                 key={game.id} 
                                 game={{ id: String(game.id), name: game.name, slug: game.slug, cover_image_url: game.cover_image_url, metacritic_score: game.metacritic_score, released: game.released }} 
-                                developer={developerMap.get(game.id)} 
+                                developer={developerMap.get(String(game.id))}
                                 userRating={game.user_rating} 
                                 ngplusRating={game.avg_ngplus_rating}
                                 advancedStats={{ is100: libraryEntries?.find(le => le.game_id == game.id)?.completed_all_achievements, hoursPlayed: libraryEntries?.find(le => le.game_id == game.id)?.hours_played, playCount: libraryEntries?.find(le => le.game_id == game.id)?.play_count }}

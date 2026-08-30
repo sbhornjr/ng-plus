@@ -4,7 +4,7 @@ import { createLoggingFetch } from "@/lib/supabase-logging";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/queries/user";
 import { getSteamAccount } from "@/lib/queries/steam";
-import { getOwnedGames } from "@/lib/steam";
+import { getOwnedGames, getFullyCompletedAppids } from "@/lib/steam";
 import { importGamesFromSteam } from "@/lib/rawg";
 import { getGamesFromSteamIds, getDeveloperNameMap } from "@/lib/queries/game";
 import { getLibraryEntries } from "@/lib/queries/library";
@@ -48,6 +48,7 @@ export default async function SteamLinkPage() {
     )
     const developerMap = await getDeveloperNameMap(supabase, ngPlusGamesData.map(g => g.id))
     const steamGamesByAppid = new Map(steamGamesData.games.map(g => [g.appid, g]))
+    const fullyCompletedAppids = await getFullyCompletedAppids(steamUser.steam_id, ngPlusGamesData.map(g => g.steam_appid))
 
     const steamLinkEntries = new Map<number, SteamLinkEntry>()
     for (const game of ngPlusGamesData) {
@@ -57,7 +58,8 @@ export default async function SteamLinkPage() {
         const playtimeHours = relevantLibraryEntry?.hours_played ?? Math.floor(playtimeSteam / 60)
         const status = relevantLibraryEntry ? relevantLibraryEntry.status : playtimeSteam > 0 ? "playing" : "backlog"
         const timesPlayed = relevantLibraryEntry?.play_count ? relevantLibraryEntry.play_count : playtimeSteam > 0 ? 1 : 0
-        steamLinkEntries.set(game.steam_appid, { gameId: game.id, playtimeSelected: playtimeHours, status: status, selected: true, coverImageUrl: game.cover_image_url, gameName: game.name, gameReleased: game.released, timesPlayed: timesPlayed, gameDeveloper: developerMap.get(game.id) ?? "" })
+        const completedAllAchievements = relevantLibraryEntry?.completed_all_achievements || fullyCompletedAppids.has(game.steam_appid)
+        steamLinkEntries.set(game.steam_appid, { gameId: game.id, playtimeSelected: playtimeHours, status: status, selected: true, coverImageUrl: game.cover_image_url, gameName: game.name, gameReleased: game.released, timesPlayed: timesPlayed, gameDeveloper: developerMap.get(String(game.id)) ?? "", completedAllAchievements })
     }
 
     const unmatchedCount = steamGamesData.games.length - ngPlusGamesData.length

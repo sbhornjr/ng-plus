@@ -43,7 +43,7 @@ export async function updateLibraryEntry(supabase: SupabaseClient, userId: strin
 }
 
 export async function upsertLibraryEntries(supabase: SupabaseClient, userId: string, entries: SteamLinkEntry[]) {
-    const toUpsert = entries.map(sle => ({ user_id: userId, game_id: sle.gameId, status: sle.status, hours_played: sle.playtimeSelected, play_count: sle.timesPlayed ?? 0}))
+    const toUpsert = entries.map(sle => ({ user_id: userId, game_id: sle.gameId, status: sle.status, hours_played: sle.playtimeSelected, play_count: sle.timesPlayed ?? 0, completed_all_achievements: sle.completedAllAchievements }))
 
     const { data, error } = await supabase
         .from("library_entries")

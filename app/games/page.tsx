@@ -70,7 +70,7 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
                             <GameCard 
                                 key={game.id} 
                                 game={{ id: String(game.id), name: game.name, slug: game.slug, cover_image_url: game.cover_image_url, metacritic_score: game.metacritic_score, released: game.released }} 
-                                developer={developerMap.get(game.id)} 
+                                developer={developerMap.get(String(game.id))}
                                 userRating={game.user_rating} 
                                 ngplusRating={game.avg_ngplus_rating}
                             />
