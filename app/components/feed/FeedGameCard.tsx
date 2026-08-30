@@ -16,7 +16,11 @@ export default function FeedGameCard({ gameSlug, gameName, gameCoverImageUrl, ga
                     <Image src={gameCoverImageUrl} alt={gameName ? gameName : "Game Cover"}
                         fill className="object-cover" sizes="80px" />
                 ) : (
-                    <div className="w-full h-full bg-(--color-surface-light) rounded-[3px]" />
+                    <div className="w-full h-full bg-(--color-surface-light) flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 opacity-[0.07]"
+                            style={{ backgroundImage: 'repeating-linear-gradient(135deg, var(--color-muted) 0, var(--color-muted) 1px, transparent 1px, transparent 8px)' }} />
+                        <span className="relative text-(--color-muted) text-[8px] uppercase tracking-[0.15em] font-mono">No Cover</span>
+                    </div>
                 )}
                 {!avgRating && metacriticScore && (
                     <Seal label="MC" score={metacriticScore} side="right" size="sm" />

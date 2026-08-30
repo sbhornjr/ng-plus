@@ -60,7 +60,24 @@ Required in `.env.local` (gitignored):
 
 ## Conventions
 
-- Dark theme hardcoded: `bg-[#0e0e10]`, `text-[#f0f0f0]`
-- Fonts: Space Grotesk (`--font-display`), Inter (`--font-body`)
+- **Design system** — a warm-dark "ledger / dossier" theme. All colour, type,
+  and spacing go through CSS custom properties defined in `app/globals.css`;
+  reference them as Tailwind arbitrary properties, e.g. `bg-(--color-bg)`,
+  `text-(--color-text)`, `border-(--color-border)`. Do **not** hardcode hex.
+  - Ground / surfaces: `--color-bg` `#17140f`, `--color-surface` `#242018`,
+    `--color-surface-light` `#2e2a20`, `--color-border` `#4a4335`
+  - Text: `--color-text` `#ddd5c4` (body), `--color-muted` `#a89e8b`
+    (genuine secondary text only — not paragraphs)
+  - Accent: `--color-accent` `#b98a3c` (aged brass) — used for primary
+    buttons, links, active nav. **Never purple.**
+  - Rating tiers (reserved for scores only, never decoration):
+    `--color-good` `#4f86c6` (critic / ≥8), `--color-mid` `#d99a3a`
+    (community / 6–7), `--color-bad` `#d6493f` (you / <6)
+- **Fonts** — Fraunces (`--font-display`, serif headings), IBM Plex Sans
+  (`--font-body`), IBM Plex Mono (`--font-mono`, tracked-uppercase labels,
+  datestamps, and numeric data only). Set in `app/layout.tsx`.
+- Reusable UI lives in `app/components/util/` — prefer `EmptyState`,
+  `StatGrid`, `ScoreVerdict`, `DistributionChart`, `Pagination`, `Avatar`,
+  `Modal` over re-rolling one.
 - Path alias: `@/*` maps to project root
 - No monorepo — single package
