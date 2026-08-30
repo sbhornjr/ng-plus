@@ -43,3 +43,6 @@ next-env.d.ts
 # ai
 /.claude/
 /.playwright-mcp/
+
+# stray screenshots from local UI review
+/*.png

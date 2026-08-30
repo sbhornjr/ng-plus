@@ -112,6 +112,7 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
                                 developer={developerMap.get(String(game.id))}
                                 userRating={game.user_rating} 
                                 ngplusRating={game.avg_ngplus_rating}
+                                libraryStatus={libraryEntries?.find(le => le.game_id == game.id)?.status}
                                 advancedStats={{ is100: libraryEntries?.find(le => le.game_id == game.id)?.completed_all_achievements, hoursPlayed: libraryEntries?.find(le => le.game_id == game.id)?.hours_played, playCount: libraryEntries?.find(le => le.game_id == game.id)?.play_count }}
                             />
                         ))}

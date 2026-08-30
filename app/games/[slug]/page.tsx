@@ -9,6 +9,7 @@ import Review from "@/app/components/game/Review";
 import GameReviewsFilters from "@/app/components/game/GameReviewsFilters";
 import Pagination from "@/app/components/util/Pagination";
 import DistributionChart from "@/app/components/util/DistributionChart";
+import ScoreVerdict from "@/app/components/game/ScoreVerdict";
 import AddToListButton from "@/app/components/lists/AddToListButton";
 import ExpandableText from "@/app/components/util/ExpandableText";
 import { ListSummary, GameRatingsStats } from "@/types";
@@ -43,14 +44,6 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
         developers: developerList,
         publishers: publisherList,
     } = await getGameTaxonomy(supabase, game.id)
-
-    const scoreColor = !game.metacritic_score
-        ? 'var(--color-muted)'
-        : game.metacritic_score >= 80
-        ? 'var(--color-good)'
-        : game.metacritic_score >= 60
-        ? 'var(--color-mid)'
-        : 'var(--color-bad)'
 
     const stats = await getGameRatingsStats(supabase, game.id)
 
@@ -90,6 +83,15 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
 
     const userSettings = user ? await getAccountSettings(supabase, user.id) : null
 
+    // Browsable facets (genre / platform / ESRB) read as chips; credits
+    // (developer / publisher) read as plain links so the page isn't a wall
+    // of identical pills.
+    const facetChip = `inline-flex px-2.5 py-1 rounded-[3px] text-sm border border-(--color-border)
+        text-(--color-muted) hover:text-(--color-accent) hover:border-(--color-accent)
+        transition-colors duration-200 font-(family-name:--font-display)`
+    const metaLink = `text-sm text-(--color-text) underline decoration-(--color-border) underline-offset-2
+        hover:decoration-(--color-accent) hover:text-(--color-accent) transition-colors duration-200`
+
     return (
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
@@ -118,64 +120,40 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
 
                     <div className="flex flex-col w-full">
 
-                        {/* Genres */}
-                        <div className="flex gap-2 mb-3 items-center">
+                        {/* Genres + ESRB — browsable facets */}
+                        <div className="flex gap-2 mb-3 items-center flex-wrap">
                             {genreList.map((genre) => (
-                                <Link
-                                    key={genre.id}
-                                    href={`/games?genre=${genre.slug}`}
-                                    className="px-3 py-1 rounded-[3px] text-sm font-semibold
-                                        text-(--color-accent) hover:bg-(--color-accent-hover) hover:text-(--color-bg) outline-(--color-accent) outline-1
-                                        transition-colors duration-200
-                                        font-(family-name:--font-display)"
-                                >
+                                <Link key={genre.id} href={`/games?genre=${genre.slug}`} className={facetChip}>
                                     {genre.name}
                                 </Link>
                             ))}
-                            <span className="text-sm font-semibold items-center">
-                                |
-                            </span>
-                            {/* ESRB Rating */}
                             {game.esrb_rating && (
-                                <Link
-                                    href={`/games?esrb=${game.esrb_rating}`}
-                                    className="text-sm font-semibold text-(--color-accent) hover:bg-(--color-accent-hover) hover:text-(--color-bg) outline-(--color-accent) outline-1 rounded-[3px] px-2 py-1"
-                                >
+                                <Link href={`/games?esrb=${game.esrb_rating}`} className={facetChip}>
                                     {game.esrb_rating}
                                 </Link>
-                            )}   
+                            )}
                         </div>
 
                         {/* Game title */}
                         <h1 className="text-5xl font-bold font-(family-name:--font-display)">
                             {game?.name}
                         </h1>
+                        {game.released && (
+                            <p className="text-sm text-(--color-muted) mt-1 mb-4 font-mono">
+                                {new Date(game.released).getFullYear()}
+                            </p>
+                        )}
 
-                        {/* Meta Row */}
-                        <div className="flex gap-6 items-center mt-3 mb-4">
-                            {/* Release Date */}
-                            {game.released && (
-                                <p className="text-sm font-semibold">
-                                    {new Date(game.released).getFullYear()}
-                                </p>
-                            )}        
-                            {/* Metacritic Score */}
-                            {game.metacritic_score && (
-                                <p className="text-sm font-semibold px-2 py-1 rounded-[3px]" style={{ outline: `1px solid ${scoreColor}` }}>
-                                    <span style={{ color: scoreColor }}>{game.metacritic_score}</span>
-                                </p>
-                            )}          
-                            {/* NG+ Score */}
-                            {aggregate_rating ? (
-                                <p className="text-sm font-semibold">
-                                    NG+ Rating: <span style={{ color: ngScoreColor }}>{aggregate_rating}</span>
-                                </p>
-                            ) : (
-                                <p className="text-sm font-semibold text-(--color-muted)">
-                                    Be the first to rate this game on NG+!
-                                </p>
-                            )}    
+                        {/* The three-source verdict — the whole point of NG+ */}
+                        <div className="mb-6">
+                            <ScoreVerdict
+                                metacritic={game.metacritic_score}
+                                community={aggregate_rating || null}
+                                communityCount={count}
+                                user={userReview?.rating ?? null}
+                            />
                         </div>
+
                         {/* Button Row */}
                         <div className="flex gap-4 flex-wrap mb-6 w-full justify-start">
                             {/* Add to Library Button */}
@@ -185,52 +163,37 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                         </div>
                     </div>
                 </div>
-                {/* Platforms / Developers / Publishers */}
-                <div className="grid grid-cols-3 mb-4 gap-2 items-start">
-                    <p className="text-sm font-semibold text-(--color-muted)">Platforms:</p>
-                    <p className="text-sm font-semibold text-(--color-muted)">Developers:</p>
-                    <p className="text-sm font-semibold text-(--color-muted)">Publishers:</p>
-                    <div className="flex gap-2 flex-wrap">
-                        {platformList.map((platform) => (
-                            <Link
-                                key={platform.id}
-                                href={`/games?platform=${platform.slug}`}
-                                className="px-3 py-1 rounded-[3px] text-sm font-semibold
-                                    text-(--color-accent) hover:bg-(--color-accent-hover) hover:text-(--color-bg) outline-(--color-accent) outline-1
-                                    transition-colors duration-200
-                                    font-(family-name:--font-display)"
-                            >
-                                {platform.name}
-                            </Link>
-                        ))}
+                {/* Platforms — facets; Developers / Publishers — credits */}
+                <div className="grid grid-cols-1 md:grid-cols-3 mb-6 gap-x-6 gap-y-4 items-start">
+                    <div>
+                        <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Platforms</p>
+                        <div className="flex gap-1.5 flex-wrap">
+                            {platformList.map((platform) => (
+                                <Link key={platform.id} href={`/games?platform=${platform.slug}`} className={facetChip}>
+                                    {platform.name}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                        {developerList.map((developer) => (
-                            <Link
-                                key={developer.id}
-                                href={`/games?developer=${developer.slug}`}
-                                className="px-3 py-1 rounded-[3px] text-sm font-semibold
-                                    text-(--color-accent) hover:bg-(--color-accent-hover) hover:text-(--color-bg) outline-(--color-accent) outline-1
-                                    transition-colors duration-200
-                                    font-(family-name:--font-display)"
-                            >
-                                {developer.name}
-                            </Link>
-                        ))}
+                    <div>
+                        <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Developers</p>
+                        <div className="flex flex-col gap-1">
+                            {developerList.map((developer) => (
+                                <Link key={developer.id} href={`/games?developer=${developer.slug}`} className={metaLink}>
+                                    {developer.name}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                        {publisherList.map((publisher) => (
-                            <Link
-                                key={publisher.id}
-                                href={`/games?publisher=${publisher.slug}`}
-                                className="px-3 py-1 rounded-[3px] text-sm font-semibold
-                                    text-(--color-accent) hover:bg-(--color-accent-hover) hover:text-(--color-bg) outline-(--color-accent) outline-1
-                                    transition-colors duration-200
-                                    font-(family-name:--font-display)"
-                            >
-                                {publisher.name}
-                            </Link>
-                        ))}
+                    <div>
+                        <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Publishers</p>
+                        <div className="flex flex-col gap-1">
+                            {publisherList.map((publisher) => (
+                                <Link key={publisher.id} href={`/games?publisher=${publisher.slug}`} className={metaLink}>
+                                    {publisher.name}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 {/* Description */}
@@ -241,7 +204,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                 )}
                 {/* Screenshot Carousel */}
                 {game.screenshots.length > 1 && (
-                    <div className="mb-4 w-1/2 max-w-6xl mx-auto">
+                    <div className="mb-8 max-w-3xl">
                         <ScreenshotCarousel screenshots={game.screenshots.slice(1) ?? []} />
                     </div>
                 )}
