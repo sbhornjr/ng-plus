@@ -74,43 +74,43 @@ export default function LibraryFilters({ current, genres, platforms, developers,
 
     return (
         <div>
-            <div className="flex gap-4 items-center justify-center w-full mb-6">
+            <div className="flex gap-2 flex-wrap items-center w-full mb-6">
                 <button
                     onClick={() => handleStatus("")}
-                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                    className={`text-base px-2.5 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
                     All
                 </button>
                 <button
                     onClick={() => handleStatus("completed")}
-                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "completed" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                    className={`text-base px-2.5 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "completed" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
                     Completed
                 </button>
                 <button
                     onClick={() => handleStatus("playing")}
-                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "playing" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                    className={`text-base px-2.5 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "playing" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
                     Playing
                 </button>
                 <button
                     onClick={() => handleStatus("backlog")}
-                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "backlog" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                    className={`text-base px-2.5 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "backlog" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
                     Backlog
                 </button>
                 <button
                     onClick={() => handleStatus("abandoned")}
-                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "abandoned" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                    className={`text-base px-2.5 py-1 rounded-[3px] transition-all duration-200 ${selectedStatus == "abandoned" ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
                     Abandoned
                 </button>
                 <span className="w-px h-6 bg-(--color-border)" />
                 <button
                     onClick={() => handle100Toggle()}
-                    className={`text-xl px-2 py-1 rounded-[3px] transition-all duration-200 ${selected100 === 'true' ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
+                    className={`text-base px-2.5 py-1 rounded-[3px] transition-all duration-200 ${selected100 === 'true' ? "border border-(--color-accent) text-(--color-accent)" : "hover:border hover:border-(--color-accent) hover:text-(--color-accent)"}`}
                 >
-                    100%
+                    100% only
                 </button>
             </div>
             <div className="flex gap-2 mb-4 items-center w-full">

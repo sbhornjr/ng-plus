@@ -3,7 +3,7 @@ import ExpandableText from "../util/ExpandableText"
 import Avatar from "../user/Avatar"
 
 export default function Review({ rating_review, gameName, gameSlug } : { rating_review: { rating: number, review: string, user_id: string, created_at: string, updated_at: string,
-    users: { username: string, display_name: string, avatar_url: string }}, gameName: string, gameSlug: string}) {
+    users: { username: string, display_name: string, avatar_url: string }}, gameName?: string, gameSlug?: string}) {
 
     const ngScoreColor = rating_review.rating >= 8
     ? 'var(--color-good)'

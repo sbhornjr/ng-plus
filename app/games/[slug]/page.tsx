@@ -220,10 +220,12 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                     </div>
                     <DistributionChart data={rating_distribution}/>
                     <h2 className="border-t border-(--color-border) text-2xl font-semibold mb-2 mt-2 pt-2">Reviews ({reviewCount})</h2>
-                    <GameReviewsFilters gameSlug={game.slug} pageSize={String(pageSizeQuery)} sort={sortQuery} order={orderQuery} page={String(pageQuery)} />
-                    {userReview && user && userReview.review != "" && <Review rating_review={userReview} gameName={game.name} gameSlug={game.slug}/>}
+                    {reviewCount > 1 && (
+                        <GameReviewsFilters gameSlug={game.slug} pageSize={String(pageSizeQuery)} sort={sortQuery} order={orderQuery} page={String(pageQuery)} />
+                    )}
+                    {userReview && user && userReview.review != "" && <Review rating_review={userReview} />}
                     {pagedReviews.map(r =>
-                        <Review key={r.user_id} rating_review={r} gameName={game.name} gameSlug={game.slug}/>
+                        <Review key={r.user_id} rating_review={r} />
                     )}
                     {otherReviewsCount > 0 &&
                         <div className="mt-4">
@@ -236,16 +238,17 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                         </div>
                     }
                 </div>
-                {/* Reddit Link */}
+                {/* External links footer */}
                 {game?.reddit_url && (
-                    <div className="mb-6">
+                    <div className="mt-6 pt-4 border-t border-(--color-border) flex items-center gap-4 text-sm">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-(--color-muted)">Elsewhere</span>
                         <Link
-                            href={game?.reddit_url || '#'}
+                            href={game.reddit_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-4 py-2 text-sm text-(--color-accent) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200 border border-(--color-accent) hover:text-(--color-bg)"
+                            className="text-(--color-text) underline decoration-(--color-border) underline-offset-2 hover:decoration-(--color-accent) hover:text-(--color-accent) transition-colors duration-200"
                         >
-                            Visit Reddit: {game.reddit_url.replace(/https?:\/\/(www\.)?reddit\.com\//, '').replace(/\/$/, '')}
+                            r/{game.reddit_url.replace(/https?:\/\/(www\.)?reddit\.com\/r\//, '').replace(/\/$/, '')}
                         </Link>
                     </div>
                 )}

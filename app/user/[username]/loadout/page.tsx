@@ -126,7 +126,9 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                         { label: 'Games Logged', value: totalGames },
                         { label: 'Completed', value: completedStat?.count ?? 0 },
                         { label: 'Rated', value: ratingsReviews.length },
-                        { label: 'Avg Rating', value: Math.trunc(avgRating * 100) / 100 },
+                        { label: 'Avg Rating', value: ratingsReviews.length
+                            ? <>{Math.trunc(avgRating * 100) / 100}<span className="text-base text-(--color-muted)"> / 10</span></>
+                            : <span className="text-(--color-muted)">&mdash;</span> },
                     ].map(s => (
                         <div key={s.label} className="border border-(--color-border)
                             bg-(--color-surface) rounded-[3px] py-5 text-center">

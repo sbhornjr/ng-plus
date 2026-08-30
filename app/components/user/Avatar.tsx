@@ -9,8 +9,8 @@ const SIZE_CLASSES: Record<AvatarSize, string> = {
 }
 
 const FALLBACK_TEXT_CLASSES: Record<AvatarSize, string> = {
-    sm: "text-2xl",
-    md: "text-xl",
+    sm: "text-sm",
+    md: "text-lg",
     lg: "text-2xl",
 }
 
@@ -20,35 +20,42 @@ const IMAGE_SIZES: Record<AvatarSize, string> = {
     lg: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw",
 }
 
+// Muted earth tones that live inside the warm-dark palette — enough variation
+// that initial-avatars are distinguishable from each other, not so much that
+// they turn into rainbow identicons and fight the UI.
+const TINTS = ["#5b4636", "#4a5340", "#5a4a52", "#3f4d57", "#63513a", "#4d4437", "#544033", "#425049"]
+
+function tintFor(seed: string) {
+    let h = 0
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0
+    return TINTS[Math.abs(h) % TINTS.length]
+}
+
 type AvatarProps = {
     src: string | null | undefined
     alt: string
     size?: AvatarSize
-    // When true, the border ring shows around the photo too. When false (default),
-    // the ring only appears on the fallback-initial state — matching most of the app.
+    // When true, a hairline ring shows around a photo too. The initial-fallback
+    // always carries the ring regardless.
     bordered?: boolean
     className?: string
 }
 
 export default function Avatar({ src, alt, size = "sm", bordered = false, className = "" }: AvatarProps) {
-    const sizeClasses = SIZE_CLASSES[size]
-
-    const fallback = (
-        <span className={`${FALLBACK_TEXT_CLASSES[size]} font-bold text-(--color-accent) font-(family-name:--font-display)`}>
-            {alt?.[0]?.toUpperCase()}
-        </span>
-    )
+    const ring = !src || bordered ? "border border-(--color-border)" : ""
 
     return (
-        <div className={`${sizeClasses} rounded-full bg-(--color-surface-light) flex items-center justify-center
-            relative overflow-hidden shrink-0 ${bordered ? "border border-(--color-accent)" : ""} ${className}`}>
+        <div className={`${SIZE_CLASSES[size]} rounded-full relative overflow-hidden shrink-0 ${ring} ${className}`}>
             {src ? (
                 <Image src={src} alt={alt} fill className="object-cover" sizes={IMAGE_SIZES[size]} />
-            ) : bordered ? (
-                fallback
             ) : (
-                <div className={`${sizeClasses} rounded-full bg-(--color-surface-light) border border-(--color-accent) flex items-center justify-center`}>
-                    {fallback}
+                <div
+                    className="w-full h-full flex items-center justify-center"
+                    style={{ backgroundColor: tintFor(alt || "?") }}
+                >
+                    <span className={`${FALLBACK_TEXT_CLASSES[size]} font-bold text-(--color-text) font-(family-name:--font-display) select-none`}>
+                        {(alt?.[0] || "?").toUpperCase()}
+                    </span>
                 </div>
             )}
         </div>

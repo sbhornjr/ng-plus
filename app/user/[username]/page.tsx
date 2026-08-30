@@ -78,32 +78,32 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <p className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">Member since {new Date(profile.created_at).getMonth() + 1}/{new Date(profile.created_at).getDate()}/{new Date(profile.created_at).getFullYear()}</p>
                         <p className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">{followersCount} Followers | {followingCount} Following</p>
                     </div>
-                    {isOwnProfile ? (
-                        <div className="flex flex-row gap-2 items-center ml-auto">
-                            <Link href={`/user/${username}/library`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
-                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Library</Link>
-                            <Link href={`/user/${username}/loadout`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
-                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>
-                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
-                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
-                        </div>
-                    ) : (
-                        <div className="flex flex-row gap-2 items-center ml-auto">
-                            {viewer && <FollowButton userId={viewer.id} targetUserId={profile.id} initialIsFollowing={!!followersData?.find(f => f.follower_id === viewer?.id)} />}
-                            {profile.library_public && <Link href={`/user/${username}/library`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
-                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Library</Link>}
-                            {profile.loadout_public && <Link href={`/user/${username}/loadout`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
-                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Loadout</Link>}
-                            <Link href={`/user/${username}/lists`} className="px-6 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg)
-                                hover:bg-(--color-accent-hover) transition-colors duration-200 font-(family-name:--font-display)">Lists</Link>
+                    {!isOwnProfile && viewer && (
+                        <div className="ml-auto">
+                            <FollowButton userId={viewer.id} targetUserId={profile.id} initialIsFollowing={!!followersData?.find(f => f.follower_id === viewer?.id)} />
                         </div>
                     )}
                 </div>
-                <StatGrid className="mt-4" stats={[
+
+                {/* Section nav — replaces the row of floating buttons */}
+                <nav className="flex gap-1 border-b border-(--color-border) mb-8 -mx-1 text-sm font-semibold font-(family-name:--font-display)">
+                    <span className="px-3 py-2 border-b-2 border-(--color-accent) text-(--color-accent) -mb-px">Profile</span>
+                    {(isOwnProfile || profile.library_public) && (
+                        <Link href={`/user/${username}/library`} className="px-3 py-2 border-b-2 border-transparent text-(--color-muted) hover:text-(--color-text) transition-colors duration-200">Library</Link>
+                    )}
+                    {(isOwnProfile || profile.loadout_public) && (
+                        <Link href={`/user/${username}/loadout`} className="px-3 py-2 border-b-2 border-transparent text-(--color-muted) hover:text-(--color-text) transition-colors duration-200">Loadout</Link>
+                    )}
+                    <Link href={`/user/${username}/lists`} className="px-3 py-2 border-b-2 border-transparent text-(--color-muted) hover:text-(--color-text) transition-colors duration-200">Lists</Link>
+                </nav>
+
+                <StatGrid stats={[
                     { label: 'Games', value: totalGames },
                     { label: 'Completed', value: libraryEntries?.filter(l => l.status === "completed").length },
                     { label: 'Rated', value: ratingStats?.length },
-                    { label: 'Avg Rating', value: Math.trunc(avgRating * Math.pow(10, 2)) / Math.pow(10, 2) },
+                    { label: 'Avg Rating', value: ratingStats?.length
+                        ? <>{Math.trunc(avgRating * 100) / 100}<span className="text-base text-(--color-muted)"> / 10</span></>
+                        : <span className="text-(--color-muted)">&mdash;</span> },
                 ]} />
                 <div className="flex flex-row gap-2 mb-2 rounded-[3px]">
                     <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Bio</h2>

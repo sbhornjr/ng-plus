@@ -66,8 +66,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
         >
                 {tab == "signin" ? (
                     <form onSubmit={(e) => { e.preventDefault(); signIn() }} className="flex flex-col items-start justify-center gap-2">
-                        <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
-                            Email:
+                        <label className="text-sm font-medium text-(--color-text) mt-2 first:mt-0">
+                            Email
                         </label>
                         <input
                             type="text"
@@ -76,8 +76,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
-                        <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
-                            Password:
+                        <label className="text-sm font-medium text-(--color-text) mt-2 first:mt-0">
+                            Password
                         </label>
                         <input
                             type="password"
@@ -96,8 +96,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                 )
                 : (
                     <form onSubmit={(e) => { e.preventDefault(); signUp() }} className="flex flex-col items-start justify-center gap-2">
-                        <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
-                            Email:
+                        <label className="text-sm font-medium text-(--color-text) mt-2 first:mt-0">
+                            Email
                         </label>
                         <input
                             type="text"
@@ -106,8 +106,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
-                        <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
-                            Username:
+                        <label className="text-sm font-medium text-(--color-text) mt-2 first:mt-0">
+                            Username
                         </label>
                         <input
                             type="text"
@@ -116,8 +116,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
-                        <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
-                            Password:
+                        <label className="text-sm font-medium text-(--color-text) mt-2 first:mt-0">
+                            Password
                         </label>
                         <input
                             type="password"
@@ -126,8 +126,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
-                        <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
-                            Re-Type Password:
+                        <label className="text-sm font-medium text-(--color-text) mt-2 first:mt-0">
+                            Confirm password
                         </label>
                         <input
                             type="password"
