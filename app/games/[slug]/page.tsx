@@ -10,6 +10,7 @@ import GameReviewsFilters from "@/app/components/game/GameReviewsFilters";
 import Pagination from "@/app/components/util/Pagination";
 import DistributionChart from "@/app/components/util/DistributionChart";
 import ScoreVerdict from "@/app/components/game/ScoreVerdict";
+import StickyGameActions from "@/app/components/game/StickyGameActions";
 import AddToListButton from "@/app/components/lists/AddToListButton";
 import ExpandableText from "@/app/components/util/ExpandableText";
 import { ListSummary, GameRatingsStats } from "@/types";
@@ -154,12 +155,12 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                             />
                         </div>
 
-                        {/* Button Row */}
-                        <div className="flex gap-4 flex-wrap mb-6 w-full justify-start">
-                            {/* Add to Library Button */}
-                            <LibraryButton game_id={game.id}/>
-                            {/* Add to List Button */}
-                            <AddToListButton gameId={game.id} lists={lists.map(l => ({ listId: String(l.id), listName: l.name, listCount: l.game_count }))} listIdsGameIsIn={listIdsGameIsIn} defaultListPrivacy={userSettings?.default_list_public ?? true} />
+                        {/* Button Row — repeats in a pinned bar once it scrolls away */}
+                        <div className="mb-6">
+                            <StickyGameActions gameName={game.name}>
+                                <LibraryButton game_id={game.id}/>
+                                <AddToListButton gameId={game.id} lists={lists.map(l => ({ listId: String(l.id), listName: l.name, listCount: l.game_count }))} listIdsGameIsIn={listIdsGameIsIn} defaultListPrivacy={userSettings?.default_list_public ?? true} />
+                            </StickyGameActions>
                         </div>
                     </div>
                 </div>

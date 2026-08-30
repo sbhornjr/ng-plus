@@ -28,7 +28,7 @@ export default function ChangePrivacyButton({ currentPrivacy, type, userId } : {
                     title={`${type} Privacy`}
                     panelClassName="w-full max-w-md max-h-8/10 p-8 overflow-y-auto"
                 >
-                    <p className="font-semibold text-lg text-(--color-muted)">Current {type} Privacy: <span className="text-[#ffffff]">{ currentPrivacy ? "Public" : "Private"}</span></p>
+                    <p className="font-semibold text-lg text-(--color-muted)">Current {type} Privacy: <span className="text-(--color-text)">{ currentPrivacy ? "Public" : "Private"}</span></p>
                     <button onClick={() => togglePrivacy()} className="px-4 py-1 mt-4 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
                         Toggle {type} Privacy
                     </button>

@@ -47,7 +47,7 @@ export default function ChangePasswordButton() {
                                 placeholder="Password..."
                                 value={oldPassword}
                                 onChange={(e) => setOldPassword(e.target.value)}
-                                className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                                className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent) rounded-[3px] px-2 py-1"
                             />
                         </div>
                         <div className="flex flex-col mt-4">
@@ -57,10 +57,10 @@ export default function ChangePasswordButton() {
                                 placeholder="Password..."
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                                className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent) rounded-[3px] px-2 py-1"
                             />
                         </div>
-                        <p className={`font-semibold text-lg text-[#ff5959] mt-4 ${errorMsg && "hidden"}`}>{errorMsg}</p>
+                        <p className={`font-semibold text-lg text-(--color-bad) mt-4 ${errorMsg && "hidden"}`}>{errorMsg}</p>
                         <button onClick={() => submitPassword()} className="px-4 py-1 mt-4 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
                             Submit
                         </button>

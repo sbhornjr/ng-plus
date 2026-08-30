@@ -3,12 +3,14 @@ import { LibraryData, EsrbRatingsData } from '@/types'
 import { SteamLinkEntry } from '@/types'
 
 export async function getLibraryEntry(supabase: SupabaseClient, userId: string, gameId: number) {
+    // maybeSingle: "not in this user's library" is a valid answer, not an error.
+    // .single() here throws a 406 / PGRST116 on every game the viewer hasn't added.
     const { data } = await supabase
         .from('library_entries')
         .select('id, status, completed_all_achievements, hours_played, play_count')
         .eq('user_id', userId)
         .eq('game_id', gameId)
-        .single()
+        .maybeSingle()
 
     return data
 }

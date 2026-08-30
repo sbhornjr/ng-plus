@@ -12,7 +12,7 @@ export default function SearchInput( { searchQuery, onChange, onSubmit} : {
                 placeholder="Search games..."
                 value={searchQuery}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent) rounded-[3px] px-2 py-1"
             />
             <button 
                 onClick={() => onSubmit()}

@@ -29,7 +29,7 @@ export default function ChangeUsernameButton({ userId, currentUsername } : { use
                     title="Change Username"
                     panelClassName="w-full max-w-md max-h-8/10 p-8 overflow-y-auto"
                 >
-                    <p className="font-semibold text-lg text-(--color-muted)">Current Username: <span className="text-[#ffffff]">{currentUsername}</span></p>
+                    <p className="font-semibold text-lg text-(--color-muted)">Current Username: <span className="text-(--color-text)">{currentUsername}</span></p>
                     <div className="flex flex-col mt-4">
                         <p className="font-semibold text-lg text-(--color-muted)">New Username:</p>
                         <input
@@ -37,7 +37,7 @@ export default function ChangeUsernameButton({ userId, currentUsername } : { use
                             placeholder="Username..."
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) self-center justify-self-center border border-(--color-border) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent) rounded-[3px] px-2 py-1"
                         />
                     </div>
                     <button onClick={() => submitUsername()} className="px-4 py-1 mt-4 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">

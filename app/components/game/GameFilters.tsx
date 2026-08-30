@@ -87,7 +87,7 @@ export default function GameFilters({ current, genres, platforms, esrb_ratings }
                 <SearchInput searchQuery={searchQuery} onChange={setSearchQuery} onSubmit={handleSubmit} />
                 <button
                     onClick={() => setFiltersOpen(!filtersOpen)}
-                    className="self-center justify-self-center bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-4 py-2 whitespace-nowrap"
+                    className="self-center justify-self-center bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent) rounded-[3px] px-4 py-2 whitespace-nowrap"
                 >
                     {filtersOpen ? '- Filters' : '+ Filters'}
                 </button>

@@ -35,8 +35,8 @@ export default function BioButton({ userId, currentBio } : { userId: string, cur
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         rows={4}
-                        className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted)
-                            border border-(--color-border) focus:outline-none focus:border-(--color-accent)
+                        className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted)
+                            border border-(--color-border) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)
                             rounded-[3px] px-3 py-2 resize-none"
                     />
                     <button onClick={() => submitBio()} className="mt-4 px-4 py-1 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
