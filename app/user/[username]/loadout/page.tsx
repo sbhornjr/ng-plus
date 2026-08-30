@@ -3,6 +3,7 @@ import GameCard from "@/app/components/game/GameCard";
 import { redirect } from "next/navigation";
 import { generateLoadoutIdentity } from "@/lib/loadout";
 import SubmitBioButton from "@/app/components/user/SubmitBioButton";
+import DistributionChart from "@/app/components/util/DistributionChart";
 import { getViewer, getUserIdFromUsername, getAccountSettings } from "@/lib/queries/user";
 import { getDeveloperNameMap } from "@/lib/queries/game";
 import { getLoadoutGenreStats, getLoadoutDeveloperStats, getLoadoutStatusBreakdown, getLoadoutRatingHighlights } from "@/lib/queries/stats";
@@ -60,11 +61,17 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
         name: n,
         count: ratingsReviews.filter(r => r.rating === n).length
     }))
-    const maxDistCount = Math.max(...ratingDistribution.map(d => d.count), 1)
 
     const developerMap = await getDeveloperNameMap(supabase, highlights.map(h => h.game_id))
     const avgRatings = await getAvgRatingsForGames(supabase, highlights.map(h => h.game_id)) as AvgRatingsData[]
     const viewerRatings = await getUserRatingsForGames(supabase, viewer?.id ?? "", highlights.map(h => h.game_id))
+
+    // Only sections with something to show get rendered — an empty labelled
+    // section reads as broken.
+    const genreFavs = genreStats?.filter(g => g.rated_count > 1).slice(0, 6) ?? []
+    const developerFavs = developerStats?.filter(d => d.rated_count > 1).slice(0, 6) ?? []
+    const topGames = highlights.filter(h => h.highlight_type === "top")
+    const bottomGames = highlights.filter(h => h.highlight_type === "bottom")
 
     let loadoutIdentity = ''
     if (ratingsReviews.length >= 5) {
@@ -81,7 +88,7 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
 
     return (
         <main className="bg-(--color-bg)">
-            <div className="w-full max-w-5xl mx-auto px-6 md:px-10 pt-8 pb-16 font-(family-name:--font-body)">
+            <div className="w-full max-w-6xl mx-auto px-6 md:px-10 pt-8 pb-16 font-(family-name:--font-body)">
                 <header className="mb-10 text-center">
                     <h1 className="text-5xl md:text-6xl text-(--color-text)
                         font-(family-name:--font-display)">
@@ -121,9 +128,9 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                         { label: 'Rated', value: ratingsReviews.length },
                         { label: 'Avg Rating', value: Math.trunc(avgRating * 100) / 100 },
                     ].map(s => (
-                        <div key={s.label} className="border border-(--color-muted)/25
+                        <div key={s.label} className="border border-(--color-border)
                             bg-(--color-surface) rounded-[3px] py-5 text-center">
-                            <p className="text-3xl text-(--color-good) font-mono">
+                            <p className="text-3xl text-(--color-text) font-mono tabular-nums">
                                 {s.value}
                             </p>
                             <p className="text-[11px] mt-1 uppercase tracking-[0.15em] text-(--color-muted)
@@ -135,29 +142,14 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                 </div>
 
                 <SectionLabel>Rating Style</SectionLabel>
-                <div className="flex flex-col gap-1.5 max-w-sm mb-14">
-                    {ratingDistribution.map(({ name, count }) => (
-                        <div key={name} className="flex items-center gap-2 font-mono">
-                            <span className="text-xs text-(--color-muted) w-4 text-right shrink-0">{name}</span>
-                            <div className="flex-1 bg-(--color-surface-light) h-2 overflow-hidden rounded-[1px]">
-                                <div
-                                    className="h-full"
-                                    style={{
-                                        width: `${(count / maxDistCount) * 100}%`,
-                                        backgroundColor: tierColor(name),
-                                        minWidth: count > 0 ? '4px' : '0'
-                                    }}
-                                />
-                            </div>
-                            <span className="text-xs text-(--color-muted) w-4 shrink-0">{count}</span>
-                        </div>
-                    ))}
+                <div className="mb-14">
+                    <DistributionChart data={ratingDistribution} />
                 </div>
 
+                {genreFavs.length > 0 && (<>
                 <SectionLabel>Favorite Genres</SectionLabel>
-                {genreStats && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-14">
-                        {genreStats.filter(g => g.rated_count > 1).slice(0, 6).map(g => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-14">
+                        {genreFavs.map(g => (
                             <div key={g.genre_name} className="border border-(--color-muted)/25
                                 bg-(--color-surface) rounded-[3px] p-4 flex flex-col gap-2">
                                 <h3 className="text-base text-(--color-text) font-(family-name:--font-display)">
@@ -178,12 +170,12 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                             </div>
                         ))}
                     </div>
-                )}
+                </>)}
 
+                {developerFavs.length > 0 && (<>
                 <SectionLabel>Favorite Developers</SectionLabel>
-                {developerStats && (
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-14">
-                        {developerStats.filter(d => d.rated_count > 1).slice(0, 6).map(d => (
+                        {developerFavs.map(d => (
                             <div key={d.developer_name} className="border border-(--color-muted)/25
                                 bg-(--color-surface) rounded-[3px] p-4 flex flex-col gap-2">
                                 <h3 className="text-base text-(--color-text) font-(family-name:--font-display)">
@@ -204,33 +196,37 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                             </div>
                         ))}
                     </div>
-                )}
+                </>)}
 
+                {topGames.length > 0 && (<>
                 <SectionLabel>Perfect Games</SectionLabel>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-14">
-                    {highlights.filter(h => h.highlight_type == "top").map(h =>
-                        <GameCard 
-                            key={h.game_id} 
-                            game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: h.metacritic_score, released: h.released }}
-                            developer={developerMap.get(h.game_id)}
-                            ngplusRating={avgRatings.find(r => String(r.game_id) == h.game_id)?.avg_rating}
-                            userRating={viewerRatings.find(r => String(r.game_id) == h.game_id)?.rating} 
-                        />
-                    )}
-                </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-14">
+                        {topGames.map(h =>
+                            <GameCard
+                                key={h.game_id}
+                                game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: h.metacritic_score, released: h.released }}
+                                developer={developerMap.get(h.game_id)}
+                                ngplusRating={avgRatings.find(r => String(r.game_id) == h.game_id)?.avg_rating}
+                                userRating={viewerRatings.find(r => String(r.game_id) == h.game_id)?.rating}
+                            />
+                        )}
+                    </div>
+                </>)}
 
+                {bottomGames.length > 0 && (<>
                 <SectionLabel>Lowest Rated</SectionLabel>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {highlights.filter(h => h.highlight_type == "bottom").map(h =>
-                        <GameCard 
-                            key={h.game_id} 
-                            game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: h.metacritic_score, released: h.released }}
-                            developer={developerMap.get(h.game_id)}
-                            ngplusRating={avgRatings.find(r => String(r.game_id) == h.game_id)?.avg_rating}
-                            userRating={viewerRatings.find(r => String(r.game_id) == h.game_id)?.rating}  
-                        />
-                    )}
-                </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {bottomGames.map(h =>
+                            <GameCard
+                                key={h.game_id}
+                                game={{ id: h.game_id, name: h.game_name, slug: h.game_slug, cover_image_url: h.cover_image_url, metacritic_score: h.metacritic_score, released: h.released }}
+                                developer={developerMap.get(h.game_id)}
+                                ngplusRating={avgRatings.find(r => String(r.game_id) == h.game_id)?.avg_rating}
+                                userRating={viewerRatings.find(r => String(r.game_id) == h.game_id)?.rating}
+                            />
+                        )}
+                    </div>
+                </>)}
             </div>
         </main>
     )

@@ -4,6 +4,7 @@ import GameCard from "@/app/components/game/GameCard";
 import Seal from "@/app/components/game/Seal";
 import Avatar from "@/app/components/user/Avatar";
 import LandingCTA from "@/app/components/util/LandingCTA";
+import EmptyState from "@/app/components/util/EmptyState";
 import Image from "next/image";
 import Link from "next/link";
 import { getViewer } from "@/lib/queries/user";
@@ -156,23 +157,32 @@ export default async function Home() {
 
 	return (
 		<main>
-			<section className="flex flex-col items-center justify-center px-6 pt-6 pb-8 text-center">
-				<p className="text-(--color-accent) text-xs font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
+			<div className="w-full max-w-6xl mx-auto px-6 pt-8 pb-16">
+				<p className="text-(--color-muted) text-xs font-semibold tracking-[0.2em] uppercase mb-1 font-mono">
 					Your gaming identity
 				</p>
-				<h1 className="text-7xl font-bold mb-4 font-(family-name:--font-display) tracking-tight">
-					NG<span className="text-(--color-accent)">+</span>
+				<h1 className="text-4xl font-bold mb-8 font-(family-name:--font-display) tracking-tight">
+					Activity
 				</h1>
-			</section>
 
-			<section className="w-full max-w-3xl mx-auto px-6 pb-16 flex flex-col gap-3">
-				{feed && feed.map((item, i) => (
-					<FeedItem
-						key={`${item.activity_type}-${item.actor_id}-${item.game_id ?? item.list_id ?? 'x'}-${item.created_at}-${i}`}
-						item={item}
+				{feed && feed.length > 0 ? (
+					<section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 items-start">
+						{feed.map((item, i) => (
+							<FeedItem
+								key={`${item.activity_type}-${item.actor_id}-${item.game_id ?? item.list_id ?? 'x'}-${item.created_at}-${i}`}
+								item={item}
+							/>
+						))}
+					</section>
+				) : (
+					<EmptyState
+						title="Your feed is quiet"
+						description="Follow other players and their ratings, reviews, and lists will show up here."
+						actionHref="/explore"
+						actionLabel="Find people to follow"
 					/>
-				))}
-			</section>
+				)}
+			</div>
 		</main>
 	)
 }
