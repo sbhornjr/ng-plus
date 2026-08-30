@@ -65,7 +65,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
             titleClassName="text-4xl font-bold font-(family-name:--font-display) tracking-tight self-center mb-4"
         >
                 {tab == "signin" ? (
-                    <div className="flex flex-col items-start justify-center gap-2">
+                    <form onSubmit={(e) => { e.preventDefault(); signIn() }} className="flex flex-col items-start justify-center gap-2">
                         <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
                             Email:
                         </label>
@@ -74,7 +74,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
                         <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
                             Password:
@@ -84,18 +84,18 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
                         {error && (
                             <p className="self-center font-semibold mt-4">{error}</p>
                         )}
-                        <button onClick={() => signIn()} className="font-semibold py-1 px-2 self-center my-4 rounded-[3px] border bg-(--color-accent) text-(--color-bg) border-(--color-border)">
+                        <button type="submit" disabled={loading} className="font-semibold py-2 px-5 self-center my-4 rounded-[3px] bg-(--color-accent) text-(--color-bg) hover:bg-(--color-accent-hover) transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-surface) disabled:opacity-60">
                             {loading ? "..." : "Sign In"}</button>
-                        <button onClick={() => setTab("signup")} className="underline self-center">Don&apos;t have an account? Sign Up.</button>
-                    </div>
+                        <button type="button" onClick={() => setTab("signup")} className="underline self-center hover:text-(--color-accent) transition-colors duration-200">Don&apos;t have an account? Sign Up.</button>
+                    </form>
                 )
                 : (
-                    <div className="flex flex-col items-start justify-center gap-2">
+                    <form onSubmit={(e) => { e.preventDefault(); signUp() }} className="flex flex-col items-start justify-center gap-2">
                         <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
                             Email:
                         </label>
@@ -104,7 +104,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
                         <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
                             Username:
@@ -114,7 +114,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             placeholder="Username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
                         <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
                             Password:
@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
                         <label className="text-xl font-bold font-(family-name:--font-display) tracking-tight">
                             Re-Type Password:
@@ -134,15 +134,15 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'signin' }: Au
                             placeholder="Password"
                             value={passwordAgain}
                             onChange={(e) => setPasswordAgain(e.target.value)}
-                            className="w-full bg-(--color-surface) text-(--color-muted) placeholder:text-(--color-muted) border border-(--color-border) focus:outline-none rounded-[3px] px-2 py-1"
+                            className="w-full bg-(--color-surface) text-(--color-text) placeholder:text-(--color-muted) border border-(--color-border) rounded-[3px] px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:border-(--color-accent)"
                         />
                         {error && (
                             <p className="self-center font-semibold mt-4">{error}</p>
                         )}
-                        <button onClick={() => signUp()} className="font-semibold py-1 px-2 self-center my-4 rounded-[3px] border bg-(--color-accent) text-(--color-bg) border-(--color-border)">
+                        <button type="submit" disabled={loading} className="font-semibold py-2 px-5 self-center my-4 rounded-[3px] bg-(--color-accent) text-(--color-bg) hover:bg-(--color-accent-hover) transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-surface) disabled:opacity-60">
                             {loading ? "..." : "Sign Up"}</button>
-                        <button onClick={() => setTab("signin")} className="underline self-center">Already have an account? Sign In.</button>
-                    </div>
+                        <button type="button" onClick={() => setTab("signin")} className="underline self-center hover:text-(--color-accent) transition-colors duration-200">Already have an account? Sign In.</button>
+                    </form>
                 )}
         </Modal>
     )

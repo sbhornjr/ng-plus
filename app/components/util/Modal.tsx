@@ -20,7 +20,16 @@ export default function Modal({
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm w-full h-full flex items-center justify-center z-50 p-5">
             <div className={`bg-(--color-surface) border border-(--color-border) rounded-[3px] relative flex flex-col ${panelClassName}`}>
-                <button onClick={onClose} className="mb-4 self-end text-(--color-muted) border border-(--color-muted) bg-(--color-surface-light) rounded-4xl px-2 py-1">X</button>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Close"
+                    className="mb-4 self-end grid place-items-center size-8 rounded-full text-(--color-muted) border border-(--color-border) bg-(--color-surface-light) hover:text-(--color-text) hover:border-(--color-muted) transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)"
+                >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+                    </svg>
+                </button>
                 {title && <h2 className={titleClassName}>{title}</h2>}
                 {children}
             </div>

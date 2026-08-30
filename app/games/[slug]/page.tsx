@@ -92,7 +92,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
 
     return (
         <main>
-            <div className="w-full max-w-6xl mx-auto px-8 py-12">
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
 
                 {/* Back to Games link */}
                 <Link href="/games" className="inline-flex items-center gap-2 text-(--color-muted)

@@ -81,11 +81,11 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
 
     return (
         <main className="bg-(--color-bg)">
-            <div className="w-full max-w-5xl mx-auto px-6 md:px-10 py-14 font-(family-name:--font-body)">
+            <div className="w-full max-w-5xl mx-auto px-6 md:px-10 pt-8 pb-16 font-(family-name:--font-body)">
                 <header className="mb-10 text-center">
                     <h1 className="text-5xl md:text-6xl text-(--color-text)
                         font-(family-name:--font-display)">
-                        {username}'s Loadout
+                        {username}&apos;s Loadout
                     </h1>
                 </header>
 

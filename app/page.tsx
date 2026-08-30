@@ -156,7 +156,7 @@ export default async function Home() {
 
 	return (
 		<main>
-			<section className="flex flex-col items-center justify-center px-6 pt-10 pb-8 text-center">
+			<section className="flex flex-col items-center justify-center px-6 pt-6 pb-8 text-center">
 				<p className="text-(--color-accent) text-xs font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
 					Your gaming identity
 				</p>
@@ -166,7 +166,12 @@ export default async function Home() {
 			</section>
 
 			<section className="w-full max-w-3xl mx-auto px-6 pb-16 flex flex-col gap-3">
-				{feed && feed.map(item => ( <FeedItem key={item.created_at} item={item} /> ))}
+				{feed && feed.map((item, i) => (
+					<FeedItem
+						key={`${item.activity_type}-${item.actor_id}-${item.game_id ?? item.list_id ?? 'x'}-${item.created_at}-${i}`}
+						item={item}
+					/>
+				))}
 			</section>
 		</main>
 	)

@@ -37,13 +37,13 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
 
     return (
         <main>
-            <div className="flex flex-col items-center justify-center pt-10 pb-4 text-center max-w-6xl mx-auto w-full">
-                <p className="text-(--color-accent) text-3xl font-semibold tracking-widest uppercase mb-1 font-(family-name:--font-display)">
-                    Explore The Gaming World
-                </p>
+            <div className="max-w-6xl mx-auto w-full px-8 pt-8 pb-4">
+                <h1 className="text-4xl font-bold font-(family-name:--font-display) tracking-tight">
+                    Explore
+                </h1>
             </div>
 
-            <div className="flex flex-col items-center justify-center pt-4 pb-8 w-full max-w-6xl mx-auto px-8">
+            <div className="flex flex-col pt-4 pb-8 w-full max-w-6xl mx-auto px-8">
                 <div className="flex gap-1 mb-6 max-w-6xl mx-auto">
                     {["week", "month", "year", "alltime"].map(r => (
                         <Link

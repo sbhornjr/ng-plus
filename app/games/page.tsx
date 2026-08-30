@@ -54,7 +54,10 @@ export default async function SearchPage({ searchParams } : SearchPageProps) {
 
     return (
         <main>
-            <div className="w-full max-w-6xl mx-auto px-8 py-12">
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
+                <h1 className="text-4xl font-bold font-(family-name:--font-display) tracking-tight mb-6">
+                    Games
+                </h1>
                 {/* Filters */}
                 <GameFilters
                     current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery, esrb: esrbQuery, pageSize: String(pageSizeQuery), order: orderQuery, sort: sortQuery}}

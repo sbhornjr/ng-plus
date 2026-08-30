@@ -26,7 +26,7 @@ export default function FeedItem({ item }: { item: FeedItemType }) {
         : item.activity_type === "list_liked" ? `liked "${item.list_name}" by ${item.list_owner_username}` : ""
 
     return (
-        <div key={item.created_at} className="p-4 bg-(--color-surface) rounded-[3px] border border-(--color-border) hover:border-(--color-accent)/40 transition-colors duration-200">
+        <div className="p-4 bg-(--color-surface) rounded-[3px] border border-(--color-border) hover:border-(--color-accent)/40 transition-colors duration-200">
 
             <div className="mb-2 flex items-center gap-2">
                 <Avatar src={item.actor_avatar_url} alt={item.actor_username} size="sm" bordered />

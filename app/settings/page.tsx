@@ -33,7 +33,8 @@ export default async function Settings({ searchParams } : SettingsPageProps) {
 
     return (
         <main>
-            <div className="w-full max-w-6xl mx-auto px-8 py-12 font-(family-name:--font-display)">
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16 font-(family-name:--font-display)">
+                <h1 className="text-4xl font-bold tracking-tight mb-6">Settings</h1>
                 <div className="flex gap-8 mb-4">
                     <AvatarUploader userId={user.id} username={user.username} currentAvatarUrl={user.avatar_url} />
                     <div className="flex flex-col">

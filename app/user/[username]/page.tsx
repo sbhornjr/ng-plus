@@ -10,6 +10,7 @@ import Link from "next/link";
 import FollowButton from "@/app/components/user/FollowButton";
 import BioButton from "@/app/components/user/BioButton";
 import StatGrid from "@/app/components/util/StatGrid";
+import EmptyState from "@/app/components/util/EmptyState";
 import { GameData } from "@/types";
 import { getViewer, getFullProfile, getFollowers, getFollowing } from "@/lib/queries/user";
 import { queryGames, getDeveloperNameMap } from "@/lib/queries/game";
@@ -61,7 +62,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
     return (
         <main>
-            <div className="w-full max-w-6xl mx-auto px-8 py-12">
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
                 <div className="flex gap-8 mb-4">
                     {isOwnProfile ? (
                         <AvatarUploader userId={profile.id} username={username} currentAvatarUrl={profile.avatar_url} />
@@ -69,7 +70,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <Avatar src={profile.avatar_url} alt={username} size="lg" />
                     )}
                     <div className="flex flex-col">
-                        <h2 className="text-3xl font-semibold font-(family-name:--font-display)">{username}</h2>
+                        <h1 className="text-3xl font-semibold font-(family-name:--font-display)">{username}</h1>
                         <div className="flex">
                             <p className="text-lg font-semibold font-(family-name:--font-display)">{currentTitle}</p>
                             {isOwnProfile && <TitleSelectButton userId={profile.id} currentTitle={currentTitle} topGames={favoriteGames ? favoriteGames.map(g => g.name) : []} topDevelopers={topDeveloperNames} />}
@@ -108,29 +109,41 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Bio</h2>
                     {isOwnProfile && <BioButton userId={profile.id} currentBio={profile.user_bio} />}
                 </div>
-                {profile.user_bio}
+                {profile.user_bio
+                    ? <p className="text-(--color-text) leading-relaxed max-w-2xl">{profile.user_bio}</p>
+                    : <p className="text-(--color-muted) text-sm">{isOwnProfile ? "You haven't written a bio yet." : "No bio yet."}</p>}
                 <div className="flex flex-row gap-2 mb-2 mt-4">
                     <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Favorite Games</h2>
                     {isOwnProfile && <FavoriteGamePicker userId={profile.id} currentGames={favoriteGames.map(g => ({ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }))}/>}
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-                    {orderedFavorites.map((g: GameData) => 
-                        <GameCard 
-                            key={g.id} 
-                            game={{ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }} 
-                            developer={developerMap.get(String(g.id))}
-                            userRating={g.user_rating} 
-                            ngplusRating={g.avg_ngplus_rating}
-                        />
-                    )}
-                </div>
+                {orderedFavorites.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                        {orderedFavorites.map((g: GameData) =>
+                            <GameCard
+                                key={g.id}
+                                game={{ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }}
+                                developer={developerMap.get(String(g.id))}
+                                userRating={g.user_rating}
+                                ngplusRating={g.avg_ngplus_rating}
+                            />
+                        )}
+                    </div>
+                ) : (
+                    <EmptyState
+                        dense
+                        title="No favorite games yet"
+                        description={isOwnProfile ? "Pin a few games you love — they'll show up here." : "This player hasn't picked any favorites yet."}
+                    />
+                )}
                 <div className="mt-6 flex flex-col">
                     <p className="text-md italic text-center w-1/2 self-center max-w-2xl mx-auto mb-8 mt-8">{profile.bio}</p>
                     <div className="flex flex-row justify-between">
                         <h2 className="text-3xl font-semibold font-(family-name:--font-display) mb-2">Recent Reviews</h2>
                         <Link className="hover:text-(--color-accent) transition-colors duration-200" href={`/user/${username}/ratings_reviews`}>View All</Link>
                     </div>
-                    {recentReviews?.map(r => <Review key={r.games.name} gameName={r.games.name} gameSlug={r.games.slug} rating_review={r}/>)}
+                    {recentReviews && recentReviews.length > 0
+                        ? recentReviews.map(r => <Review key={r.games.name} gameName={r.games.name} gameSlug={r.games.slug} rating_review={r}/>)
+                        : <EmptyState dense title="No reviews yet" description={isOwnProfile ? "Rate and review a game to start building your record." : "This player hasn't reviewed anything yet."} />}
                 </div>
             </div>
         </main>

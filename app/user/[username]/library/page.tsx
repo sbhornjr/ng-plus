@@ -88,8 +88,8 @@ export default async function LibraryPage({ params, searchParams } : LibraryPage
 
     return (
         <main>
-            <div className="w-full max-w-6xl mx-auto px-8 py-12">
-                <h2 className="text-center text-5xl mb-6 font-bold">{username}'s Library</h2>
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
+                <h1 className="text-4xl font-bold font-(family-name:--font-display) tracking-tight mb-6">{username}&apos;s Library</h1>
                 {/* Filters */}
                 <LibraryFilters
                     current={{query: query, genre: genreQuery, platform: platformQuery, developer: developerQuery, publisher: publisherQuery,

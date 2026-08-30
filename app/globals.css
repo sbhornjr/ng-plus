@@ -7,14 +7,17 @@
   --font-body: 'IBM Plex Sans', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
-  --color-bg: #14120f;
-  --color-surface: #221f1a;
-  --color-surface-light: #2b271f;
-  --color-border: #3a352b;
-  --color-accent: #8e5aa8;
-  --color-accent-hover: #7a4a8f;
-  --color-text: #c9c2b4;
-  --color-muted: #8a8378;
+  --color-bg: #17140f;
+  --color-surface: #242018;
+  --color-surface-light: #2e2a20;
+  --color-border: #4a4335;
+  /* Accent is aged brass, not orchid purple — warm, on-concept for the "ledger"
+     direction, and kept browner/darker than --color-mid so rating amber stays
+     distinct. Rating colors below remain the only saturated hues in the UI. */
+  --color-accent: #b98a3c;
+  --color-accent-hover: #a3762f;
+  --color-text: #ddd5c4;
+  --color-muted: #a89e8b;
 
   /* Rating-tier / stamp seal colors — chosen for hue separation (not just
      lightness) so they stay distinguishable for color-blind viewers, and
