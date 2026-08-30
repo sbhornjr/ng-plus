@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase-server";
 import GameCard from "@/app/components/game/GameCard";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { generateLoadoutIdentity } from "@/lib/loadout";
 import SubmitBioButton from "@/app/components/user/SubmitBioButton";
@@ -89,15 +90,25 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
     return (
         <main className="bg-(--color-bg)">
             <div className="w-full max-w-6xl mx-auto px-6 md:px-10 pt-8 pb-16 font-(family-name:--font-body)">
-                <header className="mb-10 text-center">
-                    <h1 className="text-5xl md:text-6xl text-(--color-text)
-                        font-(family-name:--font-display)">
+                {/* Case-file masthead — the figures that were four duplicate stat
+                    cards now sit inline; the profile page already has the grid. */}
+                <header className="mb-10 border-t-2 border-(--color-text) pt-3">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-(--color-muted) mb-1">
+                        Player Dossier
+                    </p>
+                    <h1 className="text-4xl md:text-5xl text-(--color-text) font-(family-name:--font-display) mb-3">
                         {username}&apos;s Loadout
                     </h1>
+                    <div className="flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs text-(--color-muted) tabular-nums">
+                        <span><span className="text-(--color-text)">{totalGames}</span> logged</span>
+                        <span><span className="text-(--color-text)">{completedStat?.count ?? 0}</span> completed</span>
+                        <span><span className="text-(--color-text)">{ratingsReviews.length}</span> rated</span>
+                        <span><span className="text-(--color-text)">{ratingsReviews.length ? Math.trunc(avgRating * 100) / 100 : "—"}</span> avg</span>
+                    </div>
                 </header>
 
                 {loadoutIdentity ? (
-                    <div className="max-w-2xl mx-auto mb-14 rotate-[-0.5deg]">
+                    <div className="max-w-2xl mb-14 rotate-[-0.5deg]">
                         <div className="border border-(--color-muted)/30 bg-(--color-surface)
                             rounded-[3px] px-7 py-6 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
                             <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-accent)
@@ -114,34 +125,24 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                         </div>
                     </div>
                 ) : (
-                    <div className="max-w-md mx-auto mb-14 text-center">
-                        <p className="text-sm text-(--color-muted)">
-                            Rate at least 5 games to unlock your dossier entry.
+                    <div className="max-w-md mb-14 border border-(--color-border) bg-(--color-surface) rounded-[3px] p-6">
+                        <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-muted) font-mono mb-2">
+                            Dossier locked
                         </p>
+                        <p className="text-(--color-text) mb-4">
+                            {`Rate ${Math.max(0, 5 - ratingsReviews.length)} more ${5 - ratingsReviews.length === 1 ? "game" : "games"} to unlock your analyst’s note.`}
+                        </p>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex-1 h-1.5 bg-(--color-surface-light) rounded-full overflow-hidden">
+                                <div className="h-full bg-(--color-accent) rounded-full" style={{ width: `${Math.min(100, (ratingsReviews.length / 5) * 100)}%` }} />
+                            </div>
+                            <span className="font-mono text-xs text-(--color-muted) tabular-nums">{Math.min(ratingsReviews.length, 5)} / 5</span>
+                        </div>
+                        <Link href="/games" className="inline-block px-4 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg) hover:bg-(--color-accent-hover) transition-colors duration-200">
+                            Find games to rate
+                        </Link>
                     </div>
                 )}
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
-                    {[
-                        { label: 'Games Logged', value: totalGames },
-                        { label: 'Completed', value: completedStat?.count ?? 0 },
-                        { label: 'Rated', value: ratingsReviews.length },
-                        { label: 'Avg Rating', value: ratingsReviews.length
-                            ? <>{Math.trunc(avgRating * 100) / 100}<span className="text-base text-(--color-muted)"> / 10</span></>
-                            : <span className="text-(--color-muted)">&mdash;</span> },
-                    ].map(s => (
-                        <div key={s.label} className="border border-(--color-border)
-                            bg-(--color-surface) rounded-[3px] py-5 text-center">
-                            <p className="text-3xl text-(--color-text) font-mono tabular-nums">
-                                {s.value}
-                            </p>
-                            <p className="text-[11px] mt-1 uppercase tracking-[0.15em] text-(--color-muted)
-                                font-mono">
-                                {s.label}
-                            </p>
-                        </div>
-                    ))}
-                </div>
 
                 <SectionLabel>Rating Style</SectionLabel>
                 <div className="mb-14">

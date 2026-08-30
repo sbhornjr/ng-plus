@@ -60,7 +60,7 @@ export default function ScoreVerdict({ metacritic, community, communityCount = 0
                     )}
                 </Cell>
 
-                <Cell label="NG+" sub={hasCommunity ? `${communityCount} ${communityCount === 1 ? 'rating' : 'ratings'}` : 'Not rated yet'}>
+                <Cell label="NG+" sub={hasCommunity ? (communityCount > 0 ? `${communityCount} ${communityCount === 1 ? 'rating' : 'ratings'}` : 'Community') : 'Not rated yet'}>
                     {hasCommunity ? (
                         <>
                             <span className="text-4xl font-bold font-(family-name:--font-display)" style={{ color: tenTier(community!) }}>{community}</span>

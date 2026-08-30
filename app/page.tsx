@@ -5,6 +5,7 @@ import Seal from "@/app/components/game/Seal";
 import Avatar from "@/app/components/user/Avatar";
 import LandingCTA from "@/app/components/util/LandingCTA";
 import EmptyState from "@/app/components/util/EmptyState";
+import ScoreVerdict from "@/app/components/game/ScoreVerdict";
 import Image from "next/image";
 import Link from "next/link";
 import { getViewer } from "@/lib/queries/user";
@@ -48,9 +49,19 @@ export default async function Home() {
 								Every game gets three scores.
 							</h1>
 						)}
-						<p className="text-lg text-(--color-muted) mb-6 font-(family-name:--font-display) italic">
+						<p className="text-lg text-(--color-muted) mb-5 font-(family-name:--font-display) italic">
 							What do you say?
 						</p>
+						{heroGame && (
+							<div className="mb-6">
+								<ScoreVerdict
+									metacritic={heroGame.metacritic_score}
+									community={heroGame.avg_ngplus_rating}
+									communityCount={0}
+									user={null}
+								/>
+							</div>
+						)}
 						<p className="text-(--color-muted) mb-8 max-w-md leading-relaxed">
 							NG+ stamps every game you log with three scores — the critics&apos; verdict, the community&apos;s, and yours. Track your library, rate what you&apos;ve played, and see where you land.
 						</p>
