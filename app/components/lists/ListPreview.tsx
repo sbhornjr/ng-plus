@@ -23,7 +23,7 @@ export default function ListPreview({ listId, listName, gameCovers, isPinnable, 
 
     return (
         <div className={`flex flex-col relative border border-(--color-border) rounded-[3px] p-4 hover:border-(--color-accent)/50 transition-all duration-200 group ${!fullLength && "self-center w-1/2"}`}>
-             <Link
+            <Link
                 href={`/user/${username}/lists/${listId}`}
                 className="absolute inset-0 rounded-[3px] z-0"
                 aria-label={listName}

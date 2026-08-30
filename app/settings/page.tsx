@@ -7,8 +7,16 @@ import ChangePasswordButton from "../components/settings/ChangePasswordButton";
 import DeleteAccountButton from "../components/settings/DeleteUserButton";
 import ChangePrivacyButton from "../components/settings/ChangePrivacyButton";
 import { getViewer, getAccountSettings } from "@/lib/queries/user";
+import { getSteamAccount } from "@/lib/queries/steam";
+import UnlinkSteamAccountButton from "../components/settings/UnlinkSteamAccountButton";
+import Link from "next/link";
 
-export default async function Settings() {
+type SettingsPageProps = {
+    searchParams: Promise<{ steam_error?: string }>
+}
+
+export default async function Settings({ searchParams } : SettingsPageProps) {
+    const { steam_error } = await searchParams
     const supabase = await createClient()
     const viewer = await getViewer(supabase)
 
@@ -20,6 +28,8 @@ export default async function Settings() {
         console.log("User not found")
         redirect("/")
     }
+
+    const steamUser = await getSteamAccount(supabase, viewer.id)
 
     return (
         <main>
@@ -64,6 +74,32 @@ export default async function Settings() {
                         <p className="font-semibold text-lg text-(--color-muted)">Loadout Privacy: <span className="text-[#ffffff]">{ user.loadout_public ? "Public" : "Private" }</span></p>
                         <ChangePrivacyButton currentPrivacy={user.loadout_public} type="Loadout" userId={user.id} />
                     </div>
+                </div>
+                <div className="flex flex-col gap-4 mt-6">
+                    <h2 className="text-3xl">Connections</h2>
+                    <p className="font-semibold text-lg text-(--color-muted)">Steam: <span className="text-[#ffffff]">{ steamUser ? "Linked" : "Not Linked" }</span></p>
+                    { steam_error === "1" && (
+                        <p className="font-semibold text-sm text-(--color-bad)">Error linking Steam account</p>
+                    )}
+                    { steam_error === "2" && (
+                        <p className="font-semibold text-sm text-(--color-bad)">Your Steam games library is private. To import Steam games, go to Steam Profile -{'>'} Edit Profile -{'>'} Privacy Settings -{'>'} Set &apos;Game Details&apos; to Public</p>
+                    )}
+                    { steamUser ? (
+                        <div className="flex gap-2">
+                            <Link href="/steamlink">
+                                <button className="px-4 py-1 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
+                                    Re-Sync Steam Account
+                                </button>
+                            </Link>
+                            <UnlinkSteamAccountButton userId={user.id} />
+                        </div>
+                    ) : (
+                        <Link href="/api/steam/link">
+                            <button className="px-4 py-1 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
+                                Link Steam Account
+                            </button>
+                        </Link>
+                    )}
                 </div>
             </div>
         </main>

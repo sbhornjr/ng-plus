@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { LibraryData, EsrbRatingsData } from '@/types'
+import { SteamLinkEntry } from '@/types'
 
 export async function getLibraryEntry(supabase: SupabaseClient, userId: string, gameId: number) {
     const { data } = await supabase
@@ -37,6 +38,22 @@ export async function updateLibraryEntry(supabase: SupabaseClient, userId: strin
         .eq('game_id', gameId)
         .select('id, status, completed_all_achievements, hours_played, play_count')
         .single()
+
+    return data
+}
+
+export async function upsertLibraryEntries(supabase: SupabaseClient, userId: string, entries: SteamLinkEntry[]) {
+    const toUpsert = entries.map(sle => ({ user_id: userId, game_id: sle.gameId, status: sle.status, hours_played: sle.playtimeSelected, play_count: sle.timesPlayed ?? 0}))
+
+    const { data, error } = await supabase
+        .from("library_entries")
+        .upsert(toUpsert, { onConflict: "user_id,game_id"})
+        .select('id, status, completed_all_achievements, hours_played, play_count')
+
+    if (error) {
+        console.error("Failed to import library entries from Steam:", error)
+        throw error
+    }
 
     return data
 }

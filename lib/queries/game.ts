@@ -137,3 +137,33 @@ export async function getTaxonomyNameBySlug(supabase: SupabaseClient, table: Tax
 
     return data?.name ?? ''
 }
+
+export async function getGamesFromSteamIds(supabase: SupabaseClient, gameIds: number[]) {
+    if (gameIds.length === 0) return []
+
+    // Chunked to keep the .in() filter (sent as URL query params) from
+    // growing unbounded with large Steam libraries — a few hundred ids in
+    // one request risks a URL-length failure that would otherwise come
+    // back as a silent empty result.
+    const CHUNK_SIZE = 100
+    // steam_appid is nullable in the schema, but every row here matched a
+    // non-null .in() filter, so it's guaranteed non-null within this result.
+    const results: { id: string, name: string, slug: string, cover_image_url: string | null, released: string | null, steam_appid: number }[] = []
+
+    for (let i = 0; i < gameIds.length; i += CHUNK_SIZE) {
+        const chunk = gameIds.slice(i, i + CHUNK_SIZE)
+        const { data, error } = await supabase
+            .from("games")
+            .select("id, name, slug, cover_image_url, released, steam_appid")
+            .in("steam_appid", chunk)
+
+        if (error) {
+            console.error("Failed to fetch games by steam appid:", error)
+            throw error
+        }
+
+        results.push(...(data ?? []))
+    }
+
+    return results
+}
