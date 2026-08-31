@@ -9,7 +9,7 @@ import ScoreVerdict from "@/app/components/game/ScoreVerdict";
 import Image from "next/image";
 import Link from "next/link";
 import { getViewer } from "@/lib/queries/user";
-import { getFeed } from "@/lib/queries/feed";
+import { getFeed, FEED_PAGE_SIZE } from "@/lib/queries/feed";
 import { queryGames } from "@/lib/queries/game";
 import { getTrendingGames } from "@/lib/queries/explore";
 import { getRecentReviewsGlobal } from "@/lib/queries/review";
@@ -164,7 +164,7 @@ export default async function Home() {
 		)
 	}
 
-	const feed = await getFeed(supabase, viewer?.id)
+	const feed = await getFeed(supabase, viewer?.id, FEED_PAGE_SIZE, 0)
 
 	return (
 		<main>
@@ -177,7 +177,7 @@ export default async function Home() {
 				</h1>
 
 				{feed && feed.length > 0 ? (
-					<FeedList items={feed} />
+					<FeedList initialItems={feed} />
 				) : (
 					<EmptyState
 						title="Your feed is quiet"

@@ -58,44 +58,55 @@ export default async function ListPage({ params }: ListPageProps) {
 
     return (
         <main>
-            <div className="flex flex-col gap-2 mt-6 items-center justify-center">
-                <h2 className="text-5xl font-bold font-(family-name:--font-display) text-center mb-2">{list.name}</h2>
-                <div className="flex items-center justify-center gap-4 text-sm text-(--color-muted) mb-4">
-                    <div className="flex flex-row gap-2 items-center justify-center">
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
+                <Link href={`/user/${username}/lists`} className="inline-flex items-center gap-2 text-(--color-muted)
+                    text-sm font-semibold mb-8 group hover:text-(--color-accent) transition-colors duration-200 font-(family-name:--font-display)">
+                    <span className="group-hover:-translate-x-0.5 transition-transform duration-200 text-lg">←</span>
+                    {username}&apos;s lists
+                </Link>
+
+                <h1 className="text-4xl md:text-5xl font-bold font-(family-name:--font-display) tracking-tight mb-3">{list.name}</h1>
+                <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-(--color-muted) mb-4">
+                    <Link href={`/user/${username}`} className="flex items-center gap-2 font-semibold hover:text-(--color-accent) transition-colors duration-200">
                         <Avatar src={profile.avatar_url} alt={username} size="sm" />
-                        <Link href={`/user/${username}`} className="text-md font-semibold text-(--color-muted) hover:text-(--color-accent) 
-                            transition-colors duration-200">{username}</Link>
-                    </div>
-                    <span>·</span>
-                    <span className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">{games.length} games</span>
-                    <span>·</span>
-                    <span className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">Updated {new Date(list.updated_at).getMonth() + 1}/{new Date(list.updated_at).getDate()}/{new Date(list.updated_at).getFullYear()}</span>
-                    <span>·</span>
+                        {username}
+                    </Link>
+                    <span className="text-(--color-border)">/</span>
+                    <span className="font-mono tabular-nums">{games.length} {games.length === 1 ? 'game' : 'games'}</span>
+                    <span className="text-(--color-border)">/</span>
+                    <span className="font-mono">Updated {new Date(list.updated_at).getMonth() + 1}/{new Date(list.updated_at).getDate()}/{new Date(list.updated_at).getFullYear()}</span>
+                    <span className="text-(--color-border)">/</span>
                     <LikeListButton listId={listId} initialLiked={userHasLiked} initialCount={likeCount} userId={viewer?.id ?? null} />
                 </div>
-                <p className="text-md text-(--color-muted) text-center max-w-3xl mb-4">{list.description}</p>
-                <div className="w-full max-w-6xl mx-auto px-8">
-                    {isOwnProfile && (
-                        <div className="flex flex-row justify-between">
-                            <CreateListButton userId={profile.id} type="update" current={{ listId: listId, name: list.name, description: list.description, isPinned: list.is_pinned, isPublic: list.is_public}} />
-                            <AddToListFromListButton listId={listId} currentGames={games.map(g => g.games)} />
-                        </div>
-                    )}
-                    {games && games.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                            {games.map(game => (
-                                <div key={game.games.id} className="flex flex-col gap-1">
-                                    <GameCard game={game.games} developer={developerMap.get(String(game.games.id))} userRating={userRatingMap.get(game.games.id)} ngplusRating={avgRatingMap.get(game.games.id) ?? null}/>
-                                    {isOwnProfile && (
-                                        <RemoveFromListButton listId={listId} gameId={game.games.id} />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <EmptyState title="No games found" />
-                    )}
-                </div>                
+                {list.description && (
+                    <p className="text-(--color-muted) max-w-2xl leading-relaxed mb-6">{list.description}</p>
+                )}
+
+                {isOwnProfile && (
+                    <div className="flex flex-wrap gap-2 mb-8">
+                        <CreateListButton userId={profile.id} type="update" current={{ listId: listId, name: list.name, description: list.description, isPinned: list.is_pinned, isPublic: list.is_public}} />
+                        <AddToListFromListButton listId={listId} currentGames={games.map(g => g.games)} />
+                    </div>
+                )}
+
+                {games && games.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {games.map(game => (
+                            <div key={game.games.id} className="flex flex-col gap-1">
+                                <GameCard game={game.games} developer={developerMap.get(String(game.games.id))} userRating={userRatingMap.get(game.games.id)} ngplusRating={avgRatingMap.get(game.games.id) ?? null}/>
+                                {isOwnProfile && (
+                                    <RemoveFromListButton listId={listId} gameId={game.games.id} />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyState
+                        dense
+                        title="This list is empty"
+                        description={isOwnProfile ? "Add a few games to get it started." : "The owner hasn't added any games yet."}
+                    />
+                )}
             </div>
         </main>
     )

@@ -4,6 +4,7 @@ import Review from "@/app/components/game/ReviewPageReview";
 import Pagination from "@/app/components/util/Pagination";
 import RatingsReviewsFilters from "@/app/components/game/RatingsReviewsFilters";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getViewer, getProfileSummaryByUsername } from "@/lib/queries/user";
 import { getUserRatingsReviewsPage, getUserRatingsReviewsCounts } from "@/lib/queries/review";
 import { getDeveloperNameMap } from "@/lib/queries/game";
@@ -62,17 +63,22 @@ export default async function RatingsPage({ params, searchParams }: RatingsPageP
 
     return (
         <main>
-            <div className="flex flex-col gap-2 mt-6 items-center justify-center">
-                <h2 className="text-5xl font-bold font-(family-name:--font-display) text-center mb-2">{username}'s Ratings and Reviews</h2>
-                <div className="flex items-center justify-center gap-4 text-sm text-(--color-muted) mb-4">
-                    <span className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">{ratingsReviewsCounts[0].rating_count} ratings</span>
-                    <span>·</span>
-                    <span className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">{ratingsReviewsCounts[0].review_count} reviews</span>
-                    <span>·</span>
-                    <span className="text-md font-semibold font-(family-name:--font-display) text-(--color-muted)">{ratingsReviewsCounts[0].total_count} total</span>
+            <div className="w-full max-w-4xl mx-auto px-8 pt-8 pb-16 flex flex-col gap-2">
+                <Link href={`/user/${username}`} className="inline-flex items-center gap-2 text-(--color-muted)
+                    text-sm font-semibold mb-6 group hover:text-(--color-accent) transition-colors duration-200 font-(family-name:--font-display)">
+                    <span className="group-hover:-translate-x-0.5 transition-transform duration-200 text-lg">←</span>
+                    {username}&apos;s profile
+                </Link>
+                <h1 className="text-4xl md:text-5xl font-bold font-(family-name:--font-display) tracking-tight mb-2">{username}&apos;s Ratings &amp; Reviews</h1>
+                <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-(--color-muted) font-mono mb-6">
+                    <span className="tabular-nums"><span className="text-(--color-text)">{ratingsReviewsCounts[0].rating_count}</span> ratings</span>
+                    <span className="text-(--color-border)">/</span>
+                    <span className="tabular-nums"><span className="text-(--color-text)">{ratingsReviewsCounts[0].review_count}</span> reviews</span>
+                    <span className="text-(--color-border)">/</span>
+                    <span className="tabular-nums"><span className="text-(--color-text)">{ratingsReviewsCounts[0].total_count}</span> total</span>
                 </div>
                 {ratingsReviews && ratingsReviews.length > 0 ? (
-                    <div className="flex flex-col gap-4 w-2/3 mb-4">
+                    <div className="flex flex-col gap-4 w-full mb-4">
                         <RatingsReviewsFilters username={username} filter={filterValue} page={String(currentPage)} pageSize={String(currentPageSize)} sort={sortValue} order={orderValue} />
                         {ratingsReviews.map(rr => (
                             rr.review == "" ? (

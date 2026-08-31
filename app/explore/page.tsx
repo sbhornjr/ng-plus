@@ -31,10 +31,6 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
 
     const { games: recommendedGames, lists: recommendedLists, users: recommendedUsers } = await getExploreRecommendations(supabase, viewer?.id)
 
-    console.log("Recommended Games:", recommendedGames)
-    console.log("Recommended Lists:", recommendedLists)
-    console.log("Recommended Users:", recommendedUsers)
-
     return (
         <main>
             <div className="max-w-6xl mx-auto w-full px-8 pt-8 pb-4">

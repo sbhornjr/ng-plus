@@ -97,13 +97,12 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16">
 
-                {/* Back to Games link */}
                 <Link href="/games" className="inline-flex items-center gap-2 text-(--color-muted)
-                    text-sm font-semibold mb-8 group hover:text-(--color-bad) transition-colors duration-200
+                    text-sm font-semibold mb-8 group hover:text-(--color-accent) transition-colors duration-200
                     font-(family-name:--font-display)"
                 >
                     <span className="group-hover:-translate-x-0.5 transition-transform duration-200 text-lg">←</span> 
-                    Back to Games
+                    All Games
                 </Link>
             
                 <div className="flex gap-8 mb-8 items-start">

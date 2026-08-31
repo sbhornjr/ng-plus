@@ -49,18 +49,20 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
 
     return (
         <main>
-            <div className="flex flex-col gap-2 mt-6">
-                <h2 className="text-4xl font-bold font-(family-name:--font-display) text-center mb-4">{username}'s Lists</h2>
-                <div className="flex gap-4 border-b border-(--color-border) mb-8 justify-center">
+            <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16 flex flex-col gap-2">
+                <h1 className="text-4xl font-bold font-(family-name:--font-display) tracking-tight mb-4">
+                    {isOwnProfile ? 'Your Lists' : `${username}’s Lists`}
+                </h1>
+                <div className="flex gap-4 border-b border-(--color-border) mb-8">
                     <Link
                         href={`/user/${username}/lists`}
                         className={`px-4 py-2 text-sm font-semibold transition-colors duration-200
                             border-b-2 -mb-px
                             ${!tab || tab === 'user'
                                 ? 'border-(--color-accent) text-(--color-accent)'
-                                : 'border-transparent text-(--color-muted) hover:text-(--color-text)'}`}
+                                : 'border-transparent text-(--color-muted) hover:text-(--color-accent)'}`}
                     >
-                        {isOwnProfile ? 'My Lists' : `${username}'s Lists`}
+                        {isOwnProfile ? 'My Lists' : `${username}’s Lists`}
                     </Link>
                     <Link
                         href={`/user/${username}/lists?tab=liked`}
@@ -68,13 +70,13 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
                         border-b-2 -mb-px
                         ${tab === 'liked'
                             ? 'border-(--color-accent) text-(--color-accent)'
-                            : 'border-transparent text-(--color-muted) hover:text-(--color-text)'}`}
+                            : 'border-transparent text-(--color-muted) hover:text-(--color-accent)'}`}
                     >
                         Liked Lists
                     </Link>
                 </div>
                 {viewer && viewer.id && isOwnProfile && <CreateListButton userId={viewer?.id} defaultListPrivacy={userSettings?.default_list_public ?? true} />}
-                {lists.map(l => 
+                {lists.map(l =>
                     <ListPreview 
                         key={l.id} 
                         listId={l.id} 
