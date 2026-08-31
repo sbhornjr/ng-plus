@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { LibraryData, EsrbRatingsData } from '@/types'
 import { SteamLinkEntry } from '@/types'
 
-export async function getLibraryEntry(supabase: SupabaseClient, userId: string, gameId: number) {
+export async function getLibraryEntry(supabase: SupabaseClient, userId: string, gameId: string | number) {
     // maybeSingle: "not in this user's library" is a valid answer, not an error.
     // .single() here throws a 406 / PGRST116 on every game the viewer hasn't added.
     const { data } = await supabase

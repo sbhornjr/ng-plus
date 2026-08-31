@@ -83,15 +83,15 @@ export default function RateReviewButton({ game_id, existing_rating_review } :
     return (
         <div className="mb-2">
             { user == null ? (
-                <button onClick={() => setIsAuthModalOpen(true)} className="px-4 py-1 text-xl bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
-                    Sign in to Rate and Review
+                <button onClick={() => setIsAuthModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
+                    Sign in to file a rating
                 </button>
             ) : existingRatingReview == null ? (
-                <button onClick={() => setIsRateReviewModalOpen(true)} className="px-4 py-1 text-xl bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
-                    Rate and Review
+                <button onClick={() => setIsRateReviewModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
+                    File a Rating
                 </button>
-            ) : <button onClick={() => setIsRateReviewModalOpen(true)} className="px-4 py-1 text-xl bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
-                    Update Rating and Review
+            ) : <button onClick={() => setIsRateReviewModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
+                    Amend Your Rating
                 </button>
             }
             {isAuthModalOpen && (

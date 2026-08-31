@@ -28,12 +28,12 @@ export default function StickyGameActions({ gameName, children }: { gameName: st
             <div ref={sentinel} aria-hidden="true" className="h-px w-full" />
 
             <div
-                className={`fixed inset-x-0 top-0 z-40 border-b border-(--color-border) bg-(--color-bg)/95 backdrop-blur
+                className={`fixed inset-x-0 top-0 z-40 border-b-2 border-(--rule-strong) bg-(--color-bg)/95 backdrop-blur
                     transition-transform duration-200 motion-reduce:transition-none
                     ${stuck ? 'translate-y-0' : '-translate-y-full pointer-events-none'}`}
             >
-                <div className="max-w-6xl mx-auto px-8 py-2 flex items-center gap-4">
-                    <span className="font-(family-name:--font-display) font-semibold text-(--color-text) truncate">
+                <div className="max-w-5xl mx-auto px-6 md:px-10 py-2 flex items-center gap-4">
+                    <span className="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-(--carbon) truncate">
                         {gameName}
                     </span>
                     <div className="ml-auto flex gap-2 shrink-0">{children}</div>

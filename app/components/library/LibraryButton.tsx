@@ -80,15 +80,15 @@ export default function LibraryButton({ game_id }: { game_id: number }) {
     return (
         <div>
             { user == null ? (
-                <button onClick={() => setIsAuthModalOpen(true)} className="px-4 py-1 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
-                    Sign in to Add to Library
+                <button onClick={() => setIsAuthModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
+                    Sign in to file
                 </button>
             ) : libraryEntry == null ? (
-                <button onClick={() => setIsLibraryModalOpen(true)} className="px-4 py-1 text-md bg-(--color-accent) text-(--color-bg) font-semibold rounded-[3px] hover:bg-(--color-accent-hover) transition-colors duration-200">
-                    Add to Library
+                <button onClick={() => setIsLibraryModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
+                    File to Library
                 </button>
             ) : <div className="group">
-                    <button onClick={() => setIsLibraryModalOpen(true)} className=" w-32 px-4 py-1 text-md bg-(--color-surface-light) text-(--color-text) font-semibold rounded-[3px] transition-all duration-200 group-hover:bg-(--color-bad)">
+                    <button onClick={() => setIsLibraryModalOpen(true)} className="w-36 px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-border) text-(--color-text) transition-colors duration-200 group-hover:border-(--color-bad) group-hover:text-(--color-bad)">
                         <span className="group-hover:hidden">
                             {libraryEntry.status.charAt(0).toUpperCase() + libraryEntry.status.slice(1)}
                         </span>

@@ -56,3 +56,296 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-border);
   border-radius: 3px;
 }
+
+/* ============================================================
+   Game "case file" view — a bureaucratic games registry.
+   Scoped under .file so it can't leak into the rest of the app.
+   ============================================================ */
+.file {
+  --paper: #2e271d;
+  --paper-2: #372e22;
+  --rule: #4c4234;
+  --rule-strong: #776649;
+  --typed: #e8dfca;
+  --carbon: #a3987f;
+  --ink-critic: var(--color-good);
+  --ink-community: var(--color-mid);
+  --ink-you: var(--color-bad);
+  --ink-none: #7c7360;
+
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Paper surfaces carry a faint fibre grain */
+.file .paper {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  isolation: isolate;
+  box-shadow: inset 0 1px 0 rgba(240, 228, 202, 0.09), 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+/* A dossier note — the abstract, boxed with a filing margin. Long records
+   scroll inside the note rather than pushing the whole page down. */
+.file .dossier-note {
+  border-left: 3px solid var(--rule-strong);
+  padding: 1.35rem 1.6rem;
+  max-height: 21rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+}
+.file .dossier-note::-webkit-scrollbar { width: 8px; }
+.file .dossier-note::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+.file .paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+.file .paper > * { position: relative; z-index: 1; }
+
+/* Document header */
+.file .masthead {
+  border-top: 3px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.7rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.5rem;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--carbon);
+}
+.file .masthead b { color: var(--typed); font-weight: 500; }
+.file .masthead .filed { color: var(--ink-critic); }
+.file .masthead .unfiled { color: var(--carbon); }
+
+/* Ruled line running into a small mono label — a form section header */
+.file .marker {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--carbon);
+  margin: 2.35rem 0 1.2rem;
+}
+.file .marker > span { white-space: nowrap; }
+.file .marker::before {
+  content: "";
+  width: 2.75rem;
+  height: 2px;
+  background: var(--rule-strong);
+  flex: none;
+}
+.file .marker::after {
+  content: "";
+  flex: 1 1 2rem;
+  height: 1px;
+  background: var(--rule);
+}
+.file .marker b { color: var(--typed); font-weight: 500; }
+
+/* Typed field rows — LABEL .......... value */
+.file .field {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--carbon);
+  margin-bottom: 0.5rem;
+}
+
+/* Mounted print — cover art and exhibit plates */
+.file .mount {
+  position: relative;
+  background: #d7cdb4;
+  padding: 7px;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
+}
+.file .mount > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.file .mount .tape {
+  position: absolute;
+  width: 3.25rem;
+  height: 1.1rem;
+  background: rgba(230, 221, 201, 0.1);
+  border: 1px solid rgba(230, 221, 201, 0.14);
+  backdrop-filter: blur(1px);
+}
+.file .mount .tape.tl { top: -0.55rem; left: -0.9rem; transform: rotate(-27deg); }
+.file .mount .tape.br { bottom: -0.55rem; right: -0.9rem; transform: rotate(-27deg); }
+
+/* Synopsis — an archival abstract: ruled column + drop cap */
+.file .abstract {
+  max-width: 64ch;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--typed);
+}
+.file .abstract::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 3.3em;
+  line-height: 0.78;
+  margin: 0.06em 0.14em 0 0;
+  color: var(--color-accent);
+}
+
+/* Rubber stamp — the signature element. Only the frame gets the hand-stamped
+   wobble (SVG filter injected on the page); the ink text stays crisp. */
+.file .stamp {
+  --ink: var(--ink-none);
+  position: relative;
+  flex: 0 0 auto;
+  width: 8.5rem;
+  padding: 0.95rem 0.5rem 0.8rem;
+  text-align: center;
+  color: var(--ink);
+}
+.file .stamp .stamp-frame {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  filter: url(#stamp-rough);
+  pointer-events: none;
+}
+.file .stamp .stamp-frame::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+.file .stamp .stamp-auth {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.file .stamp .stamp-num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2.9rem;
+  line-height: 1;
+  margin: 0.18rem 0 0.12rem;
+  font-variant-numeric: tabular-nums;
+}
+.file .stamp .stamp-scale {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  opacity: 0.8;
+}
+.file .stamp.critic { --ink: var(--ink-critic); }
+.file .stamp.community { --ink: var(--ink-community); }
+.file .stamp.you { --ink: var(--ink-you); }
+
+/* The finding printed under the stamps */
+.file .finding {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--carbon);
+  text-align: center;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.55rem;
+  margin: 0.65rem auto 0;
+  max-width: 24rem;
+}
+
+/* Tally sheet — the ratings breakdown */
+.file .tally-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.28rem 0;
+  border-bottom: 1px dotted var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--carbon);
+}
+.file .tally-row .tally-n {
+  width: 1.4rem;
+  text-align: right;
+  color: var(--typed);
+  font-variant-numeric: tabular-nums;
+}
+.file .tally-row .tally-track {
+  flex: 1;
+  height: 0.75rem;
+  background: var(--paper-2);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.file .tally-row .tally-fill {
+  height: 100%;
+  border-radius: 1px;
+}
+.file .tally-row .tally-c {
+  width: 4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Witness statement — a review on file */
+.file .statement { padding: 1rem 1.1rem 1.1rem; }
+.file .statement .statement-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 0.7rem;
+}
+.file .statement .statement-meta {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--carbon);
+}
+.file .statement .statement-score {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+.file .statement .statement-body {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--typed);
+}
+.file .statement .statement-body.empty { color: var(--carbon); font-style: italic; }
+
+@media (max-width: 640px) {
+  .file .stamp .stamp-num { font-size: 2.1rem; }
+  .file .marker { margin-top: 2.25rem; }
+}
