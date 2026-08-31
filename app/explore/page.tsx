@@ -44,25 +44,25 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
             </div>
 
             <div className="flex flex-col pt-4 pb-8 w-full max-w-6xl mx-auto px-8">
-                <div className="flex gap-1 mb-6 max-w-6xl mx-auto">
+                <div className="flex gap-1 mb-8">
                     {["week", "month", "year", "alltime"].map(r => (
                         <Link
                             key={r}
                             href={`/explore?range=${r}`}
                             className={`px-3 py-1 rounded-[3px] text-sm font-semibold transition-colors duration-200
-                            ${range === r 
+                            ${range === r
                             ? "bg-(--color-accent) text-(--color-bg)"
-                            : "text-(--color-muted) hover:text-(--color-text)"}`}
+                            : "text-(--color-muted) hover:text-(--color-accent)"}`}
                         >
                             {r === "week" ? "This Week" : r === "month" ? "This Month" : r === "year" ? "This Year" : "All Time"}
                         </Link>
                     ))}
                 </div>
 
-                <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
+                <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
                     Trending Games
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                     {trendingGames.map(game => (
                         <GameCard 
                             key={game.game_id} 
@@ -74,19 +74,19 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                 </div>
 
                 {viewer && (
-                    <div className="flex flex-col items-center justify-center pt-8 pb-2 w-full">
-                        <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
+                    <div className="flex flex-col pt-8 pb-2 w-full">
+                        <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
                             Recommended For You
                         </h2>
-                        <p className="text-sm text-(--color-muted) mb-2 text-left w-full max-w-6xl mx-auto">
+                        <p className="text-sm text-(--color-muted) mb-2 text-left w-full">
                             Follow more users to get more recommendations.
                         </p>
                         {recommendedGames.length > 0 && (
-                            <div className="flex flex-col items-center justify-center pt-4 pb-8 w-full max-w-6xl mx-auto">
-                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
+                            <div className="flex flex-col pt-4 pb-8 w-full">
+                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
                                     Recommended Games
                                 </h2>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                                     {recommendedGames.map(game => (
                                         <div key={game.game_id} className="flex flex-col gap-1">
                                             <p className="text-xs text-(--color-muted) text-center">
@@ -112,7 +112,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                         )}
                         {recommendedLists.length > 0 && (
                             <div className="flex flex-col pt-4 pb-8 w-full max-w-6xl mx-auto">
-                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
+                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
                                     Recommended Lists
                                 </h2>
                                 <div className="flex flex-col gap-4 w-full">
@@ -144,11 +144,11 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                             </div>
                         )}
                         {recommendedUsers.length > 0 && (
-                            <div className="flex flex-col items-center justify-center pt-4 pb-8 w-full max-w-6xl mx-auto">
-                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
+                            <div className="flex flex-col pt-4 pb-8 w-full">
+                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
                                     Recommended Users
                                 </h2>
-                                <div className="grid grid-col grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl mx-auto">
+                                <div className="grid grid-col grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                                     {recommendedUsers.map(user => (
                                         <div key={user.user_id} className="flex flex-col gap-2 w-full">
                                             <p className="text-sm text-left text-(--color-muted) mt-2">followed by
@@ -171,10 +171,10 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                     </div>
                 )}
 
-                <h2 className="text-4xl font-bold mb-4 mt-8 font-(family-name:--font-display) tracking-tight text-left w-full max-w-6xl mx-auto">
+                <h2 className="text-4xl font-bold mb-4 mt-8 font-(family-name:--font-display) tracking-tight text-left w-full">
                     Popular Lists
                 </h2>
-                <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
+                <div className="flex flex-col gap-4 w-full">
                     {trendingLists.map(list => (
                         <ListPreview 
                             key={list.list_id} 

@@ -106,20 +106,52 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                     Back to Games
                 </Link>
             
-                <div className="flex gap-8 mb-4">
+                <div className="flex gap-8 mb-8 items-start">
 
-                    {/* Cover image */}
-                    <div className="shrink-0 w-48 md:w-64 lg:w-80 rounded-[3px] overflow-hidden border border-(--color-border) shadow-2xl self-start">
-                        <Image
-                            src={game.cover_image_url}
-                            alt={game.name}
-                            width={256}
-                            height={340}
-                            className="w-full h-auto object-cover"
-                        />
+                    {/* Left rail — cover + the game's catalogue metadata */}
+                    <div className="shrink-0 w-48 md:w-60 lg:w-72 flex flex-col gap-5 self-start">
+                        <div className="rounded-[3px] overflow-hidden border border-(--color-border) shadow-2xl">
+                            <Image
+                                src={game.cover_image_url}
+                                alt={game.name}
+                                width={256}
+                                height={340}
+                                className="w-full h-auto object-cover"
+                            />
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Platforms</p>
+                            <div className="flex gap-1.5 flex-wrap">
+                                {platformList.map((platform) => (
+                                    <Link key={platform.id} href={`/games?platform=${platform.slug}`} className={facetChip}>
+                                        {platform.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Developers</p>
+                            <div className="flex flex-col gap-1">
+                                {developerList.map((developer) => (
+                                    <Link key={developer.id} href={`/games?developer=${developer.slug}`} className={metaLink}>
+                                        {developer.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Publishers</p>
+                            <div className="flex flex-col gap-1">
+                                {publisherList.map((publisher) => (
+                                    <Link key={publisher.id} href={`/games?publisher=${publisher.slug}`} className={metaLink}>
+                                        {publisher.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="flex flex-col w-full">
+                    <div className="flex flex-col flex-1 min-w-0">
 
                         {/* Genres + ESRB — browsable facets */}
                         <div className="flex gap-2 mb-3 items-center flex-wrap">
@@ -164,39 +196,6 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                         </div>
                     </div>
                 </div>
-                {/* Platforms — facets; Developers / Publishers — credits */}
-                <div className="grid grid-cols-1 md:grid-cols-3 mb-6 gap-x-6 gap-y-4 items-start">
-                    <div>
-                        <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Platforms</p>
-                        <div className="flex gap-1.5 flex-wrap">
-                            {platformList.map((platform) => (
-                                <Link key={platform.id} href={`/games?platform=${platform.slug}`} className={facetChip}>
-                                    {platform.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Developers</p>
-                        <div className="flex flex-col gap-1">
-                            {developerList.map((developer) => (
-                                <Link key={developer.id} href={`/games?developer=${developer.slug}`} className={metaLink}>
-                                    {developer.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-(--color-muted) mb-2">Publishers</p>
-                        <div className="flex flex-col gap-1">
-                            {publisherList.map((publisher) => (
-                                <Link key={publisher.id} href={`/games?publisher=${publisher.slug}`} className={metaLink}>
-                                    {publisher.name}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                </div>
                 {/* Description */}
                 {game?.description && (
                     <div className="mb-4">
@@ -205,7 +204,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                 )}
                 {/* Screenshot Carousel */}
                 {game.screenshots.length > 1 && (
-                    <div className="mb-8 max-w-3xl">
+                    <div className="mb-8 max-w-3xl mx-auto">
                         <ScreenshotCarousel screenshots={game.screenshots.slice(1) ?? []} />
                     </div>
                 )}

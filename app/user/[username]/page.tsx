@@ -85,16 +85,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     )}
                 </div>
 
-                {/* Section nav — replaces the row of floating buttons */}
-                <nav className="flex gap-1 border-b border-(--color-border) mb-8 -mx-1 text-sm font-semibold font-(family-name:--font-display)">
-                    <span className="px-3 py-2 border-b-2 border-(--color-accent) text-(--color-accent) -mb-px">Profile</span>
-                    {(isOwnProfile || profile.library_public) && (
-                        <Link href={`/user/${username}/library`} className="px-3 py-2 border-b-2 border-transparent text-(--color-muted) hover:text-(--color-text) transition-colors duration-200">Library</Link>
-                    )}
-                    {(isOwnProfile || profile.loadout_public) && (
-                        <Link href={`/user/${username}/loadout`} className="px-3 py-2 border-b-2 border-transparent text-(--color-muted) hover:text-(--color-text) transition-colors duration-200">Loadout</Link>
-                    )}
-                    <Link href={`/user/${username}/lists`} className="px-3 py-2 border-b-2 border-transparent text-(--color-muted) hover:text-(--color-text) transition-colors duration-200">Lists</Link>
+                {/* Links to this player's other pages — nav, not on-page tabs */}
+                <nav className="flex items-center gap-3 mb-8 text-sm font-semibold font-(family-name:--font-display)">
+                    {[
+                        { label: 'Profile', href: null as string | null },
+                        ...(isOwnProfile || profile.library_public ? [{ label: 'Library', href: `/user/${username}/library` }] : []),
+                        ...(isOwnProfile || profile.loadout_public ? [{ label: 'Loadout', href: `/user/${username}/loadout` }] : []),
+                        { label: 'Lists', href: `/user/${username}/lists` },
+                    ].map((item, i) => (
+                        <span key={item.label} className="flex items-center gap-3">
+                            {i > 0 && <span className="text-(--color-border)" aria-hidden="true">/</span>}
+                            {item.href
+                                ? <Link href={item.href} className="text-(--color-muted) hover:text-(--color-accent) transition-colors duration-200">{item.label}</Link>
+                                : <span className="text-(--color-accent)" aria-current="page">{item.label}</span>}
+                        </span>
+                    ))}
                 </nav>
 
                 <StatGrid stats={[

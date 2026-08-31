@@ -90,13 +90,8 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
     return (
         <main className="bg-(--color-bg)">
             <div className="w-full max-w-6xl mx-auto px-6 md:px-10 pt-8 pb-16 font-(family-name:--font-body)">
-                {/* Case-file masthead — the figures that were four duplicate stat
-                    cards now sit inline; the profile page already has the grid. */}
-                <header className="mb-10 border-t-2 border-(--color-text) pt-3">
-                    <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-(--color-muted) mb-1">
-                        Player Dossier
-                    </p>
-                    <h1 className="text-4xl md:text-5xl text-(--color-text) font-(family-name:--font-display) mb-3">
+                <header className="mb-8 border-t-2 border-(--color-text) pt-3">
+                    <h1 className="text-4xl md:text-5xl text-(--color-text) font-(family-name:--font-display) mb-2">
                         {username}&apos;s Loadout
                     </h1>
                     <div className="flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs text-(--color-muted) tabular-nums">
@@ -107,46 +102,45 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                     </div>
                 </header>
 
-                {loadoutIdentity ? (
-                    <div className="max-w-2xl mb-14 rotate-[-0.5deg]">
-                        <div className="border border-(--color-muted)/30 bg-(--color-surface)
+                {/* Analyst's note beside the rating breakdown — two halves of "who is this player" */}
+                <div className="grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 mb-14 items-start">
+                    {loadoutIdentity ? (
+                        <div className="rotate-[-0.5deg] border border-(--color-muted)/30 bg-(--color-surface)
                             rounded-[3px] px-7 py-6 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
-                            <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-accent)
-                                font-mono mb-3">
+                            <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-accent) font-mono mb-3">
                                 Analyst&apos;s Note
                             </p>
-                            <p className="text-lg leading-relaxed text-(--color-text)
-                                font-(family-name:--font-display) italic">
+                            <p className="text-lg leading-relaxed text-(--color-text) font-(family-name:--font-display) italic">
                                 &ldquo;{loadoutIdentity}&rdquo;
                             </p>
                             <div className="mt-4 flex justify-end">
                                 <SubmitBioButton userId={ownerId.id} bio={loadoutIdentity} />
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="max-w-md mb-14 border border-(--color-border) bg-(--color-surface) rounded-[3px] p-6">
-                        <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-muted) font-mono mb-2">
-                            Dossier locked
-                        </p>
-                        <p className="text-(--color-text) mb-4">
-                            {`Rate ${Math.max(0, 5 - ratingsReviews.length)} more ${5 - ratingsReviews.length === 1 ? "game" : "games"} to unlock your analyst’s note.`}
-                        </p>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="flex-1 h-1.5 bg-(--color-surface-light) rounded-full overflow-hidden">
-                                <div className="h-full bg-(--color-accent) rounded-full" style={{ width: `${Math.min(100, (ratingsReviews.length / 5) * 100)}%` }} />
+                    ) : (
+                        <div className="border border-(--color-border) bg-(--color-surface) rounded-[3px] p-6">
+                            <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-muted) font-mono mb-2">
+                                Dossier locked
+                            </p>
+                            <p className="text-(--color-text) mb-4">
+                                {`Rate ${Math.max(0, 5 - ratingsReviews.length)} more ${5 - ratingsReviews.length === 1 ? "game" : "games"} to unlock your analyst’s note.`}
+                            </p>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="flex-1 h-1.5 bg-(--color-surface-light) rounded-full overflow-hidden">
+                                    <div className="h-full bg-(--color-accent) rounded-full" style={{ width: `${Math.min(100, (ratingsReviews.length / 5) * 100)}%` }} />
+                                </div>
+                                <span className="font-mono text-xs text-(--color-muted) tabular-nums">{Math.min(ratingsReviews.length, 5)} / 5</span>
                             </div>
-                            <span className="font-mono text-xs text-(--color-muted) tabular-nums">{Math.min(ratingsReviews.length, 5)} / 5</span>
+                            <Link href="/games" className="inline-block px-4 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg) hover:bg-(--color-accent-hover) transition-colors duration-200">
+                                Find games to rate
+                            </Link>
                         </div>
-                        <Link href="/games" className="inline-block px-4 py-2 rounded-[3px] text-sm font-semibold bg-(--color-accent) text-(--color-bg) hover:bg-(--color-accent-hover) transition-colors duration-200">
-                            Find games to rate
-                        </Link>
-                    </div>
-                )}
+                    )}
 
-                <SectionLabel>Rating Style</SectionLabel>
-                <div className="mb-14">
-                    <DistributionChart data={ratingDistribution} />
+                    <div>
+                        <SectionLabel>Rating Style</SectionLabel>
+                        <DistributionChart data={ratingDistribution} />
+                    </div>
                 </div>
 
                 {genreFavs.length > 0 && (<>

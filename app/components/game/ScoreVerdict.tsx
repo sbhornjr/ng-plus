@@ -47,7 +47,7 @@ export default function ScoreVerdict({ metacritic, community, communityCount = 0
     }
 
     return (
-        <div className="border border-(--color-border) rounded-[3px] bg-(--color-surface) overflow-hidden max-w-xl">
+        <div className="border border-(--color-border) rounded-[3px] bg-(--color-surface) overflow-hidden max-w-2xl">
             <div className="flex divide-x divide-(--color-border)">
                 <Cell label="Critics" sub={hasCritic ? 'Metacritic' : 'No score'}>
                     {hasCritic ? (

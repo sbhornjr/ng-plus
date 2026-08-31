@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase-server";
-import FeedItem from "@/app/components/feed/FeedItem";
+import FeedList from "@/app/components/feed/FeedList";
 import GameCard from "@/app/components/game/GameCard";
 import Seal from "@/app/components/game/Seal";
 import Avatar from "@/app/components/user/Avatar";
@@ -177,14 +177,7 @@ export default async function Home() {
 				</h1>
 
 				{feed && feed.length > 0 ? (
-					<section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 items-start">
-						{feed.map((item, i) => (
-							<FeedItem
-								key={`${item.activity_type}-${item.actor_id}-${item.game_id ?? item.list_id ?? 'x'}-${item.created_at}-${i}`}
-								item={item}
-							/>
-						))}
-					</section>
+					<FeedList items={feed} />
 				) : (
 					<EmptyState
 						title="Your feed is quiet"
