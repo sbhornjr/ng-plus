@@ -9,8 +9,8 @@ type Chip = { id: number; text: string }
  * your file dispatches `window` event "ngplus:plus1"; this layer catches it
  * and floats a "+1 LABEL" up the screen like XP gain.
  *
- * Mount once near the app root (or per page). Trigger from anywhere:
- *   window.dispatchEvent(new CustomEvent("ngplus:plus1", { detail: { label: "SAVED" } }))
+ * Mounted once in the root layout. Trigger from anywhere via `plus1()` in
+ * `lib/plus1.ts`:  plus1("SAVED")
  */
 export default function Plus1Layer() {
     const [chips, setChips] = useState<Chip[]>([])

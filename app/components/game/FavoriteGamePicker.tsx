@@ -9,6 +9,7 @@ import Modal from "@/app/components/util/Modal"
 import EditTriggerButton from "@/app/components/util/EditTriggerButton"
 import { searchGamesByName } from "@/lib/queries/game"
 import { updateFavoriteGames } from "@/lib/queries/user"
+import { plus1 } from "@/lib/plus1"
 
 export default function FavoriteGamePicker({ userId, currentGames } : { userId: string, currentGames: Game[]}) {
     const [searchQuery, setSearchQuery] = useState('')
@@ -43,8 +44,11 @@ export default function FavoriteGamePicker({ userId, currentGames } : { userId: 
     
     async function submitGames() {
         const supabase = createClient()
+        const addedNew = selectedGames.some(g => !currentGames.find(c => c.id === g.id))
         await updateFavoriteGames(supabase, userId, selectedGames.map(g => g.id))
         setIsGamePickerModalOpen(false)
+        // +1 only when a game was newly pinned, not on reorder/removal
+        if (addedNew) plus1("FAVORITED")
         router.refresh()
     }
 

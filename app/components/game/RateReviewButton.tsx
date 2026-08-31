@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from "next/navigation"
 import Modal from "@/app/components/util/Modal"
 import { createRatingReview, updateRatingReview } from "@/lib/queries/review"
+import { plus1 } from "@/lib/plus1"
 
 export default function RateReviewButton({ game_id, existing_rating_review } : 
     { game_id: string, existing_rating_review: { rating: number, review: string | null, user_id: string, created_at: string, updated_at: string } | null | undefined}) {
@@ -67,6 +68,8 @@ export default function RateReviewButton({ game_id, existing_rating_review } :
 
         const supabase = createClient()
 
+        const wasNew = !existingRatingReview
+
         if (existingRatingReview) {
             const data = await updateRatingReview(supabase, { userId: user.id, gameId: game_id, rating, review })
             setExistingRatingReview(data)
@@ -77,9 +80,8 @@ export default function RateReviewButton({ game_id, existing_rating_review } :
         }
 
         setIsRateReviewModalOpen(false)
-        window.dispatchEvent(new CustomEvent("ngplus:plus1", {
-            detail: { label: existingRatingReview ? "AMENDED" : "RATED" },
-        }))
+        // +1 fires only the first time you score a game, not on amendments
+        if (wasNew) plus1("RATED")
         router.refresh()
     }
 

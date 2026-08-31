@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase-browser"
 import { useRouter } from "next/navigation"
 import Modal from "@/app/components/util/Modal"
 import { createList, addGameToList } from "@/lib/queries/list"
+import { plus1 } from "@/lib/plus1"
 
 export default function CreateListFromGamePageButton({ userId, gameId, close, defaultListPrivacy } : { userId: string, gameId: string, close: () => void, defaultListPrivacy?: boolean }) {
     const [name, setName] = useState("")
@@ -22,6 +23,8 @@ export default function CreateListFromGamePageButton({ userId, gameId, close, de
 
         setIsCreateListModalOpen(false)
         close()
+        // one chip for the whole action — the new list, not also LISTED
+        plus1("NEW LIST")
         router.refresh()
     }
 

@@ -7,6 +7,7 @@ import AuthModal from "@/app/components/user/AuthModal"
 import CreateListFromGamePageButton from "./CreateListFromGamePageButton"
 import Modal from "@/app/components/util/Modal"
 import { addGameToList, removeGameFromList } from "@/lib/queries/list"
+import { plus1 } from "@/lib/plus1"
 
 export default function AddToListButton({ gameId, lists, listIdsGameIsIn, defaultListPrivacy } : 
     { gameId : string, lists : { listId: string, listName: string, listCount: number }[], listIdsGameIsIn: Set<string>, defaultListPrivacy?: boolean }) {
@@ -20,14 +21,11 @@ export default function AddToListButton({ gameId, lists, listIdsGameIsIn, defaul
 
         if (alreadyInList) {
             await removeGameFromList(supabase, listId, gameId)
-        } else {
-            await addGameToList(supabase, listId, gameId)
-        }
-
-        if (alreadyInList) {
             setListIdsGameIsInState(prev => { prev.delete(listId); return new Set(prev) })
         } else {
+            await addGameToList(supabase, listId, gameId)
             setListIdsGameIsInState(prev => new Set(prev).add(listId))
+            plus1("LISTED")
         }
     }
 

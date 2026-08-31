@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 import NavBar from "@/app/components/util/NavBar"
+import Plus1Layer from "@/app/components/util/Plus1Layer"
 import UserProvider from "@/app/components/user/UserContext"
 
 const fraunces = Fraunces({
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang="en" className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable}`}>
       <body>
         <UserProvider>
+          <Plus1Layer />
           <header className="w-full">
             <NavBar />
           </header>

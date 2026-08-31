@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from "next/navigation"
 import Modal from "@/app/components/util/Modal"
 import { getLibraryEntry, createLibraryEntry, updateLibraryEntry, deleteLibraryEntry } from "@/lib/queries/library"
+import { plus1 } from "@/lib/plus1"
 
 export default function LibraryButton({ game_id }: { game_id: number }) {
     const { user } = useUser()
@@ -46,27 +47,27 @@ export default function LibraryButton({ game_id }: { game_id: number }) {
         const fields = { status: currentStatus, is100, hours, playedCount }
 
         const wasNew = !libraryEntry
-        if (libraryEntry) {
-            const data = await updateLibraryEntry(supabase, user.id, game_id, fields)
-            setLibraryEntry(data)
-            setStatus(data?.status ?? "")
-            setIs100(data?.completed_all_achievements ?? false)
-            setHours(data?.hours_played ?? 0)
-            setPlayedCount(data?.play_count ?? 1)
-        }
-        else {
-            const data = await createLibraryEntry(supabase, user.id, game_id, fields)
-            setLibraryEntry(data)
-            setStatus(data?.status ?? "")
-            setIs100(data?.completed_all_achievements ?? false)
-            setHours(data?.hours_played ?? 0)
-            setPlayedCount(data?.play_count ?? 1)
-        }
+        const prevStatus = libraryEntry?.status
+
+        const data = wasNew
+            ? await createLibraryEntry(supabase, user.id, game_id, fields)
+            : await updateLibraryEntry(supabase, user.id, game_id, fields)
+
+        setLibraryEntry(data)
+        setStatus(data?.status ?? "")
+        setIs100(data?.completed_all_achievements ?? false)
+        setHours(data?.hours_played ?? 0)
+        setPlayedCount(data?.play_count ?? 1)
 
         setIsLibraryModalOpen(false)
-        window.dispatchEvent(new CustomEvent("ngplus:plus1", {
-            detail: { label: wasNew ? "SAVED" : "UPDATED" },
-        }))
+
+        // +1 fires on a new entry, or when an existing one first reaches "completed"
+        if (wasNew) {
+            plus1(data?.status === "completed" ? "COMPLETED" : "SAVED")
+        } else if (data?.status === "completed" && prevStatus !== "completed") {
+            plus1("COMPLETED")
+        }
+
         router.refresh()
     }
 

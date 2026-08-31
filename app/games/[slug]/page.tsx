@@ -9,7 +9,6 @@ import GameReviewsFilters from "@/app/components/game/GameReviewsFilters";
 import Pagination from "@/app/components/util/Pagination";
 import StatCompare from "@/app/components/game/StatCompare";
 import StickyGameActions from "@/app/components/game/StickyGameActions";
-import Plus1Layer from "@/app/components/game/Plus1Layer";
 import AddToListButton from "@/app/components/lists/AddToListButton";
 import Avatar from "@/app/components/user/Avatar";
 import ExpandableText from "@/app/components/util/ExpandableText";
@@ -126,8 +125,6 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
 
     return (
         <main style={{ background: "radial-gradient(120% 55% at 50% -8%, rgba(230,169,74,0.06), transparent 60%), var(--color-bg)" }}>
-            <Plus1Layer />
-
             <div className="w-full max-w-5xl mx-auto px-6 md:px-10 pt-6 pb-24">
 
                 <div className="flex items-center justify-between mb-8 font-mono text-[0.6875rem] uppercase tracking-[0.2em] text-(--color-muted)">

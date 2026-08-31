@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase-browser"
 import { useRouter } from "next/navigation"
 import Modal from "@/app/components/util/Modal"
 import { createList, updateList } from "@/lib/queries/list"
+import { plus1 } from "@/lib/plus1"
 
 export default function CreateListButton({ userId, type, current, defaultListPrivacy } : 
     { userId: string, type?: "create" | "update" | undefined, current?: { listId: string, name: string, description: string, isPublic: boolean, isPinned: boolean } | undefined, defaultListPrivacy?: boolean }) {
@@ -24,6 +25,7 @@ export default function CreateListButton({ userId, type, current, defaultListPri
             await updateList(supabase, current.listId, fields)
         } else {
             await createList(supabase, userId, fields)
+            plus1("NEW LIST")
         }
 
         setIsCreateListModalOpen(false)
