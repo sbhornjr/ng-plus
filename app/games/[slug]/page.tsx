@@ -135,7 +135,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                         <span className="group-hover:-translate-x-0.5 transition-transform duration-200">&#9666;</span>
                         Games
                     </Link>
-                    <span>NG+ &nbsp;·&nbsp; <span className="text-(--color-text)">File</span></span>
+                    <span>NG+ &nbsp;·&nbsp; <span className="text-(--color-text)">Save file</span></span>
                 </div>
 
                 <h1
@@ -159,7 +159,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                             <Image src={game.cover_image_url} alt={game.name} width={256} height={340} className="w-full h-auto object-cover" priority />
                         </div>
                         <Panel className="p-4">
-                            <p className={`${label} mb-2.5`}>Your file</p>
+                            <p className={`${label} mb-2.5`}>Your save file</p>
                             {inFile ? (
                                 <ul className="flex flex-col gap-1 text-[0.8125rem]">
                                     {statusLabel && <li className="flex items-baseline gap-2"><span className={label}>Status</span> {statusLabel}</li>}
@@ -169,7 +169,7 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
                                 </ul>
                             ) : (
                                 <p className="text-sm text-(--color-muted) leading-relaxed">
-                                    Not in your file yet. Hit <span className="text-(--color-accent) font-mono">+ Save Game</span> to add it.
+                                    Not in your save file yet. Hit <span className="text-(--color-accent) font-mono">+ Save Game</span> to add it.
                                 </p>
                             )}
                         </Panel>

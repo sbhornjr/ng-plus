@@ -115,7 +115,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         : <span className="text-(--color-muted)">&mdash;</span> },
                 ]} />
                 {profile.bio && (
-                    <p className="mt-6 mb-2 text-lg italic leading-relaxed text-(--color-text) font-(family-name:--font-display) max-w-2xl">
+                    <p className="mt-6 mb-2 text-lg italic leading-relaxed text-(--color-text) font-(family-name:--font-display) max-w-2xl mx-auto text-center">
                         &ldquo;{profile.bio}&rdquo;
                     </p>
                 )}

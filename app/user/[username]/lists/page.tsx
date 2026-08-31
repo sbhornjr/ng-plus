@@ -51,7 +51,7 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
         <main>
             <div className="w-full max-w-6xl mx-auto px-8 pt-8 pb-16 flex flex-col gap-2">
                 <p className="font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-(--color-muted) mb-1">
-                    <span className="text-(--color-accent)" aria-hidden="true">▸</span> Loadouts
+                    <span className="text-(--color-accent)" aria-hidden="true">▸</span> Collections
                 </p>
                 <h1 className="text-4xl font-bold font-(family-name:--font-display) tracking-tight mb-4">
                     {isOwnProfile ? 'Your Lists' : `${username}’s Lists`}

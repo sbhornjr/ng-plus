@@ -22,7 +22,7 @@ export default function ListPreview({ listId, listName, gameCovers, isPinnable, 
     }
 
     return (
-        <div className={`flex flex-col relative border border-(--color-border) rounded-[3px] p-4 hover:border-(--color-accent)/50 transition-all duration-200 group ${!fullLength && "self-center w-1/2"}`}>
+        <div className={`flex flex-col relative border border-(--color-border) rounded-[3px] p-4 min-w-0 hover:border-(--color-accent)/50 transition-all duration-200 group ${fullLength ? "" : "w-full"}`}>
             <Link
                 href={`/user/${username}/lists/${listId}`}
                 className="absolute inset-0 rounded-[3px] z-0"
