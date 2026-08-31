@@ -65,7 +65,7 @@ export default function LibraryButton({ game_id }: { game_id: number }) {
 
         setIsLibraryModalOpen(false)
         window.dispatchEvent(new CustomEvent("ngplus:plus1", {
-            detail: { label: wasNew ? "LOGGED" : "UPDATED" },
+            detail: { label: wasNew ? "SAVED" : "UPDATED" },
         }))
         router.refresh()
     }
@@ -85,11 +85,11 @@ export default function LibraryButton({ game_id }: { game_id: number }) {
         <div>
             { user == null ? (
                 <button onClick={() => setIsAuthModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
-                    + Log
+                    + Save Game
                 </button>
             ) : libraryEntry == null ? (
                 <button onClick={() => setIsLibraryModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
-                    + Log
+                    + Save Game
                 </button>
             ) : <div className="group">
                     <button onClick={() => setIsLibraryModalOpen(true)} className="w-36 px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-border) text-(--color-text) transition-colors duration-200 group-hover:border-(--color-bad) group-hover:text-(--color-bad)">

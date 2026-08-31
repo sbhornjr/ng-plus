@@ -5,7 +5,7 @@ import Seal from "@/app/components/game/Seal";
 import Avatar from "@/app/components/user/Avatar";
 import LandingCTA from "@/app/components/util/LandingCTA";
 import EmptyState from "@/app/components/util/EmptyState";
-import ScoreVerdict from "@/app/components/game/ScoreVerdict";
+import StatCompare from "@/app/components/game/StatCompare";
 import Image from "next/image";
 import Link from "next/link";
 import { getViewer } from "@/lib/queries/user";
@@ -54,11 +54,11 @@ export default async function Home() {
 						</p>
 						{heroGame && (
 							<div className="mb-6">
-								<ScoreVerdict
-									metacritic={heroGame.metacritic_score}
+								<StatCompare
+									critic={heroGame.metacritic_score}
 									community={heroGame.avg_ngplus_rating}
 									communityCount={0}
-									user={null}
+									you={null}
 								/>
 							</div>
 						)}

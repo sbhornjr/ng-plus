@@ -94,7 +94,7 @@ export default function RateReviewButton({ game_id, existing_rating_review } :
                     + Rate
                 </button>
             ) : <button onClick={() => setIsRateReviewModalOpen(true)} className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200">
-                    Amend run
+                    Amend
                 </button>
             }
             {isAuthModalOpen && (
