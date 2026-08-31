@@ -26,6 +26,7 @@ export default function AddToListButton({ gameId, lists, listIdsGameIsIn, defaul
             await addGameToList(supabase, listId, gameId)
             setListIdsGameIsInState(prev => new Set(prev).add(listId))
             plus1("LISTED")
+            setIsAddToListModalOpen(false)
         }
     }
 
