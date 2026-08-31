@@ -37,13 +37,13 @@ export default function AddToListButton({ gameId, lists, listIdsGameIsIn, defaul
                 <button className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200
                     font-semibold rounded-[3px] hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200"
                     onClick={() => setIsAuthModalOpen(true)}>
-                    Sign in to Add to List
+                    + List
                 </button>
             ) : (
                 <button className="px-4 py-1.5 rounded-[4px] font-mono text-[0.7rem] uppercase tracking-[0.14em] font-semibold border-2 border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200
                     font-semibold rounded-[3px] hover:bg-(--color-accent) hover:text-(--color-bg) transition-colors duration-200"
                     onClick={() => setIsAddToListModalOpen(true)}>
-                    Add to List
+                    + List
                 </button>
             )}
             {isAuthModalOpen && (

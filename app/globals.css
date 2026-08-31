@@ -349,3 +349,253 @@ h1, h2, h3, h4, h5, h6 {
   .file .stamp .stamp-num { font-size: 2.1rem; }
   .file .marker { margin-top: 2.25rem; }
 }
+
+/* ============================================================
+   Game page — "New Game Plus": your save file for games.
+   The page is the moment you've got this game highlighted in
+   your file. Three scores = three runs (critic / community / you).
+   Hearth-lit console-menu feel, not neon. Scoped under .ngplus.
+   ============================================================ */
+.ngplus {
+  --bg: #141210;
+  --panel: #1d1a15;
+  --panel-2: #262119;
+  --line: #38332a;
+  --line-bright: #5b5040;
+  --fg: #efe8d7;
+  --dim: #9a917e;
+  --glow: #e6a94a;          /* the accent — treated as light, not ink */
+  --run-critic: #5b91cc;
+  --run-community: #cbc1a8;
+  --run-you: var(--glow);
+
+  /* Brighten the app accent on this page so child action buttons glow to match */
+  --color-accent: #e6a94a;
+  --color-accent-hover: #d49a3a;
+}
+
+.ngplus { color: var(--fg); }
+
+/* Section header: a menu cursor into a tracked label + a rule */
+.ngplus .head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 2.6rem 0 1.15rem;
+}
+.ngplus .head::before { content: "\25B8"; color: var(--glow); font-size: 0.8rem; }
+.ngplus .head::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.ngplus .head b { color: var(--fg); font-weight: 600; }
+.ngplus .head .count { color: var(--dim); font-weight: 400; }
+
+/* Panels — raised console surfaces with a faint top light */
+.ngplus .panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(239, 232, 215, 0.05);
+}
+
+/* Data label / value pairs */
+.ngplus .stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* THE RUN — three-file score comparison */
+.ngplus .run {
+  position: relative;
+  flex: 1 1 22rem;
+  max-width: 34rem;
+  background:
+    radial-gradient(130% 120% at 50% -10%, rgba(230, 169, 74, 0.1), transparent 55%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem 1rem 0.85rem;
+  overflow: hidden;
+}
+.ngplus .run-cols {
+  display: flex;
+  gap: 0.35rem;
+}
+.ngplus .run-col {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  padding: 0.5rem 0.35rem 0.55rem;
+  border-radius: 6px;
+}
+.ngplus .run-col .run-src {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.ngplus .run-col .run-val {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2.7rem;
+  line-height: 1;
+  margin: 0.15rem 0 0.08rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ngplus .run-col .run-scale {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+}
+.ngplus .run-col.critic .run-val { color: var(--run-critic); }
+.ngplus .run-col.community .run-val { color: var(--run-community); }
+.ngplus .run-col.you {
+  background: radial-gradient(85% 100% at 50% 45%, rgba(230, 169, 74, 0.2), rgba(230, 169, 74, 0.04) 80%);
+  outline: 1px solid rgba(230, 169, 74, 0.55);
+  box-shadow: 0 0 22px -6px rgba(230, 169, 74, 0.4);
+}
+.ngplus .run-col.you .run-val { color: var(--run-you); }
+.ngplus .run-col.you .run-src::before,
+.ngplus .run-col.you .run-src::after {
+  content: "\25B8";
+  color: var(--glow);
+  margin: 0 0.35rem;
+  font-size: 0.7em;
+}
+.ngplus .run-col.you .run-src::after { content: "\25C2"; }
+.ngplus .run-gap {
+  margin-top: 0.6rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+}
+.ngplus .run-gap b { color: var(--fg); font-weight: 500; }
+
+/* YOUR FILE — the viewer's save data for this game */
+.ngplus .yourfile li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--fg);
+  padding: 0.15rem 0;
+}
+.ngplus .yourfile li::before { content: "\25B8"; color: var(--glow); font-size: 0.62rem; }
+.ngplus .yourfile .k { color: var(--dim); font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* Tag / chip */
+.ngplus .tag {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  transition: color 0.2s, border-color 0.2s;
+}
+.ngplus .tag:hover { color: var(--glow); border-color: var(--line-bright); }
+
+/* Community run — histogram */
+.ngplus .bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.22rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--dim);
+}
+.ngplus .bar-row .bar-n { width: 1.4rem; text-align: right; color: var(--fg); font-variant-numeric: tabular-nums; }
+.ngplus .bar-row .bar-track { flex: 1; height: 0.7rem; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+.ngplus .bar-row .bar-fill { height: 100%; background: var(--run-community); border-radius: 2px; }
+.ngplus .bar-row .bar-c { width: 4rem; font-variant-numeric: tabular-nums; }
+
+/* Log (a review) */
+.ngplus .log { padding: 0.95rem 1.1rem 1rem; }
+.ngplus .log-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0.65rem;
+}
+.ngplus .log-meta {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.ngplus .log-score {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+.ngplus .log-score span { color: var(--dim); font-weight: 400; font-size: 0.7em; }
+.ngplus .log-body { font-size: 0.9rem; line-height: 1.7; color: var(--fg); }
+.ngplus .log-body.empty { color: var(--dim); font-style: italic; }
+
+/* The +1 tic — the signature interaction */
+.ngplus-plus1-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 14vh;
+  gap: 0.4rem;
+}
+.ngplus-plus1 {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: #e6a94a;
+  text-shadow: 0 0 16px rgba(230, 169, 74, 0.55), 0 1px 0 rgba(0, 0, 0, 0.4);
+  animation: ngplus-plus1 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes ngplus-plus1 {
+  0% { opacity: 0; transform: translateY(10px) scale(0.85); }
+  16% { opacity: 1; transform: translateY(0) scale(1.05); }
+  30% { transform: translateY(-2px) scale(1); }
+  100% { opacity: 0; transform: translateY(-34px) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ngplus-plus1 { animation: ngplus-plus1-rm 1s steps(1) forwards; }
+  @keyframes ngplus-plus1-rm { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+}
+
+@media (max-width: 640px) {
+  .ngplus .run-cols { flex-wrap: wrap; }
+  .ngplus .run-col { flex: 1 1 40%; }
+  .ngplus .run-col .run-val { font-size: 2.1rem; }
+}
