@@ -10,6 +10,7 @@ import Link from "next/link";
 import FollowButton from "@/app/components/user/FollowButton";
 import BioButton from "@/app/components/user/BioButton";
 import StatGrid from "@/app/components/util/StatGrid";
+import SectionHead from "@/app/components/util/SectionHead";
 import EmptyState from "@/app/components/util/EmptyState";
 import { GameData } from "@/types";
 import { getViewer, getFullProfile, getFollowers, getFollowing } from "@/lib/queries/user";
@@ -70,6 +71,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <Avatar src={profile.avatar_url} alt={username} size="lg" />
                     )}
                     <div className="flex flex-col">
+                        <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-(--color-muted) mb-0.5">
+                            <span className="text-(--color-accent)" aria-hidden="true">&#9656;</span> Player file
+                        </p>
                         <h1 className="text-3xl font-semibold font-(family-name:--font-display)">{username}</h1>
                         <div className="flex">
                             <p className="text-lg font-semibold font-(family-name:--font-display)">{currentTitle}</p>
@@ -110,17 +114,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         ? <>{Math.trunc(avgRating * 100) / 100}<span className="text-base text-(--color-muted)"> / 10</span></>
                         : <span className="text-(--color-muted)">&mdash;</span> },
                 ]} />
-                <div className="flex flex-row gap-2 mb-2 rounded-[3px]">
-                    <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Bio</h2>
-                    {isOwnProfile && <BioButton userId={profile.id} currentBio={profile.user_bio} />}
-                </div>
+                {profile.bio && (
+                    <p className="mt-6 mb-2 text-lg italic leading-relaxed text-(--color-text) font-(family-name:--font-display) max-w-2xl">
+                        &ldquo;{profile.bio}&rdquo;
+                    </p>
+                )}
+
+                <SectionHead action={isOwnProfile && <BioButton userId={profile.id} currentBio={profile.user_bio} />}>Bio</SectionHead>
                 {profile.user_bio
                     ? <p className="text-(--color-text) leading-relaxed max-w-2xl">{profile.user_bio}</p>
                     : <p className="text-(--color-muted) text-sm">{isOwnProfile ? "You haven't written a bio yet." : "No bio yet."}</p>}
-                <div className="flex flex-row gap-2 mb-2 mt-4">
-                    <h2 className="text-3xl font-semibold font-(family-name:--font-display)">Favorite Games</h2>
-                    {isOwnProfile && <FavoriteGamePicker userId={profile.id} currentGames={favoriteGames.map(g => ({ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }))}/>}
-                </div>
+                <SectionHead action={isOwnProfile && <FavoriteGamePicker userId={profile.id} currentGames={favoriteGames.map(g => ({ id: String(g.id), name: g.name, slug: g.slug, cover_image_url: g.cover_image_url, metacritic_score: g.metacritic_score, released: g.released }))}/>}>Favorite Games</SectionHead>
                 {orderedFavorites.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                         {orderedFavorites.map((g: GameData) =>
@@ -140,12 +144,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         description={isOwnProfile ? "Pin a few games you love — they'll show up here." : "This player hasn't picked any favorites yet."}
                     />
                 )}
-                <div className="mt-6 flex flex-col">
-                    <p className="text-md italic text-center w-1/2 self-center max-w-2xl mx-auto mb-8 mt-8">{profile.bio}</p>
-                    <div className="flex flex-row justify-between">
-                        <h2 className="text-3xl font-semibold font-(family-name:--font-display) mb-2">Recent Reviews</h2>
-                        <Link className="hover:text-(--color-accent) transition-colors duration-200" href={`/user/${username}/ratings_reviews`}>View All</Link>
-                    </div>
+                <div className="flex flex-col">
+                    <SectionHead action={
+                        <Link className="font-mono text-[0.625rem] uppercase tracking-[0.15em] hover:text-(--color-accent) transition-colors duration-200" href={`/user/${username}/ratings_reviews`}>View all</Link>
+                    }>Recent Logs</SectionHead>
                     {recentReviews && recentReviews.length > 0
                         ? recentReviews.map(r => <Review key={r.games.name} gameName={r.games.name} gameSlug={r.games.slug} rating_review={r}/>)
                         : <EmptyState dense title="No reviews yet" description={isOwnProfile ? "Rate and review a game to start building your record." : "This player hasn't reviewed anything yet."} />}

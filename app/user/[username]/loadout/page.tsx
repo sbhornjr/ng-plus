@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { generateLoadoutIdentity } from "@/lib/loadout";
 import SubmitBioButton from "@/app/components/user/SubmitBioButton";
 import DistributionChart from "@/app/components/util/DistributionChart";
+import SectionHead from "@/app/components/util/SectionHead";
+import Panel from "@/app/components/util/Panel";
 import { getViewer, getUserIdFromUsername, getAccountSettings } from "@/lib/queries/user";
 import { getDeveloperNameMap } from "@/lib/queries/game";
 import { getLoadoutGenreStats, getLoadoutDeveloperStats, getLoadoutStatusBreakdown, getLoadoutRatingHighlights } from "@/lib/queries/stats";
@@ -13,16 +15,6 @@ import { AvgRatingsData } from "@/types";
 
 type LoadoutPageProps = {
     params: Promise<{ username: string }>
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-    return (
-        <h2 className="text-[11px] tracking-[0.3em] uppercase text-(--color-muted)
-            font-mono border-t border-(--color-muted)/25
-            pt-3 mb-5">
-            {children}
-        </h2>
-    )
 }
 
 function tierColor(rating: number) {
@@ -90,7 +82,10 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
     return (
         <main className="bg-(--color-bg)">
             <div className="w-full max-w-6xl mx-auto px-6 md:px-10 pt-8 pb-16 font-(family-name:--font-body)">
-                <header className="mb-8 border-t-2 border-(--color-text) pt-3">
+                <header className="mb-8">
+                    <p className="font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-(--color-muted) mb-1">
+                        <span className="text-(--color-accent)" aria-hidden="true">&#9656;</span> Stats screen
+                    </p>
                     <h1 className="text-4xl md:text-5xl text-(--color-text) font-(family-name:--font-display) mb-2">
                         {username}&apos;s Loadout
                     </h1>
@@ -105,10 +100,9 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                 {/* Analyst's note beside the rating breakdown — two halves of "who is this player" */}
                 <div className="grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 mb-14 items-start">
                     {loadoutIdentity ? (
-                        <div className="rotate-[-0.5deg] border border-(--color-muted)/30 bg-(--color-surface)
-                            rounded-[3px] px-7 py-6 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                        <div className="border border-(--color-border) bg-(--color-surface) rounded-md px-7 py-6 shadow-[inset_0_1px_0_rgba(239,232,215,0.05)]">
                             <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-accent) font-mono mb-3">
-                                Analyst&apos;s Note
+                                The Read-out
                             </p>
                             <p className="text-lg leading-relaxed text-(--color-text) font-(family-name:--font-display) italic">
                                 &ldquo;{loadoutIdentity}&rdquo;
@@ -120,10 +114,10 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                     ) : (
                         <div className="border border-(--color-border) bg-(--color-surface) rounded-[3px] p-6">
                             <p className="text-[10px] tracking-[0.3em] uppercase text-(--color-muted) font-mono mb-2">
-                                Dossier locked
+                                Read-out locked
                             </p>
                             <p className="text-(--color-text) mb-4">
-                                {`Rate ${Math.max(0, 5 - ratingsReviews.length)} more ${5 - ratingsReviews.length === 1 ? "game" : "games"} to unlock your analyst’s note.`}
+                                {`Rate ${Math.max(0, 5 - ratingsReviews.length)} more ${5 - ratingsReviews.length === 1 ? "game" : "games"} to unlock your read-out.`}
                             </p>
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="flex-1 h-1.5 bg-(--color-surface-light) rounded-full overflow-hidden">
@@ -138,17 +132,16 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                     )}
 
                     <div>
-                        <SectionLabel>Rating Style</SectionLabel>
+                        <SectionHead>Scoring Style</SectionHead>
                         <DistributionChart data={ratingDistribution} />
                     </div>
                 </div>
 
                 {genreFavs.length > 0 && (<>
-                <SectionLabel>Favorite Genres</SectionLabel>
+                <SectionHead>Favorite Genres</SectionHead>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-14">
                         {genreFavs.map(g => (
-                            <div key={g.genre_name} className="border border-(--color-muted)/25
-                                bg-(--color-surface) rounded-[3px] p-4 flex flex-col gap-2">
+                            <div key={g.genre_name} className="bg-(--color-surface) border border-(--color-border) rounded-md shadow-[inset_0_1px_0_rgba(239,232,215,0.05)] p-4 flex flex-col gap-2">
                                 <h3 className="text-base text-(--color-text) font-(family-name:--font-display)">
                                     {g.genre_name}
                                 </h3>
@@ -170,11 +163,10 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                 </>)}
 
                 {developerFavs.length > 0 && (<>
-                <SectionLabel>Favorite Developers</SectionLabel>
+                <SectionHead>Favorite Developers</SectionHead>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-14">
                         {developerFavs.map(d => (
-                            <div key={d.developer_name} className="border border-(--color-muted)/25
-                                bg-(--color-surface) rounded-[3px] p-4 flex flex-col gap-2">
+                            <div key={d.developer_name} className="bg-(--color-surface) border border-(--color-border) rounded-md shadow-[inset_0_1px_0_rgba(239,232,215,0.05)] p-4 flex flex-col gap-2">
                                 <h3 className="text-base text-(--color-text) font-(family-name:--font-display)">
                                     {d.developer_name}
                                 </h3>
@@ -196,7 +188,7 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                 </>)}
 
                 {topGames.length > 0 && (<>
-                <SectionLabel>Perfect Games</SectionLabel>
+                <SectionHead>Top Scores</SectionHead>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-14">
                         {topGames.map(h =>
                             <GameCard
@@ -211,7 +203,7 @@ export default async function LoadoutPage({ params } : LoadoutPageProps) {
                 </>)}
 
                 {bottomGames.length > 0 && (<>
-                <SectionLabel>Lowest Rated</SectionLabel>
+                <SectionHead>Bottom Scores</SectionHead>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {bottomGames.map(h =>
                             <GameCard

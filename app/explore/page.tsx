@@ -4,6 +4,7 @@ import Link from "next/link";
 import ListPreview from "../components/lists/ListPreview";
 import UserCard from "../components/user/UserCard";
 import { getViewer } from "@/lib/queries/user";
+import SectionHead from "@/app/components/util/SectionHead";
 import { getTrendingGames, getTrendingLists, getExploreRecommendations } from "@/lib/queries/explore";
 
 type ExplorePageProps = {
@@ -34,6 +35,9 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
     return (
         <main>
             <div className="max-w-6xl mx-auto w-full px-8 pt-8 pb-4">
+                <p className="font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-(--color-muted) mb-1">
+                    <span className="text-(--color-accent)" aria-hidden="true">▸</span> Discover
+                </p>
                 <h1 className="text-4xl font-bold font-(family-name:--font-display) tracking-tight">
                     Explore
                 </h1>
@@ -55,9 +59,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                     ))}
                 </div>
 
-                <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
-                    Trending Games
-                </h2>
+                <SectionHead>Trending Games</SectionHead>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                     {trendingGames.map(game => (
                         <GameCard 
@@ -71,17 +73,13 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
 
                 {viewer && (
                     <div className="flex flex-col pt-8 pb-2 w-full">
-                        <h2 className="text-4xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
-                            Recommended For You
-                        </h2>
+                        <SectionHead>Recommended For You</SectionHead>
                         <p className="text-sm text-(--color-muted) mb-2 text-left w-full">
                             Follow more users to get more recommendations.
                         </p>
                         {recommendedGames.length > 0 && (
                             <div className="flex flex-col pt-4 pb-8 w-full">
-                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
-                                    Recommended Games
-                                </h2>
+                                <SectionHead>Recommended Games</SectionHead>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                                     {recommendedGames.map(game => (
                                         <div key={game.game_id} className="flex flex-col gap-1">
@@ -108,9 +106,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                         )}
                         {recommendedLists.length > 0 && (
                             <div className="flex flex-col pt-4 pb-8 w-full max-w-6xl mx-auto">
-                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
-                                    Recommended Lists
-                                </h2>
+                                <SectionHead>Recommended Lists</SectionHead>
                                 <div className="flex flex-col gap-4 w-full">
                                     {recommendedLists.map(list => (
                                         <div key={list.list_id} className="flex flex-col gap-0.5 w-full">
@@ -141,9 +137,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                         )}
                         {recommendedUsers.length > 0 && (
                             <div className="flex flex-col pt-4 pb-8 w-full">
-                                <h2 className="text-2xl font-bold mb-4 font-(family-name:--font-display) tracking-tight text-left w-full">
-                                    Recommended Users
-                                </h2>
+                                <SectionHead>Recommended Users</SectionHead>
                                 <div className="grid grid-col grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                                     {recommendedUsers.map(user => (
                                         <div key={user.user_id} className="flex flex-col gap-2 w-full">
@@ -167,9 +161,7 @@ export default async function Explore({ searchParams }: ExplorePageProps) {
                     </div>
                 )}
 
-                <h2 className="text-4xl font-bold mb-4 mt-8 font-(family-name:--font-display) tracking-tight text-left w-full">
-                    Popular Lists
-                </h2>
+                <SectionHead>Popular Lists</SectionHead>
                 <div className="flex flex-col gap-4 w-full">
                     {trendingLists.map(list => (
                         <ListPreview 

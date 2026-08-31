@@ -11,16 +11,17 @@ type EmptyStateProps = {
     dense?: boolean
 }
 
-/* Default mark: a stacked-cards / catalogue glyph, on-concept for the "ledger"
-   direction and an SVG rather than an emoji (emoji render inconsistently across
-   platforms and read as placeholder art). */
+/* Default mark: an empty save-slot glyph, on-concept for the "your save file"
+   direction — a floppy outline with a hollow label, reading as "slot with
+   nothing written to it yet". SVG rather than emoji (emoji render
+   inconsistently across platforms and read as placeholder art). */
 function DefaultIcon({ size }: { size: number }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true"
             className="text-(--color-muted)">
-            <rect x="3" y="7" width="18" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M6 7V4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V7" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M8 12h8M8 15.5h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h11l3.5 3.5v11A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M8 4v4h7V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="8" y="12" width="8" height="5" rx="0.75" stroke="currentColor" strokeWidth="1.5" strokeDasharray="1.5 2" />
         </svg>
     )
 }
